@@ -6,7 +6,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.context.annotation.Bean;
+import tk.mybatis.spring.annotation.MapperScan;
 
+@MapperScan(basePackages = "com.sq.demo.mapper")
 @SpringBootApplication
 public class SqApplication {
 
