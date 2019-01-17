@@ -28,7 +28,6 @@ public class DepartmentController {
         } catch (Exception e) {
             return null;
         }
-
     }
 
     //保存department

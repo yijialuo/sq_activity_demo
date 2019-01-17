@@ -34,6 +34,7 @@ public class UserController {
         userOV.userId = user.getId();
         userOV.userName = user.getFirstName();
         userOV.passWord = user.getPassword();
+        userOV.departmentId=identityService.getUserInfo(user.getId(),"departmentId");
         //查询用户所在的组
         String groupId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
         userOV.groupId = groupId;
@@ -41,13 +42,14 @@ public class UserController {
     }
     @RequestMapping("/adduser")
     public boolean Adduser(@RequestBody UserOV userOV) {
-        System.out.println(userOV.userId);
         User user = identityService.createUserQuery().userId(userOV.userId).singleResult();
         if (user != null)
             return false;
         user = identityService.newUser(userOV.userId);
         user.setFirstName(userOV.userName);
         user.setPassword(userOV.passWord);
+        //保存用户部门
+        identityService.setUserInfo(user.getId(),"departmentId",userOV.departmentId);
         identityService.saveUser(user);
         identityService.createMembership(user.getId(), userOV.groupId);
         return true;
@@ -70,6 +72,8 @@ public class UserController {
             identityService.deleteMembership(userOV.userId, groupId);
             identityService.createMembership(user.getId(), userOV.groupId);
         }
+        //修改部门ID
+        identityService.setUserInfo(user.getId(),"departmentId",userOV.departmentId);
         identityService.saveUser(user);
         return true;
     }

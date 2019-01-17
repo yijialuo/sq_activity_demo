@@ -35,7 +35,9 @@ public class GroupController {
             return null;
         }
     }
-
+//
+//    @RequestMapping("/getGroupOptions")
+//    public List<Group_>
 
     @RequestMapping("/getallgroup")
     public List<Group> getallroup(){
