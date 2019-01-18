@@ -35,24 +35,25 @@ public class UserController {
     }
 
     @RequestMapping("/getuser")
-    public UserOV getuser(String userId){
-        User user=identityService.createUserQuery().userId(userId).singleResult();
+    public UserOV getuser(String userId) {
+        User user = identityService.createUserQuery().userId(userId).singleResult();
         UserOV userOV = new UserOV();
         userOV.userId = user.getId();
         userOV.userName = user.getFirstName();
         userOV.passWord = user.getPassword();
-        userOV.departmentId=identityService.getUserInfo(user.getId(),"departmentId");
+        userOV.departmentId = identityService.getUserInfo(user.getId(), "departmentId");
         //查询用户所在的组
         String groupId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
         userOV.groupId = groupId;
         Department department = new Department();
         department.setId(userOV.departmentId);
         String d_name = departmentMapper.selectOne(department).getdNam();
-        userOV.departmentName=d_name;
-        Group group=identityService.createGroupQuery().groupId(groupId).singleResult();
+        userOV.departmentName = d_name;
+        Group group = identityService.createGroupQuery().groupId(groupId).singleResult();
         userOV.groupName = group.getName();
         return userOV;
     }
+
     @RequestMapping("/adduser")
     public boolean Adduser(@RequestBody UserOV userOV) {
         User user = identityService.createUserQuery().userId(userOV.userId).singleResult();
@@ -62,7 +63,7 @@ public class UserController {
         user.setFirstName(userOV.userName);
         user.setPassword(userOV.passWord);
         //保存用户部门
-        identityService.setUserInfo(user.getId(),"departmentId",userOV.departmentId);
+        identityService.setUserInfo(user.getId(), "departmentId", userOV.departmentId);
         identityService.saveUser(user);
         identityService.createMembership(user.getId(), userOV.groupId);
         return true;
@@ -86,32 +87,49 @@ public class UserController {
             identityService.createMembership(user.getId(), userOV.groupId);
         }
         //修改部门ID
-        identityService.setUserInfo(user.getId(),"departmentId",userOV.departmentId);
+        identityService.setUserInfo(user.getId(), "departmentId", userOV.departmentId);
         identityService.saveUser(user);
         return true;
     }
 
     @RequestMapping("getallusers")
-    public List<UserOV> getallusers() {
+    public List<UserOV> getallusers(String userId, String passWord) {
+
         List<UserOV> userOVs = new ArrayList<>();
         List<User> users = identityService.createUserQuery().list();
-        for (User user : users) {
-            UserOV userOV = new UserOV();
-            userOV.userId = user.getId();
-            userOV.userName = user.getFirstName();
-            userOV.passWord = user.getPassword();
-            userOV.departmentId=identityService.getUserInfo(user.getId(),"departmentId");
-            //查询用户所在的组
-            String groupId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
-            userOV.groupId = groupId;
-            Department department = new Department();
-            department.setId(userOV.departmentId);
-            System.out.println(userOV.departmentId);
-            userOV.departmentName = departmentMapper.selectOne(department).getdNam();
-            Group group=identityService.createGroupQuery().groupId(groupId).singleResult();
-            userOV.groupName = group.getName();
-            userOVs.add(userOV);
+        List<Group> checkgroup = identityService.createGroupQuery().groupMember(userId).list();
+        System.out.print(checkgroup);
+        for(Group group : checkgroup){
+
+            if(group.getId().equals("4") ){
+                boolean check = identityService.checkPassword(userId, passWord);
+                if (check) {
+                    for (User user : users) {
+                        UserOV userOV = new UserOV();
+                        userOV.userId = user.getId();
+                        userOV.userName = user.getFirstName();
+                        userOV.passWord = user.getPassword();
+                        userOV.departmentId = identityService.getUserInfo(user.getId(), "departmentId");
+                        //查询用户所在的组
+                        String groupId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
+                        userOV.groupId = groupId;
+                        Department department = new Department();
+                        department.setId(userOV.departmentId);
+                        System.out.println(userOV.departmentId);
+                        userOV.departmentName = departmentMapper.selectOne(department).getdNam();
+                        Group group1 = identityService.createGroupQuery().groupId(groupId).singleResult();
+                        userOV.groupName = group1.getName();
+                        userOVs.add(userOV);
+                    }
+                    return userOVs;
+                }else{
+                    return null;
+                }
+            }else{
+                continue;
+            }
         }
-        return userOVs;
+        return null;
+
     }
 }
