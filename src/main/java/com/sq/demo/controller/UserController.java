@@ -35,23 +35,29 @@ public class UserController {
     }
 
     @RequestMapping("/getuser")
-    public UserOV getuser(String userId) {
-        User user = identityService.createUserQuery().userId(userId).singleResult();
-        UserOV userOV = new UserOV();
-        userOV.userId = user.getId();
-        userOV.userName = user.getFirstName();
-        userOV.passWord = user.getPassword();
-        userOV.departmentId = identityService.getUserInfo(user.getId(), "departmentId");
-        //查询用户所在的组
-        String groupId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
-        userOV.groupId = groupId;
-        Department department = new Department();
-        department.setId(userOV.departmentId);
-        String d_name = departmentMapper.selectOne(department).getdNam();
-        userOV.departmentName = d_name;
-        Group group = identityService.createGroupQuery().groupId(groupId).singleResult();
-        userOV.groupName = group.getName();
-        return userOV;
+    public UserOV getuser(String userId , String passWord) {
+        boolean check = identityService.checkPassword(userId, passWord);
+        if(check){
+            User user = identityService.createUserQuery().userId(userId).singleResult();
+            UserOV userOV = new UserOV();
+            userOV.userId = user.getId();
+            userOV.userName = user.getFirstName();
+            userOV.passWord = user.getPassword();
+            userOV.departmentId = identityService.getUserInfo(user.getId(), "departmentId");
+            //查询用户所在的组
+            String groupId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
+            userOV.groupId = groupId;
+            Department department = new Department();
+            department.setId(userOV.departmentId);
+            String d_name = departmentMapper.selectOne(department).getdNam();
+            userOV.departmentName = d_name;
+            Group group = identityService.createGroupQuery().groupId(groupId).singleResult();
+            userOV.groupName = group.getName();
+            return userOV;
+        }else{
+            return null;
+        }
+
     }
 
     @RequestMapping("/adduser")
@@ -98,7 +104,6 @@ public class UserController {
         List<UserOV> userOVs = new ArrayList<>();
         List<User> users = identityService.createUserQuery().list();
         List<Group> checkgroup = identityService.createGroupQuery().groupMember(userId).list();
-        System.out.print(checkgroup);
         for(Group group : checkgroup){
 
             if(group.getId().equals("4") ){
@@ -132,4 +137,18 @@ public class UserController {
         return null;
 
     }
+    //确认管理员身份
+    @RequestMapping("checkadmin")
+    public boolean checkadmin(String userId) {
+        List<Group> checkgroup = identityService.createGroupQuery().groupMember(userId).list();
+        for(Group group : checkgroup){
+            if(group.getId().equals("4") ){
+                return true;
+            }
+        }
+        return false;
+
+    }
+
+
 }
