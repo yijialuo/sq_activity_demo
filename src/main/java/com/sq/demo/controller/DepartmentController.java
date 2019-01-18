@@ -55,4 +55,17 @@ public class DepartmentController {
         }
     }
 
+    //id返回名字
+    @RequestMapping("/IdToName")
+    String IdToName(String departmentId){
+        try {
+            Department department = new Department();
+            department.setId(departmentId);
+            String name = departmentMapper.selectOne(department).getdNam();
+            return name;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }

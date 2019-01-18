@@ -1,10 +1,14 @@
 package com.sq.demo.controller;
 
 import com.sq.demo.Entity.UserOV;
+import com.sq.demo.mapper.DepartmentMapper;
+import com.sq.demo.pojo.Department;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
+import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +26,9 @@ public class UserController {
     ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
     IdentityService identityService = processEngine.getIdentityService();
 
+    @Autowired
+    DepartmentMapper departmentMapper;
+
     @RequestMapping("/login")
     public boolean dologin(String username, String password) {
         return identityService.checkPassword(username, password);
@@ -38,6 +45,12 @@ public class UserController {
         //查询用户所在的组
         String groupId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
         userOV.groupId = groupId;
+        Department department = new Department();
+        department.setId(userOV.departmentId);
+        String d_name = departmentMapper.selectOne(department).getdNam();
+        userOV.departmentName=d_name;
+        Group group=identityService.createGroupQuery().groupId(groupId).singleResult();
+        userOV.groupName = group.getName();
         return userOV;
     }
     @RequestMapping("/adduser")
@@ -87,9 +100,16 @@ public class UserController {
             userOV.userId = user.getId();
             userOV.userName = user.getFirstName();
             userOV.passWord = user.getPassword();
+            userOV.departmentId=identityService.getUserInfo(user.getId(),"departmentId");
             //查询用户所在的组
             String groupId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
             userOV.groupId = groupId;
+            Department department = new Department();
+            department.setId(userOV.departmentId);
+            System.out.println(userOV.departmentId);
+            userOV.departmentName = departmentMapper.selectOne(department).getdNam();
+            Group group=identityService.createGroupQuery().groupId(groupId).singleResult();
+            userOV.groupName = group.getName();
             userOVs.add(userOV);
         }
         return userOVs;

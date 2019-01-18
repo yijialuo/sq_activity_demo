@@ -8,5 +8,8 @@ public class UserOV {
    public String userName;
    public String passWord;
    public String groupId;//职位
+   public String groupName;
    public String departmentId;//部门
+   public String departmentName;
+
 }

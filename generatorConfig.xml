@@ -15,7 +15,7 @@
         <jdbcConnection driverClass="com.mysql.jdbc.Driver"
                         connectionURL="jdbc:mysql://localhost:3306/activity_test?useSSL=true"
                         userId="root"
-                        password="yijialuo666">
+                        password="123">
         </jdbcConnection>
 
         <!-- 对于生成的pojo所在包 -->
@@ -29,7 +29,7 @@
                              type="XMLMAPPER"/>
 
 
-		<table tableName="POSITION"></table>
+		<table tableName="TEST"></table>
 		 
     </context>
 </generatorConfiguration>

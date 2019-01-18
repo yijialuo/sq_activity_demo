@@ -7,7 +7,7 @@
         <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/activity_test?useSSL=FALSE&amp;characterEncoding=utf8"/>
         <property name="jdbcDriver" value="com.mysql.jdbc.Driver"/>
         <property name="jdbcUsername" value="root"/>
-        <property name="jdbcPassword" value="yijialuo666"/>
+        <property name="jdbcPassword" value="123"/>
         <property name="databaseSchemaUpdate" value="true"/>
     </bean>
 
