@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sq.demo.mapper.ContractFileMapper" >
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.ContractFile" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="URL" property="url" jdbcType="VARCHAR" />
+    <result column="CONTRACT_ID" property="contractId" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

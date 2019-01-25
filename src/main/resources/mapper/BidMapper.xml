@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sq.demo.mapper.BidMapper" >
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Bid" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="PROJECT_ID" property="projectId" jdbcType="VARCHAR" />
+    <result column="BIDER" property="bider" jdbcType="VARCHAR" />
+    <result column="AMOUNT" property="amount" jdbcType="DECIMAL" />
+    <result column="BID_DTE" property="bidDte" jdbcType="DATE" />
+  </resultMap>
+</mapper>
