@@ -5,8 +5,10 @@ import com.sq.demo.Entity.Project_Application;
 import com.sq.demo.Entity.Project_Receive;
 import com.sq.demo.Entity.Return_Comments;
 import com.sq.demo.Entity.Sqb;
+import com.sq.demo.mapper.AttachmentlinkMapper;
 import com.sq.demo.mapper.DepartmentMapper;
 import com.sq.demo.mapper.ProjectMapper;
+import com.sq.demo.pojo.Attachmentlink;
 import com.sq.demo.pojo.Department;
 import com.sq.demo.pojo.Project;
 import com.sq.demo.utils.IdCreate;
@@ -18,6 +20,7 @@ import org.activiti.engine.identity.User;
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import sun.misc.BASE64Encoder;
 
+import javax.xml.bind.attachment.AttachmentMarshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,6 +55,8 @@ public class ProjectController {
     ProjectMapper projectMapper;
     @Autowired
     DepartmentMapper departmentMapper;
+    @Autowired
+    AttachmentlinkMapper  attachmentlinkMapper;
 
     //启动申请流程,办事员填写申请表
     @RequestMapping("/startapplication")
@@ -254,10 +260,16 @@ public class ProjectController {
     public boolean uploadFile(MultipartFile file, String pId, String userId)  {
         try {
             TaskService taskService=processEngine.getTaskService();
+            System.out.println(pId+' '+userId+' '+file.getOriginalFilename());
             //查找当前流程的任务
             Task task=taskService.createTaskQuery().processInstanceId(pId).singleResult();
             //上传附件  参数：附件类型、任务id，流程id，附件名称，附件描述，文件流
-            taskService.createAttachment("",task.getId(),pId,file.getName(),"",file.getInputStream());
+            Attachment attachment=taskService.createAttachment("",task.getId(),pId,file.getOriginalFilename(),"",file.getInputStream());
+            Attachmentlink attachmentlink = new Attachmentlink();
+            attachmentlink.setUserid(userId);
+            attachmentlink.setAttachment(attachment.getId());
+            attachmentlinkMapper.insert(attachmentlink);
+
             //完成任务
             //taskService.complete(task.getId());
             return true;
@@ -293,8 +305,15 @@ public class ProjectController {
         TaskService taskService=processEngine.getTaskService();
         List<Comment> comments = taskService.getProcessInstanceComments(pid);
         List<Return_Comments> return_comments = new ArrayList<>();
+        for(int i=0;i<comments.size();i++){
+            if(comments.get(i).getType().equals("event")){
+                comments.remove(i);
+                i--;
+            }
+        }
         for(Comment comment : comments){
             String uid = comment.getUserId();
+            System.out.println(uid);
             User user = identityService.createUserQuery().userId(uid).singleResult();
             String unam = user.getFirstName();
             Return_Comments return_comments1 = new Return_Comments();
