@@ -19,12 +19,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/group")
 public class GroupController {
-    ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-    IdentityService identityService = processEngine.getIdentityService();
 
     @RequestMapping("/addgroup")
     public Group addgroup(String groupName,String groupCode){
-        System.out.println();
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         try {
             Group group=identityService.newGroup(IdCreate.id());
             group.setName(groupName);
@@ -35,18 +34,18 @@ public class GroupController {
             return null;
         }
     }
-//
-//    @RequestMapping("/getGroupOptions")
-//    public List<Group_>
 
     @RequestMapping("/getallgroup")
     public List<Group> getallroup(){
-
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         return identityService.createGroupQuery().list();
     }
 
     @RequestMapping("/updatagroup")
     public boolean updatagroup(String id,String name,String code){
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         try {
             Group group=identityService.createGroupQuery().groupId(id).singleResult();
             group.setName(name);

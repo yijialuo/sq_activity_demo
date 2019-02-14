@@ -23,19 +23,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-    IdentityService identityService = processEngine.getIdentityService();
 
     @Autowired
     DepartmentMapper departmentMapper;
 
     @RequestMapping("/login")
     public boolean dologin(String username, String password) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         return identityService.checkPassword(username, password);
     }
 
     @RequestMapping("/getuser")
     public UserOV getuser(String userId , String passWord) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         boolean check = identityService.checkPassword(userId, passWord);
         if(check){
             User user = identityService.createUserQuery().userId(userId).singleResult();
@@ -62,6 +64,8 @@ public class UserController {
 
     @RequestMapping("/adduser")
     public boolean Adduser(@RequestBody UserOV userOV) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         User user = identityService.createUserQuery().userId(userOV.userId).singleResult();
         if (user != null)
             return false;
@@ -77,12 +81,16 @@ public class UserController {
 
     @RequestMapping("/deleteuser")
     public boolean deleteuser(String userId) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         identityService.deleteUser(userId);
         return true;
     }
 
     @RequestMapping("/edituser")
     public boolean edituser(@RequestBody UserOV userOV) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         User user = identityService.createUserQuery().userId(userOV.userId).singleResult();
         user.setFirstName(userOV.userName);
         user.setPassword(userOV.passWord);
@@ -100,12 +108,12 @@ public class UserController {
 
     @RequestMapping("getallusers")
     public List<UserOV> getallusers(String userId, String passWord) {
-
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         List<UserOV> userOVs = new ArrayList<>();
         List<User> users = identityService.createUserQuery().list();
         List<Group> checkgroup = identityService.createGroupQuery().groupMember(userId).list();
         for(Group group : checkgroup){
-
             if(group.getId().equals("admin") ){
                 boolean check = identityService.checkPassword(userId, passWord);
                 if (check) {
@@ -135,11 +143,13 @@ public class UserController {
             }
         }
         return null;
-
     }
+
     //确认管理员身份
     @RequestMapping("checkadmin")
     public boolean checkadmin(String userId) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         List<Group> checkgroup = identityService.createGroupQuery().groupMember(userId).list();
         for(Group group : checkgroup){
             if(group.getId().equals("admin") ){
@@ -147,8 +157,5 @@ public class UserController {
             }
         }
         return false;
-
     }
-
-
 }

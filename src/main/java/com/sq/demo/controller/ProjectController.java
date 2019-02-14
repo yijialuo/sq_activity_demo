@@ -1,10 +1,7 @@
 package com.sq.demo.controller;
 
-import com.github.pagehelper.PageException;
-import com.sq.demo.Entity.Project_Application;
 import com.sq.demo.Entity.Project_Receive;
 import com.sq.demo.Entity.Return_Comments;
-import com.sq.demo.Entity.Sqb;
 import com.sq.demo.mapper.AttachmentlinkMapper;
 import com.sq.demo.mapper.DepartmentMapper;
 import com.sq.demo.mapper.ProjectMapper;
@@ -29,17 +26,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import sun.misc.BASE64Encoder;
-
-import javax.xml.bind.attachment.AttachmentMarshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.SimpleFormatter;
+
 
 /**
  * Created by yijialuo on 2019/1/13.
@@ -48,9 +42,6 @@ import java.util.logging.SimpleFormatter;
 @RestController
 @RequestMapping("/projectApplication")
 public class ProjectController {
-    ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-    IdentityService identityService = processEngine.getIdentityService();
-
     @Autowired
     ProjectMapper projectMapper;
     @Autowired
@@ -61,15 +52,14 @@ public class ProjectController {
     //启动申请流程,办事员填写申请表
     @RequestMapping("/startapplication")
     public String startapplication(@RequestBody Project_Receive pa){
-        TaskService taskService=processEngine.getTaskService();
-        RuntimeService runtimeService=processEngine.getRuntimeService();
-        IdCreate idCreate = new IdCreate();
-        ProcessInstance pi=runtimeService.startProcessInstanceByKey("lxsp");
-        Task task=taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
+        //申请人姓名
         String unam = identityService.createUserQuery().userId(pa.getUserId()).singleResult().getFirstName();
         Project project = new Project();
-        String dnam = IdToNam(identityService.getUserInfo(pa.getUserId(),"departmentId"));
-        String project_id = idCreate.id();
+        //部门名字
+        String dnam = dnam(identityService.getUserInfo(pa.getUserId(),"departmentId"));
+        String project_id = IdCreate.id();
         project.setId(project_id);
         project.setProjectNam(pa.getProject_name());
         project.setProjectType(pa.getProject_type());
@@ -81,26 +71,36 @@ public class ProjectController {
         project.setScale(pa.getScale());
         project.setIllustration(pa.getIllustration());
         project.setDeclarationDep(dnam);
+        TaskService taskService=processEngine.getTaskService();
+        RuntimeService runtimeService=processEngine.getRuntimeService();
+        //根据userId查找职位
+        String groupName=identityService.createGroupQuery().groupMember(pa.getUserId()).singleResult().getName();
+        String res;
+        ProcessInstance pi;
+        System.out.println(groupName);
+        if(groupName.equals("办事员")){
+            System.out.println("================");
+            pi=runtimeService.startProcessInstanceByKey("lxsp3");
+        }else {//技术部项目
+            pi=runtimeService.startProcessInstanceByKey("jsb_lxsp");
+        }
+        Task task=taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
         project.setPid(pi.getId());
         projectMapper.insert(project);
-        System.out.println("当前任务:" +task.getName());
+        //设置项目参数
         taskService.setVariable(task.getId(),"project",project);
+        //第一次设置依此申请
+        taskService.setVariable(task.getId(),"cxsq",true);
         //设置任务受理人
         taskService.setAssignee(task.getId(),pa.getUserId());
         taskService.complete(task.getId());
-        task=taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-        System.out.println("完成任务后的下一个任务为:" +task.getName());
-        String res = project_id+'_'+pi.getId();
+        res = project_id+'_'+pi.getId();
         return res;
     }
 
-    public String IdToNam(String departmentId){
-        Department department = new Department();
-        department.setId(departmentId);
-        String name = departmentMapper.selectOne(department).getdNam();
-        return name;
-    }
 
+
+    //当前时间
     public String getnowtime(){
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -110,6 +110,7 @@ public class ProjectController {
     //id查询所有项目
     @RequestMapping("/getallproject")
     public List<Project> getallproject(String userId){
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         HistoryService historyService = processEngine.getHistoryService();
         List<HistoricTaskInstance> datas = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).list();
         List<Project> p = new ArrayList<>();
@@ -121,6 +122,7 @@ public class ProjectController {
         return p;
     }
 
+    //部门id转name
     public String dnam(String departmentId){
         Department department = new Department();
         department.setId(departmentId);
@@ -138,11 +140,11 @@ public class ProjectController {
         return po;
     }
 
-
     //领取消息数
     @RequestMapping("/lqxxs")
     public int lqxxs(String userId){
-        IdentityService identityService=processEngine.getIdentityService();
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         TaskService taskService=processEngine.getTaskService();
         //查询职位
         Group group=identityService.createGroupQuery().groupMember(userId).singleResult();
@@ -154,7 +156,7 @@ public class ProjectController {
             return 0;
         //过滤，查询自己部门下的任务
         int i=0;
-        if(did.equals("20190123022801622")){
+        if(did.equals("20190123022801622")){//工程技术部，全部返回
             return tasks.size();
         }else{
             for(Task task:tasks){
@@ -164,15 +166,14 @@ public class ProjectController {
                 }
             }
         }
-
         return i;
     }
-
 
     //领取项目
     @RequestMapping("/lqxm")
     public List<Project> lqxm(String userId){
-        IdentityService identityService=processEngine.getIdentityService();
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         TaskService taskService=processEngine.getTaskService();
         //查询职位
         Group group=identityService.createGroupQuery().groupMember(userId).singleResult();
@@ -183,7 +184,7 @@ public class ProjectController {
         System.out.println(did);
         //过滤，查询自己部门下的任务,找到后返回
         List<Project> projects=new ArrayList<>();
-        if(did.equals("20190123022801622")){
+        if(did.equals("20190123022801622")){//工程技术部
             for(Task task:tasks){
                 Project project =(Project) taskService.getVariable(task.getId(),"project");
                 projects.add(project);
@@ -199,15 +200,17 @@ public class ProjectController {
         return projects;
     }
 
-
     //查看申请状态
     @RequestMapping("/zt")
     public String zt(String pi) throws IOException {
-        System.out.println("pi:"+pi);
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         RuntimeService runtimeService=processEngine.getRuntimeService();
         RepositoryService repositoryService=processEngine.getRepositoryService();
+        //根据pid找流程名字
+        ProcessInstance processInstance=runtimeService.createProcessInstanceQuery().processInstanceId(pi).singleResult();
+        String pidName=processInstance.getProcessDefinitionKey();
         //查询流程定义
-        ProcessDefinition pd=repositoryService.createProcessDefinitionQuery().processDefinitionKey("lxsp").list().get(0);
+        ProcessDefinition pd=repositoryService.createProcessDefinitionQuery().processDefinitionKey(pidName).list().get(0);
         //获取bpmn模型对象
         BpmnModel model=repositoryService.getBpmnModel(pd.getId());
         //定义使用宋体
@@ -231,33 +234,10 @@ public class ProjectController {
         return data;
     }
 
-    //得到用户组的申请
-    @RequestMapping("/getsq")
-    public List<Sqb> getSq (String userId){
-        String groupId=processEngine.getIdentityService().createGroupQuery().groupMember(userId).singleResult().getId();
-        List<Sqb> sqbs=new ArrayList<>();
-        TaskService taskService=processEngine.getTaskService();
-        //查询用户组下的任务
-        List<Task> tasks=taskService.createTaskQuery().taskCandidateGroup(groupId).list();
-        //得到所以任务的申请表
-        for(Task task:tasks){
-            sqbs.add((Sqb)taskService.getVariable(task.getId(),"sqb"));
-        }
-        return sqbs;
-    }
-
-    //
-    @RequestMapping("/lqrw")
-    public boolean lqrw(String userId,String pi){
-        TaskService taskService=processEngine.getTaskService();
-        Task task=taskService.createTaskQuery().processInstanceId(pi).singleResult();
-        taskService.claim(task.getId(),userId);
-        return true;
-    }
-
     //上传附件
     @RequestMapping(value = "/uploadFile")
     public boolean uploadFile(MultipartFile file, String pId, String userId)  {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         try {
             TaskService taskService=processEngine.getTaskService();
             System.out.println(pId+' '+userId+' '+file.getOriginalFilename());
@@ -269,19 +249,16 @@ public class ProjectController {
             attachmentlink.setUserid(userId);
             attachmentlink.setAttachment(attachment.getId());
             attachmentlinkMapper.insert(attachmentlink);
-
-            //完成任务
-            //taskService.complete(task.getId());
             return true;
         }catch (Exception e){
             return false;
         }
     }
 
-
     //添加评论
     @RequestMapping(value = "/addComment")
     public boolean addCommnet(String pid,String userId,String comment){
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         try {
             System.out.println(pid+'_'+userId+'_'+comment);
             TaskService taskService=processEngine.getTaskService();
@@ -302,6 +279,8 @@ public class ProjectController {
     //项目ID拿评论
     @RequestMapping(value = "projecttocomment")
     public List<Return_Comments> projecttocomment(String pid){
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         TaskService taskService=processEngine.getTaskService();
         List<Comment> comments = taskService.getProcessInstanceComments(pid);
         List<Return_Comments> return_comments = new ArrayList<>();

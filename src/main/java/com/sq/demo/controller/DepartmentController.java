@@ -22,14 +22,13 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/department")
 public class DepartmentController {
-    ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-    IdentityService identityService = processEngine.getIdentityService();
     @Autowired
     DepartmentMapper departmentMapper;
 
     //查询所有部门
     @RequestMapping("/getAllDepartment")
     List<Department> getDepartment() {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         try {
             List<Department> departments = departmentMapper.selectAll();
             for(Department department : departments){
@@ -47,6 +46,7 @@ public class DepartmentController {
     //保存department
     @RequestMapping("/insertDepartment")
     Department insertDepartment(@RequestBody Department department) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         System.out.println(department.getdNam());
         try {
             department.setId(IdCreate.id());
@@ -84,6 +84,8 @@ public class DepartmentController {
     //删除部门
     @RequestMapping("deleteDepartment")
     public boolean deleteDepartment(String departmentId,String userId, String passWord) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         if(checkadmin(userId)){
             boolean check = identityService.checkPassword(userId, passWord);
             if(check){
@@ -120,6 +122,8 @@ public class DepartmentController {
 
     //确认管理员身份
     public boolean checkadmin(String userId) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         List<Group> checkgroup = identityService.createGroupQuery().groupMember(userId).list();
         for(Group group : checkgroup){
             if(group.getId().equals("00") ){

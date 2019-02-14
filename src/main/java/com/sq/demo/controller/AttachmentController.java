@@ -50,8 +50,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/Attachment")
 public class AttachmentController {
-    ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-    IdentityService identityService = processEngine.getIdentityService();
 
     @Autowired
     ProjectMapper projectMapper;
@@ -64,11 +62,10 @@ public class AttachmentController {
     @Autowired
     private HttpServletResponse response;
 
-
-
     //删除附件
     @RequestMapping("/deletAttachment")
     public boolean deletAttachment(String userId,String attachment_id){
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         if(getrank(userId,attachment_id)){
             TaskService taskService = processEngine.getTaskService();
             taskService.deleteAttachment(attachment_id);
@@ -85,6 +82,7 @@ public class AttachmentController {
     //返回附件信息
    @RequestMapping("/getattachment")
     public List<AttachmentReturn> getattachment(String pid){
+       ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
        TaskService taskService = processEngine.getTaskService();
        List<AttachmentReturn> attachmentReturns = new ArrayList<>();
        List<Attachment> atta = taskService.getProcessInstanceAttachments(pid);
@@ -97,14 +95,11 @@ public class AttachmentController {
        return attachmentReturns;
    }
 
-
-
    //判断用户对附件是否有操作权限
    @RequestMapping("/getrank")
     public Boolean getrank(String userId,String attachment_id){
-//       DepRank depRank = new DepRank();
-//       depRank.setDepartmentNam(dnam);
-//       String rank = depRankMapper.selectOne(depRank).getRank();
+       ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+       IdentityService identityService = processEngine.getIdentityService();
        TaskService taskService=processEngine.getTaskService();
        String rank = identityService.createGroupQuery().groupMember(userId).singleResult().getType();
        Attachment attachment = taskService.getAttachment(attachment_id);
@@ -126,37 +121,35 @@ public class AttachmentController {
    //下载附件
    @RequestMapping("/getattachment1")
    public void getattachment1(HttpServletResponse res, String attachment_id) {
-
-            TaskService taskService=processEngine.getTaskService();
-            String fileName=taskService.getAttachment(attachment_id).getName();
-            res.setHeader("content-type", "application/octet-stream");
-            res.setContentType("application/octet-stream");
-            res.setHeader("Content-Disposition", "attachment;filename=" + fileName);
-            byte[] buff = new byte[1024];
-            BufferedInputStream bis = null;
-            OutputStream os = null;
-            try {
-                os = res.getOutputStream();
-                bis=new BufferedInputStream(processEngine.getTaskService().getAttachmentContent(attachment_id));
-                int i = bis.read(buff);
-                while (i != -1) {
-                    os.write(buff, 0, buff.length);
-                    os.flush();
-                    i = bis.read(buff);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (bis != null) {
-                    try {
-                        bis.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        TaskService taskService=processEngine.getTaskService();
+        String fileName=taskService.getAttachment(attachment_id).getName();
+        res.setHeader("content-type", "application/octet-stream");
+        res.setContentType("application/octet-stream");
+        res.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+        byte[] buff = new byte[1024];
+        BufferedInputStream bis = null;
+        OutputStream os = null;
+        try {
+            os = res.getOutputStream();
+            bis=new BufferedInputStream(processEngine.getTaskService().getAttachmentContent(attachment_id));
+            int i = bis.read(buff);
+            while (i != -1) {
+                os.write(buff, 0, buff.length);
+                os.flush();
+                i = bis.read(buff);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (bis != null) {
+                try {
+                    bis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-
-
+        }
     }
 
 }
