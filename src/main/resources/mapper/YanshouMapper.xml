@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sq.demo.mapper.YanshouMapper" >
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Yanshou" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="YSNO" property="ysno" jdbcType="VARCHAR" />
+    <result column="PROJECT_NAME" property="projectName" jdbcType="VARCHAR" />
+    <result column="JSDD" property="jsdd" jdbcType="VARCHAR" />
+    <result column="SYBM" property="sybm" jdbcType="VARCHAR" />
+    <result column="SGDW" property="sgdw" jdbcType="VARCHAR" />
+    <result column="JHWH" property="jhwh" jdbcType="VARCHAR" />
+    <result column="KGRQ" property="kgrq" jdbcType="VARCHAR" />
+    <result column="JHJE" property="jhje" jdbcType="VARCHAR" />
+    <result column="SJJGRQ" property="sjjgrq" jdbcType="VARCHAR" />
+    <result column="CBJE" property="cbje" jdbcType="VARCHAR" />
+    <result column="YSRQ" property="ysrq" jdbcType="VARCHAR" />
+    <result column="SGDWZWPD" property="sgdwzwpd" jdbcType="VARCHAR" />
+    <result column="SYBMYSYJ" property="sybmysyj" jdbcType="VARCHAR" />
+    <result column="ZGBMPD" property="zgbmpd" jdbcType="VARCHAR" />
+    <result column="YSJL" property="ysjl" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sq.demo.mapper.TotalcommentMapper" >
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Totalcomment" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="SID" property="sid" jdbcType="VARCHAR" />
+    <result column="CBFW" property="cbfw" jdbcType="VARCHAR" />
+    <result column="CDXMQK" property="cdxmqk" jdbcType="VARCHAR" />
+    <result column="WZQK" property="wzqk" jdbcType="VARCHAR" />
+    <result column="PJNF" property="pjnf" jdbcType="VARCHAR" />
+    <result column="GCJSBZF" property="gcjsbzf" jdbcType="VARCHAR" />
+    <result column="GCJSBKPR" property="gcjsbkpr" jdbcType="VARCHAR" />
+    <result column="LYCZBZF" property="lyczbzf" jdbcType="VARCHAR" />
+    <result column="LYCZBKPR" property="lyczbkpr" jdbcType="VARCHAR" />
+    <result column="MKCZBZF" property="mkczbzf" jdbcType="VARCHAR" />
+    <result column="MKCZBKPR" property="mkczbkpr" jdbcType="VARCHAR" />
+    <result column="XMWYHZF" property="xmwyhzf" jdbcType="VARCHAR" />
+    <result column="XMWYHKPR" property="xmwyhkpr" jdbcType="VARCHAR" />
+    <result column="ZHDF" property="zhdf" jdbcType="VARCHAR" />
+    <result column="GCJSBYJ" property="gcjsbyj" jdbcType="VARCHAR" />
+    <result column="XMGLWYHYJ" property="xmglwyhyj" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

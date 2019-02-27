@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:tns="http://www.activiti.org/test" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" expressionLanguage="http://www.w3.org/1999/XPath" id="m1548062449746" name="" targetNamespace="http://www.activiti.org/test" typeLanguage="http://www.w3.org/2001/XMLSchema">
+  <process id="lxsp" isClosed="false" name="审批流程" processType="None">
+    <startEvent id="start_lxsp" name="立项审批开始"/>
+    <userTask activiti:candidateGroups="doman" activiti:exclusive="true" id="txlxsqb" name="填写申请表"/>
+    <userTask activiti:candidateGroups="zgjl" activiti:exclusive="true" id="zgjlsq" name="主管经理审批"/>
+    <userTask activiti:candidateGroups="jl" activiti:exclusive="true" id="jlsq" name="经理审批"/>
+    <userTask activiti:candidateGroups="jsb_doman" activiti:exclusive="true" id="jsbjbr" name="经办人"/>
+    <userTask activiti:candidateGroups="jsb_zg" activiti:exclusive="true" id="jsbzg" name="技术部主管"/>
+    <userTask activiti:candidateGroups="jsb_zgjl" activiti:exclusive="true" id="jsbzgjl" name="技术部主管经理"/>
+    <userTask activiti:candidateGroups="jsb_jl" activiti:exclusive="true" id="jsbjl" name="技术部经理"/>
+    <userTask activiti:exclusive="true" id="lh" name="两会"/>
+    <exclusiveGateway gatewayDirection="Unspecified" id="sfzjl" name="是否总经理办公会"/>
+    <userTask activiti:exclusive="true" id="zjlbgh" name="总经理办公会"/>
+    <userTask activiti:exclusive="true" id="ba" name="备案"/>
+    <endEvent id="lxspjs" name="立项申请接受"/>
+    <sequenceFlow id="f1" sourceRef="start_lxsp" targetRef="txlxsqb"/>
+    <sequenceFlow id="f2" sourceRef="txlxsqb" targetRef="zgjlsq"/>
+    <sequenceFlow id="f3" sourceRef="zgjlsq" targetRef="jlsq"/>
+    <sequenceFlow id="f4" sourceRef="jlsq" targetRef="jsbjbr"/>
+    <sequenceFlow id="f5" sourceRef="jsbjbr" targetRef="jsbzg"/>
+    <sequenceFlow id="f6" sourceRef="jsbzg" targetRef="jsbzgjl"/>
+    <sequenceFlow id="f7" sourceRef="jsbzgjl" targetRef="jsbjl"/>
+    <sequenceFlow id="f8" sourceRef="jsbjl" targetRef="lh"/>
+    <sequenceFlow id="f9" sourceRef="lh" targetRef="sfzjl"/>
+    <sequenceFlow id="f10" sourceRef="sfzjl" targetRef="zjlbgh">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${zjlbgh==true}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="f11" sourceRef="zjlbgh" targetRef="ba"/>
+    <sequenceFlow id="f12" sourceRef="sfzjl" targetRef="ba">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${zjlbgh==false}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="f13" sourceRef="ba" targetRef="lxspjs"/>
+  </process>
+  <bpmndi:BPMNDiagram documentation="background=#FFFFFF;count=1;horizontalcount=1;orientation=0;width=842.4;height=1195.2;imageableWidth=832.4;imageableHeight=1185.2;imageableX=5.0;imageableY=5.0" id="Diagram-_1" name="New Diagram">
+    <bpmndi:BPMNPlane bpmnElement="lxsp">
+      <bpmndi:BPMNShape bpmnElement="lxspjs" id="Shape-lxspjs">
+        <omgdc:Bounds height="32.0" width="32.0" x="605.0" y="339.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ba" id="Shape-ba">
+        <omgdc:Bounds height="55.0" width="85.0" x="455.0" y="324.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="zjlbgh" id="Shape-zjlbgh">
+        <omgdc:Bounds height="55.0" width="85.0" x="325.0" y="404.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sfzjl" id="Shape-sfzjl" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="250.0" y="334.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="lh" id="Shape-lh">
+        <omgdc:Bounds height="55.0" width="85.0" x="215.0" y="229.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="jsbjl" id="Shape-jsbjl">
+        <omgdc:Bounds height="55.0" width="85.0" x="355.0" y="232.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="jsbzgjl" id="Shape-jsbzgjl">
+        <omgdc:Bounds height="55.0" width="95.0" x="500.0" y="234.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="95.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="jsbzg" id="Shape-jsbzg">
+        <omgdc:Bounds height="55.0" width="85.0" x="655.0" y="234.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="jsbjbr" id="Shape-jsbjbr">
+        <omgdc:Bounds height="55.0" width="85.0" x="647.0" y="105.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="jlsq" id="Shape-jlsq">
+        <omgdc:Bounds height="55.0" width="85.0" x="502.0" y="105.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="zgjlsq" id="Shape-zgjlsq">
+        <omgdc:Bounds height="55.0" width="85.0" x="357.0" y="105.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="txlxsqb" id="Shape-txlxsqb">
+        <omgdc:Bounds height="55.0" width="85.0" x="212.0" y="105.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="start_lxsp" id="Shape-start_lxsp">
+        <omgdc:Bounds height="32.0" width="32.0" x="120.0" y="117.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="f10" id="BPMNEdge_f10" sourceElement="sfzjl" targetElement="zjlbgh">
+        <omgdi:waypoint x="282.0" y="350.0"/>
+        <omgdi:waypoint x="325.0" y="432.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f12" id="BPMNEdge_f12" sourceElement="sfzjl" targetElement="ba">
+        <omgdi:waypoint x="282.0" y="350.0"/>
+        <omgdi:waypoint x="455.0" y="352.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f11" id="BPMNEdge_f11" sourceElement="zjlbgh" targetElement="ba">
+        <omgdi:waypoint x="410.0" y="432.0"/>
+        <omgdi:waypoint x="455.0" y="352.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f13" id="BPMNEdge_f13" sourceElement="ba" targetElement="lxspjs">
+        <omgdi:waypoint x="540.0" y="352.0"/>
+        <omgdi:waypoint x="605.0" y="355.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f1" id="BPMNEdge_f1" sourceElement="start_lxsp" targetElement="txlxsqb">
+        <omgdi:waypoint x="152.0" y="133.0"/>
+        <omgdi:waypoint x="212.0" y="133.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f2" id="BPMNEdge_f2" sourceElement="txlxsqb" targetElement="zgjlsq">
+        <omgdi:waypoint x="297.0" y="133.0"/>
+        <omgdi:waypoint x="357.0" y="133.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f3" id="BPMNEdge_f3" sourceElement="zgjlsq" targetElement="jlsq">
+        <omgdi:waypoint x="442.0" y="133.0"/>
+        <omgdi:waypoint x="502.0" y="133.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f4" id="BPMNEdge_f4" sourceElement="jlsq" targetElement="jsbjbr">
+        <omgdi:waypoint x="587.0" y="133.0"/>
+        <omgdi:waypoint x="647.0" y="133.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f5" id="BPMNEdge_f5" sourceElement="jsbjbr" targetElement="jsbzg">
+        <omgdi:waypoint x="693.5" y="161.0"/>
+        <omgdi:waypoint x="693.5" y="235.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f6" id="BPMNEdge_f6" sourceElement="jsbzg" targetElement="jsbzgjl">
+        <omgdi:waypoint x="655.0" y="262.0"/>
+        <omgdi:waypoint x="595.0" y="261.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f7" id="BPMNEdge_f7" sourceElement="jsbzgjl" targetElement="jsbjl">
+        <omgdi:waypoint x="500.0" y="261.5"/>
+        <omgdi:waypoint x="440.0" y="260.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f8" id="BPMNEdge_f8" sourceElement="jsbjl" targetElement="lh">
+        <omgdi:waypoint x="355.0" y="260.0"/>
+        <omgdi:waypoint x="300.0" y="257.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f9" id="BPMNEdge_f9" sourceElement="lh" targetElement="sfzjl">
+        <omgdi:waypoint x="266.0" y="285.0"/>
+        <omgdi:waypoint x="266.0" y="334.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

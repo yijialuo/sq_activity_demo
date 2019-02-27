@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sq.demo.mapper.ContractMapper" >
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Contract" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CONTRACT_NO" property="contractNo" jdbcType="VARCHAR" />
+    <result column="PROJECT_ID" property="projectId" jdbcType="VARCHAR" />
+    <result column="DFDSR" property="dfdsr" jdbcType="VARCHAR" />
+    <result column="TZWH" property="tzwh" jdbcType="VARCHAR" />
+    <result column="PRICE" property="price" jdbcType="DECIMAL" />
+    <result column="JBR" property="jbr" jdbcType="VARCHAR" />
+    <result column="ZBDWYJ" property="zbdwyj" jdbcType="VARCHAR" />
+    <result column="ZZSC" property="zzsc" jdbcType="VARCHAR" />
+    <result column="PSJL" property="psjl" jdbcType="VARCHAR" />
+    <result column="DWYJ" property="dwyj" jdbcType="VARCHAR" />
+    <result column="CWBMYJ" property="cwbmyj" jdbcType="VARCHAR" />
+    <result column="FGLDYJ" property="fgldyj" jdbcType="VARCHAR" />
+    <result column="ZJLYJ" property="zjlyj" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

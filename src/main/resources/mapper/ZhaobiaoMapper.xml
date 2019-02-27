@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sq.demo.mapper.ZhaobiaoMapper" >
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Zhaobiao" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="VARCHAR" />
+    <result column="xmid" property="xmid" jdbcType="VARCHAR" />
+    <result column="jsyq" property="jsyq" jdbcType="VARCHAR" />
+    <result column="sqr" property="sqr" jdbcType="VARCHAR" />
+    <result column="zbpid" property="zbpid" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>
