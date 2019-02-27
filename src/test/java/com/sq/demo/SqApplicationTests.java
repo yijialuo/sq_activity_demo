@@ -1,17 +1,14 @@
 package com.sq.demo;
 
-import com.sq.demo.mapper.AttachmentlinkMapper;
-import com.sq.demo.mapper.DepartmentMapper;
-import com.sq.demo.mapper.TestMapper;
-import com.sq.demo.pojo.Attachmentlink;
-import com.sq.demo.pojo.Department;
+import com.sq.demo.mapper.*;
+import com.sq.demo.pojo.*;
+import com.sq.demo.utils.IdCreate;
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.runtime.ProcessInstance;
-import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Task;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,11 +28,21 @@ public class SqApplicationTests {
 
 
     @Autowired
+    ZhaobiaoMapper zhaobiaoMapper;
+    @Autowired
     TestMapper testMapper;
     @Autowired
     DepartmentMapper departmentMapper;
     @Autowired
     AttachmentlinkMapper attachmentlinkMapper;
+    @Autowired
+    ProjectMapper projectMapper;
+    @Autowired
+    ScoreMapper scoreMapper;
+    @Autowired
+    ContractfileMapper contractfileMapper;
+//    @Autowired
+//    SupplierMapper supplierMapper;
 //    ProcessEngine processEngine=ProcessEngines.getDefaultProcessEngine();
   //  RepositoryService repositoryService=processEngine.getRepositoryService();
 
@@ -52,6 +59,13 @@ public class SqApplicationTests {
     public void contextLoads() {
         ProcessEngineConfiguration cfg=ProcessEngineConfiguration.createProcessEngineConfigurationFromResource("activiti.cfg.xml");
         ProcessEngine processEngine=cfg.buildProcessEngine();
+    }
+
+    @Test
+    public void deploylxsp_new1(){
+        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+        RepositoryService repositoryService=engine.getRepositoryService();
+        repositoryService.createDeployment().addClasspathResource("bpmn/ztb.bpmn").deploy();
     }
 
     //插
@@ -230,6 +244,15 @@ public class SqApplicationTests {
 
 
     @Test
+    public void test666(){
+       ProcessEngine processEngine=ProcessEngines.getDefaultProcessEngine();
+       HistoryService historyService=processEngine.getHistoryService();
+       List<HistoricTaskInstance> datas=historyService.createHistoricTaskInstanceQuery().processInstanceId("12516").list();
+        System.out.println(datas.get(0).getName());
+   }
+
+
+    @Test
     public void testlxsp3(){
        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
        RuntimeService runtimeService=engine.getRuntimeService();
@@ -311,6 +334,83 @@ public class SqApplicationTests {
         //查
         task=taskService.createTaskQuery().processInstanceId("50001").singleResult();
         System.out.println(task.getName());//备案
+    }
+
+
+//    @Test
+//    public void testsdfsafd(){
+//        System.out.println(supplierMapper.selectAll().size());
+//    }
+
+    @Test
+    public void insetsssss(){
+       for (int i=0;i<13;i++){
+           Score score=new Score();
+           score.setId(IdCreate.id());
+           score.setSid("2");
+           score.setKhnr(i+1+"");
+           score.setKhbm("项目委员会（办公室）");
+           score.setPf(i+4+"");
+           scoreMapper.insert(score);
+       }
+    }
+
+    @Test
+    public void fenye(){
+        List<Project> projects = projectMapper.fenye(0,5);
+        System.out.println(projects.size());
+        for(Project project:projects){
+            System.out.println(project.getId());
+        }
+    }
+
+    @Test
+    public void adsfa(){
+       ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+       RepositoryService repositoryService=engine.getRepositoryService();
+    }
+
+    @Test
+    public void test(){
+        Contractfile contractfile=new Contractfile();
+        contractfile.setCid("1");
+        for(Contractfile s:contractfileMapper.select(contractfile)){
+            System.out.println(s.getFname());
+        }
+    }
+
+    //删除文件对应表
+    @Test
+    public void testsdfasdfasfd(){
+        Contractfile contractfile=new Contractfile();
+        contractfile.setCid("1");
+        contractfileMapper.delete(contractfile);
+    }
+
+    @Test
+    public void insetzzb(){
+        System.out.println(IdCreate.id());
+       Zhaobiao zhaobiao=new Zhaobiao();
+       zhaobiao.setId(IdCreate.id());
+       zhaobiao.setJsyq("jsyq");
+       zhaobiao.setXmid("sadf");
+       zhaobiao.setSqr("sdfdsfg");
+       zhaobiao.setZbpid("ggg");
+       zhaobiaoMapper.insert(zhaobiao);
+    }
+
+    @Test
+    public void delesdf(){
+       Zhaobiao zhaobiao=new Zhaobiao();
+       zhaobiaoMapper.deleteByPrimaryKey("ae4971ce-01d4-462b-938d-3ba01c718e34");
+    }
+
+    @Test
+    public void tsasdfasd(){
+       ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+       TaskService taskService=engine.getTaskService();
+       Task task=taskService.createTaskQuery().processInstanceId("42501").singleResult();
+        System.out.println(task.getName());
     }
 }
 

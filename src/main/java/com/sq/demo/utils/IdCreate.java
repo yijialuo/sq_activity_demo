@@ -2,6 +2,7 @@ package com.sq.demo.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Created by yijialuo on 2018/4/13.
@@ -9,8 +10,6 @@ import java.util.Date;
 //时间戳id
 public class IdCreate {
     public static String id(){
-        Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmssSS");
-        return sdf.format(date);
+        return UUID.randomUUID().toString();
     }
 }

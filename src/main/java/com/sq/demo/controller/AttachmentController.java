@@ -59,8 +59,6 @@ public class AttachmentController {
     AttachmentlinkMapper  attachmentlinkMapper;
     @Autowired
     DepRankMapper depRankMapper;
-    @Autowired
-    private HttpServletResponse response;
 
     //删除附件
     @RequestMapping("/deletAttachment")

@@ -62,13 +62,13 @@ public class Project implements Serializable {
     private String scale;
 
     /**
-     * 部门审核意见
+     * 部门审核意见(项目大类)
      */
     @Column(name = "DEP_AUDIT_OPINION")
     private String depAuditOpinion;
 
     /**
-     * 主管部门技术审核意见
+     * 主管部门技术审核意见（预计工期）
      */
     @Column(name = "TECH_AUDIT_OPINION")
     private String techAuditOpinion;

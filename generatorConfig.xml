@@ -29,7 +29,7 @@
                              type="XMLMAPPER"/>
 
 
-		<table tableName="attachmentlink"></table>
+		<table tableName="zhaobiao"></table>
 		 
     </context>
 </generatorConfiguration>
