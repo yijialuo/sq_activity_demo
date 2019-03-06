@@ -7,7 +7,7 @@
     -->
     <result column="ID" property="id" jdbcType="VARCHAR" />
     <result column="YSNO" property="ysno" jdbcType="VARCHAR" />
-    <result column="PROJECT_NAME" property="projectName" jdbcType="VARCHAR" />
+    <result column="PROJECTID" property="projectid" jdbcType="VARCHAR" />
     <result column="JSDD" property="jsdd" jdbcType="VARCHAR" />
     <result column="SYBM" property="sybm" jdbcType="VARCHAR" />
     <result column="SGDW" property="sgdw" jdbcType="VARCHAR" />

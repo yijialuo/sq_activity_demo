@@ -17,10 +17,10 @@ public class Yanshou {
     private String ysno;
 
     /**
-     * 工程名称
+     * 项目id
      */
-    @Column(name = "PROJECT_NAME")
-    private String projectName;
+    @Column(name = "PROJECTID")
+    private String projectid;
 
     /**
      * 建设地点
@@ -135,26 +135,7 @@ public class Yanshou {
     public void setYsno(String ysno) {
         this.ysno = ysno;
     }
-
-    /**
-     * 获取工程名称
-     *
-     * @return PROJECT_NAME - 工程名称
-     */
-    public String getProjectName() {
-        return projectName;
-    }
-
-    /**
-     * 设置工程名称
-     *
-     * @param projectName 工程名称
-     */
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
-
-    /**
+    /*
      * 获取建设地点
      *
      * @return JSDD - 建设地点
@@ -386,5 +367,14 @@ public class Yanshou {
      */
     public void setYsjl(String ysjl) {
         this.ysjl = ysjl;
+    }
+
+
+    public String getProjectid() {
+        return projectid;
+    }
+
+    public void setProjectid(String projectid) {
+        this.projectid = projectid;
     }
 }

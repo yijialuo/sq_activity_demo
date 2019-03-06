@@ -89,6 +89,12 @@ public class Contract {
     @Column(name = "ZJLYJ")
     private String zjlyj;
 
+    /**
+     * 合同日期
+     */
+    @Column(name = "RQ")
+    private String rq;
+
 
     /**
      * 获取主键
@@ -343,4 +349,11 @@ public class Contract {
     }
 
 
+    public String getRq() {
+        return rq;
+    }
+
+    public void setRq(String rq) {
+        this.rq = rq;
+    }
 }

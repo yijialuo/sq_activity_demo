@@ -7,6 +7,7 @@ import java.util.Date;
  * Created by yijialuo on 2019/1/13.
  */
 public class Project_Receive implements Serializable {
+    private String projectNo;
     private String userId;
     private String project_type;
     private String project_name;
@@ -78,5 +79,13 @@ public class Project_Receive implements Serializable {
 
     public void setIllustration(String illustration) {
         this.illustration = illustration;
+    }
+
+    public String getProjectNo() {
+        return projectNo;
+    }
+
+    public void setProjectNo(String projectNo) {
+        this.projectNo = projectNo;
     }
 }

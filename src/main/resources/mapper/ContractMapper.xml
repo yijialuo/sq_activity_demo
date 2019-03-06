@@ -19,5 +19,6 @@
     <result column="CWBMYJ" property="cwbmyj" jdbcType="VARCHAR" />
     <result column="FGLDYJ" property="fgldyj" jdbcType="VARCHAR" />
     <result column="ZJLYJ" property="zjlyj" jdbcType="VARCHAR" />
+    <result column="RQ" property="rq" jdbcType="VARCHAR" />
   </resultMap>
 </mapper>

@@ -28,8 +28,6 @@
         <javaClientGenerator targetPackage="com.sq.demo.mapper" targetProject="src/main/java"
                              type="XMLMAPPER"/>
 
-
-		<table tableName="zhaobiao"></table>
-		 
+		<table tableName="zhongbiao"></table>
     </context>
 </generatorConfiguration>

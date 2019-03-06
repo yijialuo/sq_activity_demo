@@ -35,11 +35,11 @@ public class UserController {
     }
 
     @RequestMapping("/getuser")
-    public UserOV getuser(String userId , String passWord) {
+    public UserOV getuser(String userId, String passWord) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = processEngine.getIdentityService();
         boolean check = identityService.checkPassword(userId, passWord);
-        if(check){
+        if (check) {
             User user = identityService.createUserQuery().userId(userId).singleResult();
             UserOV userOV = new UserOV();
             userOV.userId = user.getId();
@@ -56,7 +56,7 @@ public class UserController {
             Group group = identityService.createGroupQuery().groupId(groupId).singleResult();
             userOV.groupName = group.getName();
             return userOV;
-        }else{
+        } else {
             return null;
         }
 
@@ -113,8 +113,8 @@ public class UserController {
         List<UserOV> userOVs = new ArrayList<>();
         List<User> users = identityService.createUserQuery().list();
         List<Group> checkgroup = identityService.createGroupQuery().groupMember(userId).list();
-        for(Group group : checkgroup){
-            if(group.getId().equals("admin") ){
+        for (Group group : checkgroup) {
+            if (group.getId().equals("admin")) {
                 boolean check = identityService.checkPassword(userId, passWord);
                 if (check) {
                     for (User user : users) {
@@ -135,10 +135,10 @@ public class UserController {
                         userOVs.add(userOV);
                     }
                     return userOVs;
-                }else{
+                } else {
                     return null;
                 }
-            }else{
+            } else {
                 continue;
             }
         }
@@ -151,11 +151,21 @@ public class UserController {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = processEngine.getIdentityService();
         List<Group> checkgroup = identityService.createGroupQuery().groupMember(userId).list();
-        for(Group group : checkgroup){
-            if(group.getId().equals("admin") ){
+        for (Group group : checkgroup) {
+            if (group.getId().equals("admin")) {
                 return true;
             }
         }
         return false;
+    }
+
+    //userId To userName
+    @RequestMapping("userIdTouserName")
+    public String userIdTouserName(String userId) {
+        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService=engine.getIdentityService();
+        User user = identityService.createUserQuery().userId(userId).singleResult();
+        String username = user.getFirstName();
+        return username;
     }
 }

@@ -1,6 +1,7 @@
 package com.sq.demo.controller;
 
 import com.sq.demo.Entity.Contract_return;
+import com.sq.demo.Entity.Hetong;
 import com.sq.demo.mapper.ContractMapper;
 import com.sq.demo.mapper.ContractfileMapper;
 import com.sq.demo.mapper.ProjectMapper;
@@ -112,10 +113,20 @@ public class ContractController {
         c.setZjlyj(contract.getZjlyj());
         c.setZzsc(contract.getZzsc());
         c.setZbdwyj(contract.getZbdwyj());
+        c.setRq(contract.getRq());
         c.setProjectName(projectname);
         return c;
     }
 
+
+
+    //拿到日期
+    @RequestMapping("/getRq")
+    public String getRq(String contractId){
+        Contract contract=new Contract();
+        contract.setId(contractId);
+        return contractMapper.selectOne(contract).getRq();
+    }
     //拿到附件
     @RequestMapping("/getFjs")
     public List<Contractfile> getFjs(String cid){
@@ -147,12 +158,14 @@ public class ContractController {
 
     //点击文件下载/contract/getFj
     @RequestMapping("/getFj")
-    public void getFj(HttpServletResponse res, String fid,String fname){
+    public void getFj(HttpServletResponse res, String fid,String fname) throws UnsupportedEncodingException {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         RepositoryService repositoryService=processEngine.getRepositoryService();
         res.setHeader("content-type", "application/octet-stream");
         res.setContentType("application/octet-stream");
-        res.setHeader("Content-Disposition", "attachment;filename=" + fname);
+        //中文文件名不行，需要转码
+        String file_name = new String(fname.getBytes(), "ISO-8859-1");
+        res.setHeader("Content-Disposition", "attachment;filename=" + file_name);
         byte[] buff = new byte[1024];
         BufferedInputStream bis = null;
         OutputStream os = null;
@@ -184,6 +197,57 @@ public class ContractController {
         Contractfile contractfile=new Contractfile();
         contractfile.setFid(fid);
         if(contractfileMapper.delete(contractfile)==1)
+            return true;
+        return false;
+    }
+
+    //拿到所有合同id和合同编号
+    @RequestMapping("/getAllHtidAndHtno")
+    public List<Hetong> getallhtid(){
+        List<Contract> contracts = contractMapper.selectAll();
+        List<Hetong> hetongs = new ArrayList<>();
+        for (Contract contract : contracts) {
+            Hetong hetong = new Hetong();
+            hetong.value = contract.getId();
+            hetong.label = contract.getContractNo();
+            hetongs.add(hetong);
+        }
+        return hetongs;
+    }
+
+    //查询合同
+    @RequestMapping("/selectContract")
+    public Contract selectContract(String contractId){
+        return contractMapper.selectByPrimaryKey(contractId);
+    }
+
+    //根据合同id拿到对方当事人
+    @RequestMapping("/getDfdsr")
+    public String getDfdsr(String contractId){
+        Contract contract = new Contract();
+        contract.setId(contractId);
+        String name = contractMapper.selectOne(contract).getDfdsr();
+        return name;
+    }
+
+    //根据合同id拿到项目名称
+    @RequestMapping("/cidToPnam")
+    public String cidToPnam(String cid){
+        Contract contract = new Contract();
+        contract.setId(cid);
+        String pid = contractMapper.selectOne(contract).getProjectId();
+        Project project = new Project();
+        project.setId(pid);
+        String pnam = projectMapper.selectOne(project).getProjectNam();
+        return pnam;
+    }
+
+    //判断当前项目能不能新建合同
+    @RequestMapping("/isXjht")
+    public Boolean isXjht(String projectId){
+        Contract contract=new Contract();
+        contract.setProjectId(projectId);
+        if(contractMapper.select(contract).size()==0)
             return true;
         return false;
     }

@@ -30,6 +30,13 @@ public class Zhaobiao implements Serializable {
      */
     private String zbpid;
 
+    //发标时间
+    private String fbsj;
+    //评标时间
+    private String pbsj;
+    //投标截止时间
+    private String tbjzsj;
+
     /**
      * 获取主键
      *
@@ -118,5 +125,29 @@ public class Zhaobiao implements Serializable {
      */
     public void setZbpid(String zbpid) {
         this.zbpid = zbpid;
+    }
+
+    public String getTbjzsj() {
+        return tbjzsj;
+    }
+
+    public void setTbjzsj(String tbjzsj) {
+        this.tbjzsj = tbjzsj;
+    }
+
+    public String getPbsj() {
+        return pbsj;
+    }
+
+    public void setPbsj(String pbsj) {
+        this.pbsj = pbsj;
+    }
+
+    public String getFbsj() {
+        return fbsj;
+    }
+
+    public void setFbsj(String fbsj) {
+        this.fbsj = fbsj;
     }
 }

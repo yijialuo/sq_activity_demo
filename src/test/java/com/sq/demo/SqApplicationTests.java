@@ -17,16 +17,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import sun.misc.BASE64Encoder;
 
+import javax.persistence.Id;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class SqApplicationTests {
-
-
+    @Autowired
+    TbdwMapper tbdwMapper;
+    @Autowired
+    ContractMapper contractMapper;
     @Autowired
     ZhaobiaoMapper zhaobiaoMapper;
     @Autowired
@@ -41,10 +45,21 @@ public class SqApplicationTests {
     ScoreMapper scoreMapper;
     @Autowired
     ContractfileMapper contractfileMapper;
+    @Autowired
+    PayableMapper payableMapper;
 //    @Autowired
 //    SupplierMapper supplierMapper;
 //    ProcessEngine processEngine=ProcessEngines.getDefaultProcessEngine();
   //  RepositoryService repositoryService=processEngine.getRepositoryService();
+
+    @Test
+    public void deploylxsp_new1(){
+        ProcessEngineConfiguration cfg=ProcessEngineConfiguration.createProcessEngineConfigurationFromResource("activiti.cfg.xml");
+        ProcessEngine processEngine=cfg.buildProcessEngine();
+        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+        RepositoryService repositoryService=engine.getRepositoryService();
+        repositoryService.createDeployment().addClasspathResource("bpmn/lxsp.bpmn").addClasspathResource("bpmn/zbsp.bpmn").deploy();
+    }
 
    @Test
    public void testattachmentlink(){
@@ -61,12 +76,7 @@ public class SqApplicationTests {
         ProcessEngine processEngine=cfg.buildProcessEngine();
     }
 
-    @Test
-    public void deploylxsp_new1(){
-        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
-        RepositoryService repositoryService=engine.getRepositoryService();
-        repositoryService.createDeployment().addClasspathResource("bpmn/ztb.bpmn").deploy();
-    }
+
 
     //插
     @Test
@@ -412,6 +422,31 @@ public class SqApplicationTests {
        Task task=taskService.createTaskQuery().processInstanceId("42501").singleResult();
         System.out.println(task.getName());
     }
+    @Test
+    public void tasdfa(){
+       List<Project> x=new ArrayList<>();
+       x.add(null);
+       x.add(null);
+        System.out.println(x.size());
+    }
+
+    @Test
+    public void tsetasd(){
+        Contract contract = new Contract();
+        contract.setId("4ee618c3-8647-4de8-81f2-8e79df797cdf");
+        String pid = contractMapper.selectOne(contract).getProjectId();
+        Project project = new Project();
+        project.setId(pid);
+        String pnam = projectMapper.selectOne(project).getProjectNam();
+        System.out.println(pnam);
+        //return pnam;
+    }
+
+    @Test
+    public void asdf(){
+        System.out.println(payableMapper.selectlatest("6469f14d-7504-45b5-b0c7-7f32561b86eb").getRq());
+    }
+
 }
 
 

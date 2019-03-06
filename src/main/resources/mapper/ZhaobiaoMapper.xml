@@ -9,6 +9,9 @@
     <result column="xmid" property="xmid" jdbcType="VARCHAR" />
     <result column="jsyq" property="jsyq" jdbcType="VARCHAR" />
     <result column="sqr" property="sqr" jdbcType="VARCHAR" />
+    <result column="fbsj" property="fbsj" jdbcType="VARCHAR" />
+    <result column="pbsj" property="pnsj" jdbcType="VARCHAR" />
+    <result column="tbjzsj" property="tbjzsj" jdbcType="VARCHAR" />
     <result column="zbpid" property="zbpid" jdbcType="VARCHAR" />
   </resultMap>
 </mapper>

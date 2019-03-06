@@ -115,7 +115,6 @@ public class AttachmentController {
        }
    }
 
-
    //下载附件
    @RequestMapping("/getattachment1")
    public void getattachment1(HttpServletResponse res, String attachment_id) {
