@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sq.demo.mapper.PayableMapper" >
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Payable" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="JBBM" property="jbbm" jdbcType="VARCHAR" />
+    <result column="YSZMR" property="yszmr" jdbcType="VARCHAR" />
+    <result column="INVOICE_NO" property="invoiceNo" jdbcType="VARCHAR" />
+    <result column="ACCOUNT" property="account" jdbcType="VARCHAR" />
+    <result column="BANK" property="bank" jdbcType="VARCHAR" />
+    <result column="PROJECT" property="project" jdbcType="VARCHAR" />
+    <result column="CONTRACT_ID" property="contractId" jdbcType="VARCHAR" />
+    <result column="BQYF" property="bqyf" jdbcType="DECIMAL" />
+    <result column="JBBMFZR" property="jbbmfzr" jdbcType="VARCHAR" />
+    <result column="ZGBMFZR" property="zgbmfzr" jdbcType="VARCHAR" />
+    <result column="CWZJ" property="cwzj" jdbcType="VARCHAR" />
+    <result column="FGLD" property="fgld" jdbcType="VARCHAR" />
+    <result column="GSZJL" property="gszjl" jdbcType="VARCHAR" />
+    <result column="JBR" property="jbr" jdbcType="VARCHAR" />
+    <result column="RQ" property="rq" jdbcType="VARCHAR" />
+    <result column="WZF" property="wzf" jdbcType="DECIMAL" />
+  </resultMap>
+</mapper>
