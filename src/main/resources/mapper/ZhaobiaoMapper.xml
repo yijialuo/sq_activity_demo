@@ -12,6 +12,8 @@
     <result column="fbsj" property="fbsj" jdbcType="VARCHAR" />
     <result column="pbsj" property="pnsj" jdbcType="VARCHAR" />
     <result column="tbjzsj" property="tbjzsj" jdbcType="VARCHAR" />
+    <result column="dbsj" property="dbsj" jdbcType="VARCHAR" />
     <result column="zbpid" property="zbpid" jdbcType="VARCHAR" />
+    <result column="cjsj" property="cjsj" jdbcType="VARCHAR" />
   </resultMap>
 </mapper>

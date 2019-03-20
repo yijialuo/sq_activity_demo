@@ -1,6 +1,7 @@
 package com.sq.demo.controller;
 
-import com.sq.demo.mapper.ContractMapper;
+import com.github.pagehelper.PageHelper;
+
 import com.sq.demo.mapper.ContractfileMapper;
 import com.sq.demo.mapper.YanshouMapper;
 import com.sq.demo.pojo.Contractfile;
@@ -25,6 +26,15 @@ public class YanshouController {
     YanshouMapper yanshouMapper;
     @Autowired
     ContractfileMapper contractfileMapper ;
+
+    //归档
+    @RequestMapping("/guidang")
+    public boolean guidang(String id){
+        Yanshou yanshou=new Yanshou();
+        yanshou.setId(id);
+        yanshou.setGd("1");
+        return yanshouMapper.updateByPrimaryKeySelective(yanshou)==1;
+    }
 
     //增加验收单
     @RequestMapping("/addYanshou")
@@ -60,8 +70,15 @@ public class YanshouController {
 
     //查询所有验收单
     @RequestMapping("/getAllYanshou")
-    public List<Yanshou> getAllYanshou(){
+    public List<Yanshou> getAllYanshou(int pageNum){
+        PageHelper.startPage(pageNum,10);
         return yanshouMapper.selectAll();
+    }
+
+    //数据条数
+    @RequestMapping("/AllCounts")
+    public int AllCounts(){
+        return yanshouMapper.AllCounts();
     }
 
     //验收编号模糊搜索

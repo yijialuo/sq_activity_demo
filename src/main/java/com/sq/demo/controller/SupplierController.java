@@ -35,14 +35,12 @@ public class SupplierController {
     public String addSupplier(@RequestBody Supplier su) {
         su.setId(IdCreate.id());
         supplierMapper.insert(su);
-        System.out.println(su.getId());
         return su.getId();
     }
 
     //删除供应商
     @RequestMapping("/deleteSupplier")
     public boolean deleteSupplier(String sid) {
-        System.out.println(sid);
         if (supplierMapper.deleteByPrimaryKey(sid) == 1)
             return true;
         else

@@ -21,12 +21,14 @@ import javax.persistence.Id;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class SqApplicationTests {
+
     @Autowired
     TbdwMapper tbdwMapper;
     @Autowired
@@ -61,6 +63,14 @@ public class SqApplicationTests {
         repositoryService.createDeployment().addClasspathResource("bpmn/lxsp.bpmn").addClasspathResource("bpmn/zbsp.bpmn").deploy();
     }
 
+    @Test
+    public void ooo(){
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        TaskService taskService = processEngine.getTaskService();
+        Task task = taskService.createTaskQuery().processInstanceId("2515").singleResult();
+        System.out.println(task.getName());
+    }
+
    @Test
    public void testattachmentlink(){
        Attachmentlink attachmentlink=new Attachmentlink();
@@ -76,6 +86,51 @@ public class SqApplicationTests {
         ProcessEngine processEngine=cfg.buildProcessEngine();
     }
 
+
+    @Test
+    public void sdfa(){
+        List<Project> projects=projectMapper.selectAll();
+        double zs=projects.size();
+        double wx=0,wzcg=0,gdzc=0;//维修，物资采购，固定资产
+        double tj=0,sb=0,wz=0,xx=0;//土建，设备，物资，信息
+        for(Project project:projects){
+            String type=project.getProjectType();
+            if(type.equals("维修"))
+                wx++;
+            else if(type.equals("物资采购"))
+                wzcg++;
+            else
+                gdzc++;
+            String xmfl=project.getReviser();
+            if(xmfl.equals("土建"))
+                tj++;
+            else if(xmfl.equals("设备"))
+                sb++;
+            else if(xmfl.equals("物资"))
+                wz++;
+            else
+                xx++;
+        }
+        String s1=new BigDecimal(wx/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100+"";
+        String s2=new BigDecimal(wzcg/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100+"";
+        String s3=new BigDecimal(gdzc/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100+"";
+        String s4=new BigDecimal(tj/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100+"";
+        String s5=new BigDecimal(sb/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100+"";
+        String s6=new BigDecimal(wz/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100+"";
+        String s7=new BigDecimal(xx/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100+"";
+
+        System.out.println(s1+" "+s2+" "+s3+" "+s4+" "+s5+" "+s6+" "+s7);
+//        System.out.println(zs);
+//        System.out.println(new BigDecimal(wx/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
+//        System.out.println(wzcg/zs*100);
+//        System.out.println(gdzc/zs*100);
+//        System.out.println(tj/zs*100);
+//        System.out.println(sb/zs*100);
+//        System.out.println(wz/zs*100);
+//        System.out.println(xx/zs*100);
+//
+//        System.out.println(9/2);
+    }
 
 
     //插
@@ -115,12 +170,21 @@ public class SqApplicationTests {
         System.out.println(data);
     }
 
+
+    @Test
+    public void sdfasdf(){
+        System.out.println(projectMapper.AllCounts());
+    }
     //删
     @Test
     public void deletTest(){
         com.sq.demo.pojo.Test test=new com.sq.demo.pojo.Test();
         test.setId("1");
         testMapper.deleteByPrimaryKey(test);
+    }
+    @Test
+    public void asdfadfadsfa(){
+        System.out.println(projectMapper.selectYsXm().get(0).get("ID")+" "+projectMapper.selectYsXm().get(0).get("PROJECT_NAM"));
     }
 
     //改
@@ -444,9 +508,25 @@ public class SqApplicationTests {
 
     @Test
     public void asdf(){
-        System.out.println(payableMapper.selectlatest("6469f14d-7504-45b5-b0c7-7f32561b86eb").getRq());
+        Tbdw tbdw=tbdwMapper.selectByPrimaryKey("1024478e-0e6c-4a2d-8d9e-918c626a4c03");
+     //   System.out.println(tbdwMapper.deleteByPrimaryKey("1024478e-0e6c-4a2d-8d9e-918c626a4c03"));
+        System.out.println(tbdw.getDw());
     }
 
+
+    @Test
+    public void testsdafasdf(){
+        System.out.println(projectMapper.selectByDepartmentName("粮油操作部").size());
+    }
+
+
+    @Test
+    public void  asdfas(){
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        RuntimeService runtimeService = engine.getRuntimeService();
+        //删流程
+        runtimeService.deleteProcessInstance("2505", "");
+    }
 }
 
 

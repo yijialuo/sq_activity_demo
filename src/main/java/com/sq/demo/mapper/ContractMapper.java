@@ -9,4 +9,8 @@ import java.util.List;
 public interface ContractMapper extends MyMapper<Contract> {
     @Select("select * from contract where CONTRACT_NO like CONCAT('%',#{0},'%')")
     List<Contract> contractNoss(String s);
+    @Select("select * from contract order by cjsj desc")
+    List<Contract> selectAll();
+    @Select("select count(*) from contract")
+    int AllCounts();
 }

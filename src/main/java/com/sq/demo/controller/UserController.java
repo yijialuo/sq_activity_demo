@@ -87,6 +87,21 @@ public class UserController {
         return true;
     }
 
+
+    //修改密码
+    @RequestMapping("/xgmm")
+    public boolean xgmm(String userId,String oldPass,String newPass){
+        if(dologin(userId,oldPass)){
+            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+            IdentityService identityService = processEngine.getIdentityService();
+            User user = identityService.createUserQuery().userId(userId).singleResult();
+            user.setPassword(newPass);
+            identityService.saveUser(user);
+            return true;
+        }
+        return false;
+    }
+
     @RequestMapping("/edituser")
     public boolean edituser(@RequestBody UserOV userOV) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -128,7 +143,6 @@ public class UserController {
                         userOV.groupId = groupId;
                         Department department = new Department();
                         department.setId(userOV.departmentId);
-                        System.out.println(userOV.departmentId);
                         userOV.departmentName = departmentMapper.selectOne(department).getdNam();
                         Group group1 = identityService.createGroupQuery().groupId(groupId).singleResult();
                         userOV.groupName = group1.getName();

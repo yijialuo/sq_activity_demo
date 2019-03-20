@@ -25,6 +25,7 @@ public class Contract_return implements Serializable {
     private String zjlyj;
     private String fjid;
     private String rq;
+    private String gd;
 
     public String getId() {
         return id;
@@ -160,5 +161,13 @@ public class Contract_return implements Serializable {
 
     public void setRq(String rq) {
         this.rq = rq;
+    }
+
+    public String getGd() {
+        return gd;
+    }
+
+    public void setGd(String gd) {
+        this.gd = gd;
     }
 }

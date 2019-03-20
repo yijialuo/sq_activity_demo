@@ -9,9 +9,6 @@ import com.sq.demo.pojo.Contract;
 import com.sq.demo.pojo.Payable;
 import com.sq.demo.pojo.Project;
 import com.sq.demo.utils.IdCreate;
-import org.activiti.engine.IdentityService;
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.ProcessEngines;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,21 +64,28 @@ public class PayableController {
         BigDecimal wzf;
         if(payable1==null){
             wzf=zje.subtract(payable.getBqyf());
-            System.out.println("null");
-            System.out.println(wzf);
         }else {
-            System.out.println(payable.getBqyf());
             yzf = payable.getBqyf().add((zje.subtract(payable1.getWzf())));
-            System.out.println(yzf);
             wzf = zje.subtract(yzf);
-            System.out.println(wzf);
-
         }
         payable.setWzf(wzf);
         if(payableMapper.insert(payable)==1)
             return true;
         else
             return false;
+    }
+
+    //合同id查所有支付情况
+    @RequestMapping("/htidToPaybles")
+    public List<Payable_Return> htidToPaybles(String contractId){
+        List<Payable_Return> payable_returns = new ArrayList<>();
+        Payable payable = new Payable();
+        payable.setContractId(contractId);
+        List<Payable> payables = payableMapper.select(payable);
+        for(Payable payable1 : payables){
+            payable_returns.add(payableTopayable_Return(payable1));
+        }
+        return payable_returns;
     }
 
     //项目id查所有支付情况

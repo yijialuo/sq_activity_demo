@@ -1,6 +1,7 @@
 package com.sq.demo.controller;
 
 
+import com.sq.demo.Entity.Return_Comments;
 import com.sq.demo.mapper.AttachmentlinkMapper;
 import com.sq.demo.mapper.TbdwMapper;
 import com.sq.demo.mapper.ZhaobiaoMapper;
@@ -8,11 +9,15 @@ import com.sq.demo.pojo.Attachmentlink;
 import com.sq.demo.pojo.Tbdw;
 import com.sq.demo.pojo.Zhaobiao;
 import com.sq.demo.utils.IdCreate;
+import com.sq.demo.utils.Time;
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.identity.Group;
+import org.activiti.engine.identity.User;
+import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Attachment;
+import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +38,19 @@ public class ZhaobiaoController {
     ZhaobiaoMapper zhaobiaoMapper;
     @Autowired
     TbdwMapper tbdwMapper;
+
+    //重新申请
+    @RequestMapping("/cxsq")
+    public void cxsq(@RequestBody Zhaobiao zhaobiao) {
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        TaskService taskService = engine.getTaskService();
+        Task task = taskService.createTaskQuery().processInstanceId(zhaobiao.getZbpid()).singleResult();
+        //重新设置项目参数
+        taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
+        //修改项目表
+        zhaobiaoMapper.updateByPrimaryKeySelective(zhaobiao);
+        taskService.complete(task.getId());
+    }
 
     //作废招标
     @RequestMapping("/zfzb")
@@ -55,16 +74,18 @@ public class ZhaobiaoController {
 
     //技术部经办人标书发起
     @RequestMapping("/bsfq")//招标id,发标时间，评标时间，投标截止时间,招标流程pid
-    public boolean bsfq(String id, String fbsj, String pbsj, String tbjzsj, String userId) {
+    public boolean bsfq(String id,String userId,String comment) {
         try {
+            System.out.println(id+" "+userId+" "+comment);
             Zhaobiao zhaobiao = zhaobiaoMapper.selectByPrimaryKey(id);
-            zhaobiao.setPbsj(pbsj);
-            zhaobiao.setFbsj(fbsj);
-            zhaobiao.setTbjzsj(tbjzsj);
-            zhaobiaoMapper.updateByPrimaryKeySelective(zhaobiao);
             ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
             TaskService taskService = engine.getTaskService();
             Task task = taskService.createTaskQuery().processInstanceId(zhaobiao.getZbpid()).singleResult();
+            //添加评论
+            if(comment!=null&&!comment.equals("")) {
+                Authentication.setAuthenticatedUserId(userId);
+                taskService.addComment(task.getId(), zhaobiao.getZbpid(), comment);
+            }
             //设置招标表参数
             taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
             //设置任务受理人
@@ -109,6 +130,7 @@ public class ZhaobiaoController {
     @RequestMapping("/startZhaobiao")
     public String startZhaobiao(@RequestBody Zhaobiao zhaobiao) {
         zhaobiao.setId(IdCreate.id());
+        zhaobiao.setCjsj(Time.getNow());
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         TaskService taskService = engine.getTaskService();
         RuntimeService runtimeService = engine.getRuntimeService();
@@ -122,7 +144,6 @@ public class ZhaobiaoController {
         taskService.setAssignee(task.getId(), zhaobiao.getSqr());
         //完成填写申请项目
         taskService.complete(task.getId());
-        System.out.println(zhaobiao.getId() + "_" + pi.getId());
         return zhaobiao.getId() + "_" + pi.getId();
     }
 
@@ -162,7 +183,6 @@ public class ZhaobiaoController {
     //领取招标表单
     @RequestMapping("/lqzhaobiao")
     public List<Zhaobiao> lqzhaobiao(String userId) {
-        System.out.println(userId);
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = processEngine.getIdentityService();
         TaskService taskService = processEngine.getTaskService();
@@ -172,7 +192,6 @@ public class ZhaobiaoController {
         String did = identityService.getUserInfo(userId, "departmentId");
         //查询组下面的任务
         List<Task> tasks = taskService.createTaskQuery().taskCandidateGroup(group.getId()).list();
-        System.out.println(tasks.size());
         //过滤，查询自己部门下的任务,找到后返回
         List<Zhaobiao> zhaobiaos = new ArrayList<>();
         if (did.equals("20190123022801622") || did.equals("20190125102616787")) {//工程技术部或者办公室不用过滤
@@ -189,6 +208,16 @@ public class ZhaobiaoController {
                 }
             }
         }
+        //如果是办事员，拿到项目，判定是不是自己的申请人，
+        if(group.getId().equals("doman")){
+            List<Zhaobiao> res=new ArrayList<>();
+            for(int i=0;i<zhaobiaos.size();i++){
+                if(zhaobiaos.get(i).getSqr().equals(userId)){
+                    res.add(zhaobiaos.get(i));
+                }
+            }
+            return res;
+        }
         return zhaobiaos;
     }
 
@@ -198,7 +227,6 @@ public class ZhaobiaoController {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         try {
             TaskService taskService = processEngine.getTaskService();
-            System.out.println(zbpid + ' ' + userId + ' ' + file.getOriginalFilename());
             //查找当前流程的任务
             Task task = taskService.createTaskQuery().processInstanceId(zbpid).singleResult();
             //上传附件  参数：附件类型、任务id，流程id，附件名称，附件描述，文件流
@@ -213,13 +241,47 @@ public class ZhaobiaoController {
         }
     }
 
+    @RequestMapping("/wczb")
+    public boolean wczb(String userId,String id,String fbsj,String dbsj,String tbjzsj,String comment){//tbjzsj是工期
+        try {
+            Zhaobiao zhaobiao=zhaobiaoMapper.selectByPrimaryKey(id);
+            zhaobiao.setFbsj(fbsj);//发表时间
+            zhaobiao.setDbsj(dbsj);//定标时间
+            zhaobiao.setTbjzsj(tbjzsj);//工期
+            //更新招标表
+            zhaobiaoMapper.updateByPrimaryKeySelective(zhaobiao);
+            ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = engine.getTaskService();
+            Task task = taskService.createTaskQuery().processInstanceId(zhaobiao.getZbpid()).singleResult();
+            //重新设置项目参数
+            taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
+            if(comment!=null&&!comment.equals("")){
+                //添加评论
+                Authentication.setAuthenticatedUserId(userId);
+                taskService.addComment(task.getId(), zhaobiao.getZbpid(), comment);
+            }
+            //设置任务代理人
+            taskService.setAssignee(task.getId(), userId);
+            //完成任务
+            taskService.complete(task.getId());
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
     //处理节点(驳回处理)
     @RequestMapping("/doNode")
-    public boolean doNode(String zbpid, String userId, String varName, String value) {
+    public boolean doNode(String zbpid, String userId, String varName, String value,String comment) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         try {
             TaskService taskService = processEngine.getTaskService();
             Task task = taskService.createTaskQuery().processInstanceId(zbpid).singleResult();
+            if(comment!=null&&!comment.equals("")){
+                //添加评论
+                Authentication.setAuthenticatedUserId(userId);
+                taskService.addComment(task.getId(), zbpid, comment);
+            }
             //设置任务代理人
             taskService.setAssignee(task.getId(), userId);
             //设置参数
@@ -232,4 +294,33 @@ public class ZhaobiaoController {
             return false;
         }
     }
+
+    //pid拿评论
+    @RequestMapping(value = "/getComment")
+    public List<Return_Comments> projecttocomment(String zbpid) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
+        TaskService taskService = processEngine.getTaskService();
+        List<Comment> comments = taskService.getProcessInstanceComments(zbpid);
+        List<Return_Comments> return_comments = new ArrayList<>();
+        for (int i = 0; i < comments.size(); i++) {
+            if (comments.get(i).getType().equals("event")) {
+                comments.remove(i);
+                i--;
+            }
+        }
+        for (Comment comment : comments) {
+            String uid = comment.getUserId();
+            User user = identityService.createUserQuery().userId(uid).singleResult();
+            String unam = user.getFirstName();
+            Return_Comments return_comments1 = new Return_Comments();
+            return_comments1.setComment(comment.getFullMessage());
+            return_comments1.setUsernam(unam);
+            String dd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(comment.getTime());
+            return_comments1.setTime(dd);
+            return_comments.add(return_comments1);
+        }
+        return return_comments;
+    }
+
 }

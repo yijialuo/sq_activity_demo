@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+
 
 /**
  * Created by yijialuo on 2019/1/15.
@@ -28,16 +29,16 @@ public class DepartmentController {
     //查询所有部门
     @RequestMapping("/getAllDepartment")
     List<Department> getDepartment() {
-        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         try {
             List<Department> departments = departmentMapper.selectAll();
+            List<Department> res=new ArrayList<>();
             for(Department department : departments){
-                if(department.getId().equals("0")){
-                    departments.remove(department);
-                    break;
+                if(!department.getId().equals("0")){//过滤无部门和工程技术部&&!department.getId().equals("20190123022801622")&&!department.getId().equals("20190125102616787")
+                    res.add(department);
+                    continue;
                 }
             }
-            return departments;
+            return res;
         } catch (Exception e) {
             return null;
         }
@@ -47,13 +48,11 @@ public class DepartmentController {
     @RequestMapping("/insertDepartment")
     Department insertDepartment(@RequestBody Department department) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-        System.out.println(department.getdNam());
         try {
             department.setId(IdCreate.id());
             departmentMapper.insert(department);
             return department;
         } catch (Exception e) {
-            System.out.println(e);
             return null;
         }
     }
@@ -89,6 +88,7 @@ public class DepartmentController {
         if(checkadmin(userId)){
             boolean check = identityService.checkPassword(userId, passWord);
             if(check){
+                System.out.println(check);
                 if(departmentId.isEmpty()){
                     return false;
                 }
@@ -104,10 +104,8 @@ public class DepartmentController {
                     String d_id = identityService.getUserInfo(user.getId(),"departmentId");
                     if(d_id.equals(departmentId)){
                         identityService.setUserInfo(user.getId(), "departmentId", "0");
-
                     }
                 }
-
                 departmentMapper.deleteByPrimaryKey(departmentId);
                 //identityService.deleteUserInfo();
                 return true;
@@ -126,12 +124,11 @@ public class DepartmentController {
         IdentityService identityService = processEngine.getIdentityService();
         List<Group> checkgroup = identityService.createGroupQuery().groupMember(userId).list();
         for(Group group : checkgroup){
-            if(group.getId().equals("00") ){
+            if(group.getType().equals("00") ){
                 return true;
             }
         }
         return false;
-
     }
 
 }

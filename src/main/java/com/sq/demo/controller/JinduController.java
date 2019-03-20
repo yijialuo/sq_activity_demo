@@ -3,7 +3,6 @@ package com.sq.demo.controller;
 import com.sq.demo.mapper.JinduMapper;
 import com.sq.demo.mapper.ProjectMapper;
 import com.sq.demo.pojo.Jindu;
-import com.sq.demo.pojo.Payable;
 import com.sq.demo.pojo.Project;
 import com.sq.demo.utils.IdCreate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -100,7 +98,7 @@ public class JinduController {
         project.setId(pid);
         String finishDte = projectMapper.selectOne(project).getFinishDte();
         Jindu jindu = jinduMapper.selectfirst(pid);
-        String starDte = null;
+        String starDte;
         if(jindu==null){
             starDte=null;
         }else {

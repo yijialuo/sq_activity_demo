@@ -100,6 +100,9 @@ public class Yanshou {
     @Column(name = "YSJL")
     private String ysjl;
 
+    @Column(name = "GD")
+    private String gd;
+
     /**
      * 获取主键
      *
@@ -376,5 +379,13 @@ public class Yanshou {
 
     public void setProjectid(String projectid) {
         this.projectid = projectid;
+    }
+
+    public String getGd() {
+        return gd;
+    }
+
+    public void setGd(String gd) {
+        this.gd = gd;
     }
 }

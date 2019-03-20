@@ -95,6 +95,9 @@ public class Contract {
     @Column(name = "RQ")
     private String rq;
 
+    @Column(name="GD")
+    private String gd;
+
 
     /**
      * 获取主键
@@ -355,5 +358,13 @@ public class Contract {
 
     public void setRq(String rq) {
         this.rq = rq;
+    }
+
+    public String getGd() {
+        return gd;
+    }
+
+    public void setGd(String gd) {
+        this.gd = gd;
     }
 }

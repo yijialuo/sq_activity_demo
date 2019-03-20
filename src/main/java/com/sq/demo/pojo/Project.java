@@ -74,7 +74,7 @@ public class Project implements Serializable {
     private String techAuditOpinion;
 
     /**
-     * 工程技术部审核意见
+     * 工程技术部审核意见 创建时间
      */
     @Column(name = "ENG_TECH_AUDIT_OPINION")
     private String engTechAuditOpinion;
@@ -104,7 +104,7 @@ public class Project implements Serializable {
     private String applicationDte;
 
     /**
-     * 修改人
+     * 修改人 现在改为项目分类
      */
     @Column(name = "REVISER")
     private String reviser;

@@ -34,8 +34,12 @@ public class Zhaobiao implements Serializable {
     private String fbsj;
     //评标时间
     private String pbsj;
-    //投标截止时间
+    //投标截止时间   现在改为工期
     private String tbjzsj;
+    //创建时间
+    private String cjsj;
+    //定标时间
+    private String dbsj;
 
     /**
      * 获取主键
@@ -149,5 +153,21 @@ public class Zhaobiao implements Serializable {
 
     public void setFbsj(String fbsj) {
         this.fbsj = fbsj;
+    }
+
+    public String getCjsj() {
+        return cjsj;
+    }
+
+    public void setCjsj(String cjsj) {
+        this.cjsj = cjsj;
+    }
+
+    public String getDbsj() {
+        return dbsj;
+    }
+
+    public void setDbsj(String dbsj) {
+        this.dbsj = dbsj;
     }
 }

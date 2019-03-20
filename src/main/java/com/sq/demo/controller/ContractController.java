@@ -1,5 +1,6 @@
 package com.sq.demo.controller;
 
+import com.github.pagehelper.PageHelper;
 import com.sq.demo.Entity.Contract_return;
 import com.sq.demo.Entity.Hetong;
 import com.sq.demo.mapper.ContractMapper;
@@ -38,6 +39,15 @@ public class ContractController {
     ProjectMapper projectMapper;
     @Autowired
     ContractfileMapper contractfileMapper;
+
+    //归档
+    @RequestMapping("/guidang")
+    public boolean guidang(String id){
+        Contract contract=new Contract();
+        contract.setId(id);
+        contract.setGd("1");
+        return contractMapper.updateByPrimaryKeySelective(contract)==1;
+    }
 
     //修改合同
     @RequestMapping("/updateContract")
@@ -81,9 +91,27 @@ public class ContractController {
         return contract_returns;
     }
 
+    //合同id搜索
+    @RequestMapping("/xmIdSS")
+    public Contract_return xmIdSS(String xmId){
+        Contract contract=new Contract();
+        contract.setProjectId(xmId);
+        contract=contractMapper.selectOne(contract);
+        if(contract==null)
+            return null;
+        return contractTocontractreturn(contract);
+    }
+
+    //查询总数
+    @RequestMapping("/AllCounts")
+    public int AllCounts(){
+        return contractMapper.AllCounts();
+    }
+
     //查询所有合同
     @RequestMapping("/getAllContracts")
-    public List<Contract_return> getAllContracts(){
+    public List<Contract_return> getAllContracts(int pageNum){
+        PageHelper.startPage(pageNum,10);
         List<Contract> contracts = contractMapper.selectAll();
         List<Contract_return> contract_returns = new ArrayList<>();
         for(Contract contract : contracts){
@@ -115,10 +143,9 @@ public class ContractController {
         c.setZbdwyj(contract.getZbdwyj());
         c.setRq(contract.getRq());
         c.setProjectName(projectname);
+        c.setGd(contract.getGd());
         return c;
     }
-
-
 
     //拿到日期
     @RequestMapping("/getRq")
@@ -127,6 +154,7 @@ public class ContractController {
         contract.setId(contractId);
         return contractMapper.selectOne(contract).getRq();
     }
+
     //拿到附件
     @RequestMapping("/getFjs")
     public List<Contractfile> getFjs(String cid){

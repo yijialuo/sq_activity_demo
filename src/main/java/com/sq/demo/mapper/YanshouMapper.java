@@ -11,4 +11,8 @@ public interface YanshouMapper extends MyMapper<Yanshou> {
     @Select("select * from yanshou where YSNO like CONCAT('%',#{0},'%')")
     List<Yanshou> yanshouSSbyNo(String s);
     //projectId查询
+    @Select("select * from yanshou order by cjsj desc")
+    List<Yanshou> selectAll();
+    @Select("select count(*) from yanshou")
+    int AllCounts();
 }

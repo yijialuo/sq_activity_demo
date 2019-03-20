@@ -1,6 +1,6 @@
 package com.sq.demo.controller;
 
-import com.sq.demo.mapper.ZhaobiaoMapper;
+
 import com.sq.demo.mapper.ZhongbiaoMapper;
 import com.sq.demo.pojo.Zhongbiao;
 import com.sq.demo.utils.IdCreate;

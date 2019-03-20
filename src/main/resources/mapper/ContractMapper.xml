@@ -20,5 +20,6 @@
     <result column="FGLDYJ" property="fgldyj" jdbcType="VARCHAR" />
     <result column="ZJLYJ" property="zjlyj" jdbcType="VARCHAR" />
     <result column="RQ" property="rq" jdbcType="VARCHAR" />
+    <result column="GD" property="gd" jdbcType="VARCHAR" />
   </resultMap>
 </mapper>
