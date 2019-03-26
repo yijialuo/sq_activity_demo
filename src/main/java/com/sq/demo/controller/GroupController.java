@@ -5,6 +5,7 @@ import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.identity.Group;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,6 +20,7 @@ import java.util.List;
 @RequestMapping("/group")
 public class GroupController {
 
+    @Transactional
     @RequestMapping("/addgroup")
     public Group addgroup(String groupName,String groupCode){
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -41,6 +43,7 @@ public class GroupController {
         return identityService.createGroupQuery().list();
     }
 
+    @Transactional
     @RequestMapping("/updatagroup")
     public boolean updatagroup(String id,String name,String code){
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();

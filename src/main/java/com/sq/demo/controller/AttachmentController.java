@@ -14,6 +14,7 @@ import org.activiti.engine.task.Attachment;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,6 +47,7 @@ public class AttachmentController {
 
     //删除附件
     @RequestMapping("/deletAttachment")
+    @Transactional
     public boolean deletAttachment(String userId, String attachment_id) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         if (getrank(userId, attachment_id)) {

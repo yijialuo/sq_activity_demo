@@ -80,7 +80,7 @@ public class Project implements Serializable {
     private String engTechAuditOpinion;
 
     /**
-     * 中标单位
+     * 中标单位(是否删除  1为删除)
      */
     @Column(name = "BIDER")
     private String bider;

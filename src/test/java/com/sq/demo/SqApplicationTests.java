@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 import sun.misc.BASE64Encoder;
 
 import javax.persistence.Id;
@@ -35,6 +36,8 @@ public class SqApplicationTests {
     ContractMapper contractMapper;
     @Autowired
     ZhaobiaoMapper zhaobiaoMapper;
+    @Autowired
+    ZhongbiaoMapper zhongbiaoMapper;
     @Autowired
     TestMapper testMapper;
     @Autowired
@@ -120,16 +123,7 @@ public class SqApplicationTests {
         String s7=new BigDecimal(xx/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100+"";
 
         System.out.println(s1+" "+s2+" "+s3+" "+s4+" "+s5+" "+s6+" "+s7);
-//        System.out.println(zs);
-//        System.out.println(new BigDecimal(wx/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
-//        System.out.println(wzcg/zs*100);
-//        System.out.println(gdzc/zs*100);
-//        System.out.println(tj/zs*100);
-//        System.out.println(sb/zs*100);
-//        System.out.println(wz/zs*100);
-//        System.out.println(xx/zs*100);
-//
-//        System.out.println(9/2);
+
     }
 
 
@@ -282,7 +276,7 @@ public class SqApplicationTests {
     public void piddqrw(){
        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
        TaskService taskService=engine.getTaskService();
-       Task task=taskService.createTaskQuery().processInstanceId("10001").singleResult();
+       Task task=taskService.createTaskQuery().processInstanceId("7796").singleResult();
         System.out.println(task.getName());
     }
 
@@ -522,10 +516,99 @@ public class SqApplicationTests {
 
     @Test
     public void  asdfas(){
+        String pid="7726";//7726
+        Project project=new Project();
+        project.setPid(pid);
+        //删除表
+        projectMapper.delete(project);
+
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         RuntimeService runtimeService = engine.getRuntimeService();
         //删流程
-        runtimeService.deleteProcessInstance("2505", "");
+        runtimeService.deleteProcessInstance(pid, "");
+        //删除历史
+        HistoryService historyService=engine.getHistoryService();
+        historyService.deleteHistoricProcessInstance(pid);
+    }
+
+
+//    52557
+//            22529
+//            52543
+//            52571
+//            45083
+//            52515
+//            52501
+//            30026
+//            52529
+//            52585
+//            52599
+//            32528
+//            32512
+    //招标
+    @Test
+    public void dezb(){
+
+        String pid="52543";//7726
+        Zhaobiao zhaobiao =new Zhaobiao();
+        zhaobiao.setZbpid(pid);
+        zhaobiao=zhaobiaoMapper.selectOne(zhaobiao);
+        //删除招标表
+        zhaobiaoMapper.delete(zhaobiao);
+
+        //删中标表
+        Zhongbiao zhongbiao=new Zhongbiao();
+        zhongbiao.setZbid(zhaobiao.getId());
+        zhongbiaoMapper.delete(zhongbiao);
+
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        RuntimeService runtimeService = engine.getRuntimeService();
+        //删流程
+        runtimeService.deleteProcessInstance(pid, "");
+        //删除历史
+        HistoryService historyService=engine.getHistoryService();
+        historyService.deleteHistoricProcessInstance(pid);
+    }
+
+
+    @Test
+    public void selasdfadfg(){
+        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+        HistoryService historyService=engine.getHistoryService();
+        historyService.deleteHistoricProcessInstance("7572");
+    }
+
+    @Test
+    public void asdasd(){
+        System.out.println(projectMapper.getGlXmid().size());
+    }
+
+    @Test
+    public void ppp(){
+        System.out.println(projectMapper.selectAllWsq().size());
+    }
+
+    @Test
+    public void testasdfasfd(){
+        Project project=new Project();
+        project.setDeclarationDep("工程技术部");
+        System.out.println(projectMapper.select(project).size());
+    }
+
+    @Test
+    @Transactional
+    public void tesdfasdgadgad(){
+        Tbdw tbdw=new Tbdw();
+        tbdw.setId("sss");
+        tbdw.setZbid("2222");
+        tbdw.setDw("oooo");
+        tbdwMapper.insert(tbdw);
+
+        Tbdw tbdw1=new Tbdw();
+        tbdw1.setId("sss");
+        tbdw1.setZbid("2222");
+        tbdw1.setDw("oooo");
+        tbdwMapper.insert(tbdw1);
     }
 }
 

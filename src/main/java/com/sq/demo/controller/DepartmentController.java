@@ -9,6 +9,7 @@ import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,24 @@ import java.util.List;
 public class DepartmentController {
     @Autowired
     DepartmentMapper departmentMapper;
+
+
+    //查询所有部门的名称(过滤办公室)
+    @RequestMapping("/getAllDptName")
+    List<String> getAllDptName(){
+        try {
+            List<Department> departments = departmentMapper.selectAll();
+            List<String> res=new ArrayList<>();
+            for(Department department:departments){
+                if(!department.getdNam().equals("办公室")&&!department.getdNam().equals("无部门")){
+                    res.add(department.getdNam());
+                }
+            }
+            return res;
+        }catch (Exception e){
+            return null;
+        }
+    }
 
     //查询所有部门
     @RequestMapping("/getAllDepartment")
@@ -45,6 +64,7 @@ public class DepartmentController {
     }
 
     //保存department
+    @Transactional
     @RequestMapping("/insertDepartment")
     Department insertDepartment(@RequestBody Department department) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -58,6 +78,7 @@ public class DepartmentController {
     }
 
     //修改department
+    @Transactional
     @RequestMapping("/updataDepartment")
     boolean updataDepartment(@RequestBody Department department) {
         try {
@@ -81,6 +102,7 @@ public class DepartmentController {
         }
     }
     //删除部门
+    @Transactional
     @RequestMapping("deleteDepartment")
     public boolean deleteDepartment(String departmentId,String userId, String passWord) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -88,7 +110,6 @@ public class DepartmentController {
         if(checkadmin(userId)){
             boolean check = identityService.checkPassword(userId, passWord);
             if(check){
-                System.out.println(check);
                 if(departmentId.isEmpty()){
                     return false;
                 }

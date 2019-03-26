@@ -5,6 +5,7 @@ import com.sq.demo.mapper.ZhongbiaoMapper;
 import com.sq.demo.pojo.Zhongbiao;
 import com.sq.demo.utils.IdCreate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,12 +20,14 @@ public class ZhongbiaoController {
     ZhongbiaoMapper zhongbiaoMapper;
 
     //删除中标
+    @Transactional
     @RequestMapping("/deletZhongbiao")
     public boolean deletZhongbiao(String id){
         return zhongbiaoMapper.deleteByPrimaryKey(id)==1;
     }
 
     //添加中标
+    @Transactional
     @RequestMapping("/addZhongbiao")
     public boolean addZhongbiao(@RequestBody Zhongbiao zhongbiao) {
         zhongbiao.setId(IdCreate.id());

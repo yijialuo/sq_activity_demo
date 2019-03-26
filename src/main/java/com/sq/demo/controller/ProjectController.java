@@ -4,12 +4,8 @@ import com.github.pagehelper.PageHelper;
 import com.sq.demo.Entity.Project_Receive;
 import com.sq.demo.Entity.Return_Comments;
 import com.sq.demo.Entity.Xm;
-import com.sq.demo.mapper.AttachmentlinkMapper;
-import com.sq.demo.mapper.DepartmentMapper;
-import com.sq.demo.mapper.ProjectMapper;
-import com.sq.demo.pojo.Attachmentlink;
-import com.sq.demo.pojo.Department;
-import com.sq.demo.pojo.Project;
+import com.sq.demo.mapper.*;
+import com.sq.demo.pojo.*;
 import com.sq.demo.utils.IdCreate;
 import com.sq.demo.utils.Time;
 import org.activiti.bpmn.model.BpmnModel;
@@ -23,7 +19,9 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,8 +51,85 @@ public class ProjectController {
     DepartmentMapper departmentMapper;
     @Autowired
     AttachmentlinkMapper attachmentlinkMapper;
+    @Autowired
+    ZhongbiaoMapper zhongbiaoMapper;
+    @Autowired
+    ZhaobiaoMapper zhaobiaoMapper;
+
+    //搜索项目
+    @RequestMapping("zhSearch")
+    public List<Project> zhSearch(String select_dptnm,String select_jd,String select_xmfl,String select_xmlb){
+        Project project=new Project();
+        if(select_dptnm!=null&&!select_dptnm.equals(""))
+            project.setDeclarationDep(select_dptnm);
+        if(select_xmfl!=null&&!select_xmfl.equals(""))
+            project.setReviser(select_xmfl);
+        if(select_xmlb!=null&&!select_xmlb.equals(""))
+            project.setProjectType(select_xmlb);
+        List<Project> projects=projectMapper.select(project);
+        List<Project> res=new ArrayList<>();
+        if(select_jd==null||select_jd.equals("")){//没有节点搜索条件
+            return projects;
+        }
+        //有节点搜索条件
+        if(select_jd.equals("未申请")){//没有pid
+            for(Project project1:projects){
+                if(project1.getPid()==null||project1.getPid().equals("")){
+                    res.add(project1);
+                }
+            }
+            return res;
+        }else {//其他
+            for(Project project1:projects){
+                if(project1.getPid()!=null&&!project1.getPid().equals("")&&getPidNode(project1.getPid()).equals(select_jd)){
+                    res.add(project1);
+                }
+            }
+            return res;
+        }
+    }
+
+    //根据部门搜索项目
+    @RequestMapping("ssXmByBm")
+    public List<Project> ssXmByBm(String select_dptnm){
+        Project project=new Project();
+        project.setDeclarationDep(select_dptnm);
+        return projectMapper.select(project);
+    }
+
+    //根据项目类别搜索
+    @RequestMapping("ssXmByXmlb")
+    public List<Project> ssXmByXmlb(String select_xmlb){
+        return projectMapper.selectByXmlb(select_xmlb);
+    }
+
+    //根据项目分类搜索
+    @RequestMapping("ssXmByXmfl")
+    public List<Project> ssXmByXmfl(String select_xmfl){
+        return projectMapper.selectByXmfl(select_xmfl);
+    }
+
+    //根据节点搜索项目
+    @RequestMapping("ssXmByJd")
+    public List<Project> ssXmByJd(String select_jd){
+        if(select_jd.equals("未申请")){
+            return projectMapper.selectAllWsq();
+        }
+        List<Project> projects=projectMapper.selectAll();
+        List<Project> res=new ArrayList<>();
+        for(Project project:projects){
+            if(project.getPid()!=null&&!project.getPid().equals("")){
+                if(getPidNode(project.getPid()).equals(select_jd)){
+                    res.add(project);
+                }
+            }
+        }
+        return res;
+    }
+
 
     //作废项目(工程技术部)
+    @Transactional
     @RequestMapping("xmzf")
     public boolean xmzf(String id,String pid){
         try {
@@ -62,6 +137,9 @@ public class ProjectController {
             RuntimeService runtimeService = engine.getRuntimeService();
             //删流程
             runtimeService.deleteProcessInstance(pid, "");
+            //删除历史
+            HistoryService historyService=engine.getHistoryService();
+            historyService.deleteHistoricProcessInstance(pid);
             //删表
             projectMapper.deleteByPrimaryKey(id);
             return true;
@@ -76,9 +154,9 @@ public class ProjectController {
         List<Project> projects=projectMapper.selectAll();
         double zs=projects.size();
         if((new Double(zs)).intValue()==0)
-            return "0-0-0-0-0-0-0";
+            return "0-0-0-0-0-0-0-0";
         double wx=0,wzcg=0,gdzc=0;//维修，物资采购，固定资产
-        double tj=0,sb=0,wz=0,xx=0;//土建，设备，物资，信息
+        double tj=0,sb=0,wz=0,xx=0,lh=0;//土建，设备，物资，信息,绿化
         for(Project project:projects){
             String type=project.getProjectType();
             if(type.equals("维修"))
@@ -94,8 +172,10 @@ public class ProjectController {
                 sb++;
             else if(xmfl.equals("物资"))
                 wz++;
-            else
+            else if(xmfl.equals("信息"))
                 xx++;
+            else
+                lh++;
         }
         DecimalFormat df = new DecimalFormat("######0.0");
         String s1=df.format(wx/zs*100.00);// String.valueOf(new BigDecimal(wx/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
@@ -105,7 +185,8 @@ public class ProjectController {
         String s5=df.format(sb/zs*100.00);//String.valueOf(new BigDecimal(sb/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
         String s6=df.format(wz/zs*100.00);//String.valueOf(new BigDecimal(wz/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
         String s7=df.format(xx/zs*100.00);//String.valueOf(new BigDecimal(xx/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
-        return s1+"-"+s2+"-"+s3+"-"+s4+"-"+s5+"-"+s6+"-"+s7;
+        String s8=df.format(lh/zs*100.00);
+        return s1+"-"+s2+"-"+s3+"-"+s4+"-"+s5+"-"+s6+"-"+s7+"-"+s8;
     }
 
     //判断当前项目是否可以申请
@@ -127,20 +208,26 @@ public class ProjectController {
 
     //项目名称模糊搜索
     @RequestMapping("/xmmcss")
-    public List<Project> xmmcss(String projectName) {
-        return projectMapper.xmmcss(projectName);
+    public List<Project> xmmcss(String projectName,String declarationDep) {
+        if(declarationDep.equals("工程技术部")||declarationDep.equals("办公室"))//工程技术部搜索不分部门
+            return projectMapper.gcjsbxmmcss(projectName);
+        return projectMapper.xmmcss(projectName,declarationDep);
     }
 
     //项目编号模糊搜索
     @RequestMapping("/xmbhss")
-    public List<Project> xmbhss(String projectNo) {
-        return projectMapper.xmbhss(projectNo);
+    public List<Project> xmbhss(String projectNo,String declarationDep) {
+        if(declarationDep.equals("工程技术部")||declarationDep.equals("办公室"))//工程技术部搜索不分部门
+            return projectMapper.gcjsbxmbhss(projectNo);
+        return projectMapper.xmbhss(projectNo,declarationDep);
     }
 
   //  拿到有多少页
     @RequestMapping("/AllCounts")
-    public int AllCounts(){
-        return projectMapper.AllCounts();
+    public int AllCounts(String dpt){
+        if(dpt.equals("工程技术部")||dpt.equals("办公室"))
+            return projectMapper.AllCounts();
+        return projectMapper.selfAllCounts(dpt);
     }
 
     //拿所有的项目
@@ -149,7 +236,7 @@ public class ProjectController {
         ProcessEngine processEngine=ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService=processEngine.getIdentityService();
         String departmentId=identityService.getUserInfo(userId,"departmentId");
-        if(departmentId.equals("20190123022801622")){//工程技术部
+        if(departmentId.equals("20190123022801622")||departmentId.equals("20190125102616787")){//工程技术部或者办公室拿所有
             PageHelper.startPage(pageNum,10);
             return projectMapper.selectAll();
         }
@@ -158,61 +245,59 @@ public class ProjectController {
         return projectMapper.selectByDepartmentName(departmentName);
     }
 
+    @Transactional
     //从前期管理开始申请
     @RequestMapping("/qqglStartSq")
-    public String qqglStartSq(@RequestBody Project project) {
-        if (project.getPid() == null || project.getPid().equals("")) {
-            ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
-            IdentityService identityService = engine.getIdentityService();
-            //申请人姓名
-            String unam = project.getProposer();
-            TaskService taskService = engine.getTaskService();
-            RuntimeService runtimeService = engine.getRuntimeService();
-            //根据姓名查找userId
-            User user = identityService.createUserQuery().userFirstName(project.getProposer()).singleResult();
-            //根据userId查找职位
-            String groupName = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getName();
-            ProcessInstance pi;
-  //          if (groupName.equals("办事员")) {//其他部门项目
-                pi = runtimeService.startProcessInstanceByKey("lxsp");
-//            } else {//技术部项目
-//                pi = runtimeService.startProcessInstanceByKey("jsb_lxsp");
-//            }
-            Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-            project.setPid(pi.getId());
-            projectMapper.updateByPrimaryKeySelective(project);
-            //设置项目参数
-            taskService.setVariable(task.getId(), "project", project);
-            //设置任务受理人
-            taskService.setAssignee(task.getId(), user.getId());
-            //完成填写申请项目
-            taskService.complete(task.getId());
-            System.out.println(groupName);
-            if(groupName.equals("技术部办事员")) {
-                task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-                taskService.setVariable(task.getId(), "zgjl", true);
-                taskService.complete(task.getId());
-
-                task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-                taskService.setVariable(task.getId(), "jl", true);
-                taskService.complete(task.getId());
-
-                task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-                taskService.setVariable(task.getId(), "jbr", true);
+    public boolean qqglStartSq(@RequestBody Project project) {
+        try {
+            if (project.getPid() == null || project.getPid().equals("")) {//还没有流程id,
+                ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+                IdentityService identityService = engine.getIdentityService();
+                TaskService taskService = engine.getTaskService();
+                RuntimeService runtimeService = engine.getRuntimeService();
+                //根据姓名查找申请人userId
+                User user = identityService.createUserQuery().userFirstName(project.getProposer()).singleResult();
+                //根据userId查找职位
+                String groupName = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getName();
+                ProcessInstance pi = runtimeService.startProcessInstanceByKey("lxsp");
+                Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+                project.setPid(pi.getId());
+                projectMapper.updateByPrimaryKeySelective(project);
+                //设置项目参数
+                taskService.setVariable(task.getId(), "project", project);
+                //设置任务受理人
                 taskService.setAssignee(task.getId(), user.getId());
+                //完成填写申请项目
                 taskService.complete(task.getId());
+                //如果申请人是技术部办事员,前面不用走,直接通过
+                if(groupName.equals("技术部办事员")) {
+                    task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+                    taskService.setVariable(task.getId(), "zgjl", true);
+                    taskService.complete(task.getId());
+
+                    task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+                    taskService.setVariable(task.getId(), "jl", true);
+                    taskService.complete(task.getId());
+
+                    task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+                    taskService.setVariable(task.getId(), "jbr", true);
+                    taskService.setAssignee(task.getId(), user.getId());
+                    taskService.complete(task.getId());
+                }
+                return true;
+            } else {//有流程id
+                cxsq(project);
+                return true;
             }
-
-
-
-            return pi.getId();
-        } else {
-            cxsq(project);
-            return "";
+        }catch (Exception e){
+            return false;
         }
+
     }
 
+
     //启动申请流程,办事员填写申请表
+    @Transactional
     @RequestMapping("/startApplication")
     public String startApplication(@RequestBody Project_Receive pa) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -260,8 +345,8 @@ public class ProjectController {
         return res;
     }
 
-
     //技术部经办人修改项目信息
+    @Transactional
     @RequestMapping("/jsbdomanXgxm")
     public void jsbdomanXgxm(@RequestBody Project project){
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
@@ -274,6 +359,7 @@ public class ProjectController {
     }
 
     //重新申请
+    @Transactional
     @RequestMapping("/cxsq")
     public void cxsq(@RequestBody Project project) {
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
@@ -287,6 +373,7 @@ public class ProjectController {
     }
 
     //处理节点
+    @Transactional
     @RequestMapping("/doNode")
     public boolean doNode(String pid, String userId, String comment, String varName, String value) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -297,6 +384,17 @@ public class ProjectController {
                 //添加评论
                 Authentication.setAuthenticatedUserId(userId);
                 taskService.addComment(task.getId(), pid, comment);
+            }
+            IdentityService identityService=processEngine.getIdentityService();
+            String groupId=identityService.createGroupQuery().groupMember(userId).singleResult().getId();
+            if(groupId.equals("jsb_doman")){//处理人为技术部办事人,设置
+                Project project=(Project)taskService.getVariable(task.getId(), "project");
+                //设置经办人
+                project.setBider(identityService.createUserQuery().userId(userId).singleResult().getFirstName());
+                //重新设置项目参数
+                taskService.setVariable(task.getId(), "project", project);
+                //修改项目表
+                projectMapper.updateByPrimaryKeySelective(project);
             }
             //设置任务代理人
             taskService.setAssignee(task.getId(), userId);
@@ -311,6 +409,7 @@ public class ProjectController {
     }
 
     //完成备案
+    @Transactional
     @RequestMapping("/wcba")
     public void wcba(String pid, String userId) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -492,6 +591,7 @@ public class ProjectController {
     }
 
     //上传附件
+    @Transactional
     @RequestMapping(value = "/uploadFile")
     public boolean uploadFile(MultipartFile file, String pId, String userId) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -512,6 +612,7 @@ public class ProjectController {
     }
 
     //处理任务
+    @Transactional
     @RequestMapping(value = "/addComment")
     public boolean addCommnet(String pid, String userId, String comment, String varName, String value) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -570,6 +671,7 @@ public class ProjectController {
     }
 
     //项目表插入
+    @Transactional
     @RequestMapping("/insertXm")
     public String startpapplication(@RequestBody Project pa) {
         try {
@@ -583,27 +685,40 @@ public class ProjectController {
         }
     }
 
+    //判断项目是否可删
+    boolean canDelet(String projectId){
+        List<String> xmids=projectMapper.getGlXmid();//关联表的xmid;
+        for(String xmid:xmids){
+            if(xmid.equals(projectId)) //有关联数据,不可删除
+                return false;
+        }
+
+        Project project=projectMapper.selectByPrimaryKey(projectId);
+
+        if(project.getPid()!=null&&!project.getPid().equals("")&&!getPidNode(project.getPid()).equals("填写申请表"))//有pid
+            return false;
+
+        return true;
+    }
+
     //删除
+    @Transactional
     @RequestMapping("/deletXm")
     public boolean deletXm(@RequestBody Project po) {
-        try {
-            if (po.getPid() == null || po.getPid().equals("")) {//还没有开始跑流程、可以删
-                projectMapper.deleteByPrimaryKey(po);
-                return true;
-            }
-            if (getPidNode(po.getPid()).equals("填写申请表")) {//该流程跑起来了，节点在填写申请表，可删
+        if(canDelet(po.getId())){
+            projectMapper.delete(po);
+            if(po.getPid()!=null&&!po.getPid().equals("")){
                 ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
                 RuntimeService runtimeService = engine.getRuntimeService();
                 //删流程
                 runtimeService.deleteProcessInstance(po.getPid(), "");
-                //删表
-                projectMapper.deleteByPrimaryKey(po);
-                return true;
+                //删除历史
+                HistoryService historyService=engine.getHistoryService();
+                historyService.deleteHistoricProcessInstance(po.getId());
             }
-            return false;
-        } catch (Exception e) {
-            return false;
+            return true;
         }
+        return false;
     }
 
     //确定申请人
@@ -625,6 +740,7 @@ public class ProjectController {
     }
 
     //修改项目表单的项目号
+    @Transactional
     @RequestMapping("/xgxmbh")
     public boolean xgxmbh(String xmid,String xmbh){
         try {
@@ -645,6 +761,7 @@ public class ProjectController {
     }
 
     //修改项目表单
+    @Transactional
     @RequestMapping("/updataXm")
     public boolean xgxmbd(@RequestBody Project po) {
         try {
@@ -666,6 +783,41 @@ public class ProjectController {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    //拿到本部门未开始招标的项目id和项目name
+    @RequestMapping("/getSelfWzzXmidAndXmname")
+    public List<Xm> getSelfWzzXmidAndXmname(String dpt){
+        List<Xm> xms=getSelfXmidAndXmname(dpt);
+        //所有招标了的项目
+        List<String> projectIds=new ArrayList<>();
+        for(Zhaobiao zhaobiao:zhaobiaoMapper.selectAll()){
+            projectIds.add(zhaobiao.getXmid());
+        }
+        List<Xm> res=new ArrayList<>();
+        for (Xm xm:xms){
+            if(!projectIds.contains(xm.value)){
+                res.add(xm);
+            }
+        }
+        return res;
+    }
+
+    //拿到本部门项目id和项目name
+    @RequestMapping("/getSelfXmidAndXmname")
+    public List<Xm> getSelfXmidAndXmname(String dpt){
+        List<Project> projects = projectMapper.selectAll();
+        List<Xm> xms = new ArrayList<>();
+        for (Project project : projects) {
+            if(project.getDeclarationDep().equals(dpt)){
+                Xm xm = new Xm();
+                xm.value = project.getId();
+                xm.label = project.getProjectNam();
+                xms.add(xm);
+            }
+
+        }
+        return xms;
     }
 
     //拿所有项目id和项目name
@@ -701,4 +853,6 @@ public class ProjectController {
     public String xmIdToxmName(String xmId) {
         return projectMapper.selectByPrimaryKey(xmId).getProjectNam();
     }
+
+
 }

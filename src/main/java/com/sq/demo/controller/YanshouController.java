@@ -8,6 +8,7 @@ import com.sq.demo.pojo.Contractfile;
 import com.sq.demo.pojo.Yanshou;
 import com.sq.demo.utils.IdCreate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +29,7 @@ public class YanshouController {
     ContractfileMapper contractfileMapper ;
 
     //归档
+    @Transactional
     @RequestMapping("/guidang")
     public boolean guidang(String id){
         Yanshou yanshou=new Yanshou();
@@ -37,6 +39,7 @@ public class YanshouController {
     }
 
     //增加验收单
+    @Transactional
     @RequestMapping("/addYanshou")
     public String addYanshou(@RequestBody Yanshou ys){
         ys.setId(IdCreate.id());
@@ -45,6 +48,7 @@ public class YanshouController {
     }
 
     //修改验收单
+    @Transactional
     @RequestMapping("/updateYanshou")
     public boolean updateYanshou(@RequestBody Yanshou ys){
         if(yanshouMapper.updateByPrimaryKeySelective(ys)==1){
@@ -55,6 +59,7 @@ public class YanshouController {
     }
 
     //删除验收单
+    @Transactional
     @RequestMapping("/deleteYanshou")
     public boolean deleteYanshou(String yid){
         Contractfile contractfile=new Contractfile();

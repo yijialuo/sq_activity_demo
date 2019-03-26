@@ -9,6 +9,7 @@ import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,6 +63,7 @@ public class UserController {
 
     }
 
+    @Transactional
     @RequestMapping("/adduser")
     public boolean Adduser(@RequestBody UserOV userOV) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -79,6 +81,7 @@ public class UserController {
         return true;
     }
 
+    @Transactional
     @RequestMapping("/deleteuser")
     public boolean deleteuser(String userId) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -89,6 +92,7 @@ public class UserController {
 
 
     //修改密码
+    @Transactional
     @RequestMapping("/xgmm")
     public boolean xgmm(String userId,String oldPass,String newPass){
         if(dologin(userId,oldPass)){
@@ -102,6 +106,7 @@ public class UserController {
         return false;
     }
 
+    @Transactional
     @RequestMapping("/edituser")
     public boolean edituser(@RequestBody UserOV userOV) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -181,5 +186,14 @@ public class UserController {
         User user = identityService.createUserQuery().userId(userId).singleResult();
         String username = user.getFirstName();
         return username;
+    }
+
+    //根据uerId拿部门名称
+    @RequestMapping("userIdToDept")
+    public String userIdToDept(String userId){
+        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService=engine.getIdentityService();
+        String departmentId=identityService.getUserInfo(userId,"departmentId");
+        return departmentMapper.selectByPrimaryKey(departmentId).getdNam();
     }
 }

@@ -4,6 +4,7 @@ import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.*;
 import com.sq.demo.utils.IdCreate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +32,7 @@ public class SupplierController {
     }
 
     //增加供应商
+    @Transactional
     @RequestMapping("/addSupplier")
     public String addSupplier(@RequestBody Supplier su) {
         su.setId(IdCreate.id());
@@ -39,6 +41,7 @@ public class SupplierController {
     }
 
     //删除供应商
+    @Transactional
     @RequestMapping("/deleteSupplier")
     public boolean deleteSupplier(String sid) {
         if (supplierMapper.deleteByPrimaryKey(sid) == 1)
@@ -54,6 +57,7 @@ public class SupplierController {
     }
 
     //修改供应商
+    @Transactional
     @RequestMapping("/updateSupplier")
     public boolean updateSupplier(@RequestBody Supplier su){
         if(supplierMapper.updateByPrimaryKeySelective(su)==1){
@@ -62,6 +66,7 @@ public class SupplierController {
     }
 
     //添加总体评价
+    @Transactional
     @RequestMapping("/addZtpj")
     public String addZtpj(@RequestBody Totalcomment tc){
         tc.setId(IdCreate.id());
@@ -73,6 +78,7 @@ public class SupplierController {
     }
 
     //添加评分
+    @Transactional
     @RequestMapping("/addScore")
     public boolean addScore(@RequestBody Score s){
         s.setId(IdCreate.id());

@@ -5,9 +5,11 @@ import com.sq.demo.Entity.Return_Comments;
 import com.sq.demo.mapper.AttachmentlinkMapper;
 import com.sq.demo.mapper.TbdwMapper;
 import com.sq.demo.mapper.ZhaobiaoMapper;
+import com.sq.demo.mapper.ZhongbiaoMapper;
 import com.sq.demo.pojo.Attachmentlink;
 import com.sq.demo.pojo.Tbdw;
 import com.sq.demo.pojo.Zhaobiao;
+import com.sq.demo.pojo.Zhongbiao;
 import com.sq.demo.utils.IdCreate;
 import com.sq.demo.utils.Time;
 import org.activiti.engine.*;
@@ -20,6 +22,7 @@ import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,8 +41,11 @@ public class ZhaobiaoController {
     ZhaobiaoMapper zhaobiaoMapper;
     @Autowired
     TbdwMapper tbdwMapper;
+    @Autowired
+    ZhongbiaoMapper zhongbiaoMapper;
 
     //重新申请
+    @Transactional
     @RequestMapping("/cxsq")
     public void cxsq(@RequestBody Zhaobiao zhaobiao) {
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
@@ -53,6 +59,7 @@ public class ZhaobiaoController {
     }
 
     //作废招标
+    @Transactional
     @RequestMapping("/zfzb")
     public boolean zfzb(String id, String zbpid) {
         try {
@@ -60,12 +67,15 @@ public class ZhaobiaoController {
             RuntimeService runtimeService = engine.getRuntimeService();
             //删流程
             runtimeService.deleteProcessInstance(zbpid, "");
-            //删表
+            //删除历史
+            HistoryService historyService=engine.getHistoryService();
+            historyService.deleteHistoricProcessInstance(zbpid);
+            //删招标表
             zhaobiaoMapper.deleteByPrimaryKey(id);
-            //删投标商表
-            Tbdw tbdw = new Tbdw();
-            tbdw.setZbid(id);
-            tbdwMapper.delete(tbdw);
+            //删投中标表
+            Zhongbiao zhongbiao=new Zhongbiao();
+            zhongbiao.setZbid(id);
+            zhongbiaoMapper.delete(zhongbiao);
             return true;
         } catch (Exception e) {
             return false;
@@ -73,10 +83,10 @@ public class ZhaobiaoController {
     }
 
     //技术部经办人标书发起
+    @Transactional
     @RequestMapping("/bsfq")//招标id,发标时间，评标时间，投标截止时间,招标流程pid
     public boolean bsfq(String id,String userId,String comment) {
         try {
-            System.out.println(id+" "+userId+" "+comment);
             Zhaobiao zhaobiao = zhaobiaoMapper.selectByPrimaryKey(id);
             ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
             TaskService taskService = engine.getTaskService();
@@ -101,6 +111,7 @@ public class ZhaobiaoController {
     }
 
     //删除投标商
+    @Transactional
     @RequestMapping("/deletTbdw")
     public boolean deletTbdw(String id) {
         return tbdwMapper.deleteByPrimaryKey(id) == 1;
@@ -115,6 +126,7 @@ public class ZhaobiaoController {
     }
 
     //添加投标商
+    @Transactional
     @RequestMapping("/addTbdw")
     public boolean addTbdw(String zbid, String dw) {
         Tbdw tbdw = new Tbdw();
@@ -127,6 +139,7 @@ public class ZhaobiaoController {
     }
 
     //启动招标申请流程,办事员填写招标表
+    @Transactional
     @RequestMapping("/startZhaobiao")
     public String startZhaobiao(@RequestBody Zhaobiao zhaobiao) {
         zhaobiao.setId(IdCreate.id());
@@ -144,10 +157,22 @@ public class ZhaobiaoController {
         taskService.setAssignee(task.getId(), zhaobiao.getSqr());
         //完成填写申请项目
         taskService.complete(task.getId());
+
+        IdentityService identityService=engine.getIdentityService();
+
+        //根据userId查找职位
+        String groupName = identityService.createGroupQuery().groupMember(zhaobiao.getSqr()).singleResult().getName();
+        if(groupName.equals("技术部办事员")) {//技术部申请直接跳过办事员,
+            task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+            taskService.setVariable(task.getId(), "jbr", true);
+            taskService.setAssignee(task.getId(), zhaobiao.getSqr());
+            taskService.complete(task.getId());
+        }
+
         return zhaobiao.getId() + "_" + pi.getId();
     }
 
-    //id查询所有项目 根据用户id拿到自己参与的项目
+    //userid查询所有项目 根据用户id拿到自己参与的项目
     @RequestMapping("/getAllzhaobiao")
     public List<Zhaobiao> getallproject(String userId) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -178,6 +203,29 @@ public class ZhaobiaoController {
             }
         }
         return res;
+    }
+
+    //主管经理或经理拿到自己部门所有的招标信息
+    @RequestMapping("/getselfDptZb")
+    public List<Zhaobiao> getselfDptZb(String userId){
+        List<Zhaobiao> res=new ArrayList<>();
+        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService=engine.getIdentityService();
+        String dptId=identityService.getUserInfo(userId,"departmentId");
+        List<Zhaobiao> zhaobiaos=zhaobiaoMapper.selectAll();
+        for (Zhaobiao zhaobiao:zhaobiaos){
+            String dpt=identityService.getUserInfo(zhaobiao.getSqr(),"departmentId");
+            if(dpt.equals(dptId)){
+                res.add(zhaobiao);
+            }
+        }
+        return res;
+    }
+
+    //技术部经理拿所有
+    @RequestMapping("/jsbjlGetAllZhaobiao")
+    public List<Zhaobiao> jsbjlGetAllZhaobiao(){
+        return zhaobiaoMapper.selectAll();
     }
 
     //领取招标表单
@@ -222,6 +270,7 @@ public class ZhaobiaoController {
     }
 
     //上传附件
+    @Transactional
     @RequestMapping(value = "/uploadFile")
     public boolean uploadFile(MultipartFile file, String zbpid, String userId) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -241,6 +290,8 @@ public class ZhaobiaoController {
         }
     }
 
+    //完成招标
+    @Transactional
     @RequestMapping("/wczb")
     public boolean wczb(String userId,String id,String fbsj,String dbsj,String tbjzsj,String comment){//tbjzsj是工期
         try {
@@ -271,6 +322,7 @@ public class ZhaobiaoController {
     }
 
     //处理节点(驳回处理)
+    @Transactional
     @RequestMapping("/doNode")
     public boolean doNode(String zbpid, String userId, String varName, String value,String comment) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();

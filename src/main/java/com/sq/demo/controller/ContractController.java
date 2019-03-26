@@ -15,6 +15,7 @@ import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.DeploymentBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,6 +43,7 @@ public class ContractController {
 
     //归档
     @RequestMapping("/guidang")
+    @Transactional
     public boolean guidang(String id){
         Contract contract=new Contract();
         contract.setId(id);
@@ -51,6 +53,7 @@ public class ContractController {
 
     //修改合同
     @RequestMapping("/updateContract")
+    @Transactional
     public boolean updateContract(@RequestBody Contract con){
         if(contractMapper.updateByPrimaryKey(con)==1)
             return true;
@@ -60,6 +63,7 @@ public class ContractController {
 
     //增加合同
     @RequestMapping("/addContract")
+    @Transactional
     public String addContract(@RequestBody Contract con){
         con.setId(IdCreate.id());
         contractMapper.insert(con);
@@ -68,6 +72,7 @@ public class ContractController {
 
     //删除合同
     @RequestMapping("/deleteContract")
+    @Transactional
     public boolean deleteContract(String cid){
         Contractfile contractfile=new Contractfile();
         contractfile.setCid(cid);
@@ -165,6 +170,7 @@ public class ContractController {
 
     //上传合同附件
     @RequestMapping("/uploadHtfj")
+    @Transactional
     public boolean uploadHtfj(MultipartFile file, String id)  {
         try {
             ProcessEngine engine= ProcessEngines.getDefaultProcessEngine();

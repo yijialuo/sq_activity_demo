@@ -12,20 +12,66 @@ import java.util.Map;
 
 
 public interface ProjectMapper extends MyMapper<Project> {
-    @Select("select * from project where project_nam like CONCAT('%',#{0},'%')")
-    List<Project> xmmcss(String s);
-    @Select("select * from project where project_no like CONCAT('%',#{0},'%')")
-    List<Project> xmbhss(String s);
+    //工程技术部项目名称搜索
+    @Select("select * from project where project_nam like CONCAT('%',#{s},'%')")
+    List<Project> gcjsbxmmcss(@Param("s") String s);
+
+    //工程技术部项目编号搜索
+    @Select("select * from project where project_no like CONCAT('%',#{s},'%')")
+    List<Project> gcjsbxmbhss(@Param("s") String s);
+
+    @Select("select * from project where project_nam like CONCAT('%',#{s},'%') and DECLARATION_DEP=#{s2}")
+    List<Project> xmmcss(@Param("s") String s,@Param("s2") String s2);
+
+    @Select("select * from project where project_no like CONCAT('%',#{s},'%') and DECLARATION_DEP=#{s2}")
+    List<Project> xmbhss(@Param("s") String s,@Param("s2") String s2);
+
     @Select("select * from project limit #{startNo},#{pageSize}")
     List<Project> fenye(@Param("startNo") Integer pageNo, @Param("pageSize") Integer pageSize);
+
+    //工程技术部拿所有项目数
     @Select("select count(*) from project")
     int AllCounts();
+
+    //其他部门拿自己项目数
+    @Select("select count(*) from project where DECLARATION_DEP=#{s}")
+    int selfAllCounts(String s);
+
+
     @Select("select * from project order by ENG_TECH_AUDIT_OPINION desc")
     List<Project> selectAll();
+
     //拿到还可以进行验收的数据
     @Select("SELECT ID,PROJECT_NAM FROM project WHERE ID not in (SELECT PROJECTID FROM yanshou )")
     List<Map> selectYsXm();
+
     //根据部门名称那项目
     @Select("select * from project where DECLARATION_DEP=#{departmentName} order by ENG_TECH_AUDIT_OPINION desc")
     List<Project> selectByDepartmentName(String departmentName);
+
+    //拿到项目的其他关联表的项目id
+    @Select("SELECT xmid FROM zhaobiao \n" +
+            "UNION \n" +
+            "SELECT PROJECT_ID FROM contract\n" +
+            "UNION\n" +
+            "SELECT PROJECT_ID FROM jindu\n" +
+            "UNION\n" +
+            "SELECT PROJECT FROM payable\n" +
+            "UNION\n" +
+            "SELECT PROJECTID FROM yanshou\n" +
+            "UNION\n" +
+            "SELECT xmid FROM zhongbiao")
+    List<String> getGlXmid();
+
+    //拿到未申请的项目
+    @Select("SELECT * FROM project WHERE PID is NULL or PID=''")
+    List<Project> selectAllWsq();
+
+    //项目分类搜索项目
+    @Select("SELECT * FROM project WHERE REVISER=#{s}")
+    List<Project> selectByXmfl(@Param("s") String s);
+
+    //项目类别搜索
+    @Select("SELECT * FROM project WHERE PROJECT_TYPE=#{s}")
+    List<Project> selectByXmlb(@Param("s") String s);
 }

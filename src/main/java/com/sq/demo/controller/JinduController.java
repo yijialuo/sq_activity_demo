@@ -6,6 +6,7 @@ import com.sq.demo.pojo.Jindu;
 import com.sq.demo.pojo.Project;
 import com.sq.demo.utils.IdCreate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +23,17 @@ public class JinduController {
     @Autowired
     JinduMapper jinduMapper;
 
+
+    //拿项目施工状态
+    @RequestMapping("/getSgzt")
+    public String getSgzt(String projectId){
+        Jindu jindu=new Jindu();
+        jindu.setProjectId(projectId);
+        return jinduMapper.select(jindu).size()==0?"未开工":"进行中";
+    }
+
     //修改进度
+    @Transactional
     @RequestMapping("/updataJindu")
     public boolean updataJindu(@RequestBody Jindu jin){
         if(jinduMapper.updateByPrimaryKeySelective(jin)==1)
@@ -31,6 +42,7 @@ public class JinduController {
     }
 
     //完成项目
+    @Transactional
     @RequestMapping("/projectFinish")
     public String projectFinish(String pid){
         String dte= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
@@ -46,6 +58,7 @@ public class JinduController {
     }
 
     //添加节点
+    @Transactional
     @RequestMapping("/addJindu")
     public boolean addJindu(@RequestBody Jindu jin){
         Jindu jindu = new Jindu();
@@ -62,6 +75,7 @@ public class JinduController {
     }
 
     //删除进度节点
+    @Transactional
     @RequestMapping("/deleteJindu")
     public boolean deleteJindu(String jid){
         if(jinduMapper.deleteByPrimaryKey(jid)==1){
@@ -84,7 +98,7 @@ public class JinduController {
         Project project = new Project();
         project.setId(pid);
         String finishdte = projectMapper.selectOne(project).getFinishDte();
-        if(finishdte==null||finishdte==""){
+        if(finishdte==null||finishdte.equals("")){
             return false;
         }else {
             return true;

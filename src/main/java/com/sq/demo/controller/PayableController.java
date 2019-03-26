@@ -10,6 +10,7 @@ import com.sq.demo.pojo.Payable;
 import com.sq.demo.pojo.Project;
 import com.sq.demo.utils.IdCreate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,6 +36,7 @@ public class PayableController {
     ProjectMapper projectMapper;
 
     //添加应付信息
+    @Transactional
     @RequestMapping("/addPayable")
     public boolean addPayable(@RequestBody Payable_Receive payable_receive){
         Payable payable = new Payable();
