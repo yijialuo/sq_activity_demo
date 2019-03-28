@@ -49,8 +49,8 @@ public class AttachmentController {
     @RequestMapping("/deletAttachment")
     @Transactional
     public boolean deletAttachment(String userId, String attachment_id) {
-        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-        if (getrank(userId, attachment_id)) {
+        try {
+            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
             TaskService taskService = processEngine.getTaskService();
             taskService.deleteAttachment(attachment_id);
             //删关联表
@@ -58,9 +58,22 @@ public class AttachmentController {
             attachmentlink.setAttachment(attachment_id);
             attachmentlinkMapper.delete(attachmentlink);
             return true;
-        } else {
+        }catch (Exception e){
             return false;
         }
+//
+//        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+//        if (getrank(userId, attachment_id)) {
+//            TaskService taskService = processEngine.getTaskService();
+//            taskService.deleteAttachment(attachment_id);
+//            //删关联表
+//            Attachmentlink attachmentlink = new Attachmentlink();
+//            attachmentlink.setAttachment(attachment_id);
+//            attachmentlinkMapper.delete(attachmentlink);
+//            return true;
+//        } else {
+//            return false;
+//        }
     }
 
     //返回附件信息

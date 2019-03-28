@@ -37,7 +37,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 
-
 /**
  * Created by yijialuo on 2019/1/13.
  */
@@ -55,33 +54,35 @@ public class ProjectController {
     ZhongbiaoMapper zhongbiaoMapper;
     @Autowired
     ZhaobiaoMapper zhaobiaoMapper;
+    @Autowired
+    ContractfileMapper contractfileMapper;
 
     //搜索项目
     @RequestMapping("zhSearch")
-    public List<Project> zhSearch(String select_dptnm,String select_jd,String select_xmfl,String select_xmlb){
-        Project project=new Project();
-        if(select_dptnm!=null&&!select_dptnm.equals(""))
+    public List<Project> zhSearch(String select_dptnm, String select_jd, String select_xmfl, String select_xmlb) {
+        Project project = new Project();
+        if (select_dptnm != null && !select_dptnm.equals(""))
             project.setDeclarationDep(select_dptnm);
-        if(select_xmfl!=null&&!select_xmfl.equals(""))
+        if (select_xmfl != null && !select_xmfl.equals(""))
             project.setReviser(select_xmfl);
-        if(select_xmlb!=null&&!select_xmlb.equals(""))
+        if (select_xmlb != null && !select_xmlb.equals(""))
             project.setProjectType(select_xmlb);
-        List<Project> projects=projectMapper.select(project);
-        List<Project> res=new ArrayList<>();
-        if(select_jd==null||select_jd.equals("")){//没有节点搜索条件
+        List<Project> projects = projectMapper.select(project);
+        List<Project> res = new ArrayList<>();
+        if (select_jd == null || select_jd.equals("")) {//没有节点搜索条件
             return projects;
         }
         //有节点搜索条件
-        if(select_jd.equals("未申请")){//没有pid
-            for(Project project1:projects){
-                if(project1.getPid()==null||project1.getPid().equals("")){
+        if (select_jd.equals("未申请")) {//没有pid
+            for (Project project1 : projects) {
+                if (project1.getPid() == null || project1.getPid().equals("")) {
                     res.add(project1);
                 }
             }
             return res;
-        }else {//其他
-            for(Project project1:projects){
-                if(project1.getPid()!=null&&!project1.getPid().equals("")&&getPidNode(project1.getPid()).equals(select_jd)){
+        } else {//其他
+            for (Project project1 : projects) {
+                if (project1.getPid() != null && !project1.getPid().equals("") && getPidNode(project1.getPid()).equals(select_jd)) {
                     res.add(project1);
                 }
             }
@@ -91,35 +92,35 @@ public class ProjectController {
 
     //根据部门搜索项目
     @RequestMapping("ssXmByBm")
-    public List<Project> ssXmByBm(String select_dptnm){
-        Project project=new Project();
+    public List<Project> ssXmByBm(String select_dptnm) {
+        Project project = new Project();
         project.setDeclarationDep(select_dptnm);
         return projectMapper.select(project);
     }
 
     //根据项目类别搜索
     @RequestMapping("ssXmByXmlb")
-    public List<Project> ssXmByXmlb(String select_xmlb){
+    public List<Project> ssXmByXmlb(String select_xmlb) {
         return projectMapper.selectByXmlb(select_xmlb);
     }
 
     //根据项目分类搜索
     @RequestMapping("ssXmByXmfl")
-    public List<Project> ssXmByXmfl(String select_xmfl){
+    public List<Project> ssXmByXmfl(String select_xmfl) {
         return projectMapper.selectByXmfl(select_xmfl);
     }
 
     //根据节点搜索项目
     @RequestMapping("ssXmByJd")
-    public List<Project> ssXmByJd(String select_jd){
-        if(select_jd.equals("未申请")){
+    public List<Project> ssXmByJd(String select_jd) {
+        if (select_jd.equals("未申请")) {
             return projectMapper.selectAllWsq();
         }
-        List<Project> projects=projectMapper.selectAll();
-        List<Project> res=new ArrayList<>();
-        for(Project project:projects){
-            if(project.getPid()!=null&&!project.getPid().equals("")){
-                if(getPidNode(project.getPid()).equals(select_jd)){
+        List<Project> projects = projectMapper.selectAll();
+        List<Project> res = new ArrayList<>();
+        for (Project project : projects) {
+            if (project.getPid() != null && !project.getPid().equals("")) {
+                if (getPidNode(project.getPid()).equals(select_jd)) {
                     res.add(project);
                 }
             }
@@ -131,14 +132,14 @@ public class ProjectController {
     //作废项目(工程技术部)
     @Transactional
     @RequestMapping("xmzf")
-    public boolean xmzf(String id,String pid){
+    public boolean xmzf(String id, String pid) {
         try {
             ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
             RuntimeService runtimeService = engine.getRuntimeService();
             //删流程
             runtimeService.deleteProcessInstance(pid, "");
             //删除历史
-            HistoryService historyService=engine.getHistoryService();
+            HistoryService historyService = engine.getHistoryService();
             historyService.deleteHistoricProcessInstance(pid);
             //删表
             projectMapper.deleteByPrimaryKey(id);
@@ -150,43 +151,43 @@ public class ProjectController {
 
     //拿到项目占比情况
     @RequestMapping("zb")
-    public String zb(){
-        List<Project> projects=projectMapper.selectAll();
-        double zs=projects.size();
-        if((new Double(zs)).intValue()==0)
+    public String zb() {
+        List<Project> projects = projectMapper.selectAll();
+        double zs = projects.size();
+        if ((new Double(zs)).intValue() == 0)
             return "0-0-0-0-0-0-0-0";
-        double wx=0,wzcg=0,gdzc=0;//维修，物资采购，固定资产
-        double tj=0,sb=0,wz=0,xx=0,lh=0;//土建，设备，物资，信息,绿化
-        for(Project project:projects){
-            String type=project.getProjectType();
-            if(type.equals("维修"))
+        double wx = 0, wzcg = 0, gdzc = 0;//维修，物资采购，固定资产
+        double tj = 0, sb = 0, wz = 0, xx = 0, lh = 0;//土建，设备，物资，信息,绿化
+        for (Project project : projects) {
+            String type = project.getProjectType();
+            if (type.equals("维修"))
                 wx++;
-            else if(type.equals("物资采购"))
+            else if (type.equals("物资采购"))
                 wzcg++;
             else
                 gdzc++;
-            String xmfl=project.getReviser();
-            if(xmfl.equals("土建"))
+            String xmfl = project.getReviser();
+            if (xmfl.equals("土建"))
                 tj++;
-            else if(xmfl.equals("设备"))
+            else if (xmfl.equals("设备"))
                 sb++;
-            else if(xmfl.equals("物资"))
+            else if (xmfl.equals("物资"))
                 wz++;
-            else if(xmfl.equals("信息"))
+            else if (xmfl.equals("信息"))
                 xx++;
             else
                 lh++;
         }
         DecimalFormat df = new DecimalFormat("######0.0");
-        String s1=df.format(wx/zs*100.00);// String.valueOf(new BigDecimal(wx/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
-        String s2=df.format(wzcg/zs*100.00);//String.valueOf(new BigDecimal(wzcg/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
-        String s3=df.format(gdzc/zs*100.00);//String.valueOf(new BigDecimal(gdzc/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
-        String s4=df.format(tj/zs*100.00);//String.valueOf(new BigDecimal(tj/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
-        String s5=df.format(sb/zs*100.00);//String.valueOf(new BigDecimal(sb/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
-        String s6=df.format(wz/zs*100.00);//String.valueOf(new BigDecimal(wz/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
-        String s7=df.format(xx/zs*100.00);//String.valueOf(new BigDecimal(xx/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
-        String s8=df.format(lh/zs*100.00);
-        return s1+"-"+s2+"-"+s3+"-"+s4+"-"+s5+"-"+s6+"-"+s7+"-"+s8;
+        String s1 = df.format(wx / zs * 100.00);// String.valueOf(new BigDecimal(wx/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
+        String s2 = df.format(wzcg / zs * 100.00);//String.valueOf(new BigDecimal(wzcg/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
+        String s3 = df.format(gdzc / zs * 100.00);//String.valueOf(new BigDecimal(gdzc/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
+        String s4 = df.format(tj / zs * 100.00);//String.valueOf(new BigDecimal(tj/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
+        String s5 = df.format(sb / zs * 100.00);//String.valueOf(new BigDecimal(sb/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
+        String s6 = df.format(wz / zs * 100.00);//String.valueOf(new BigDecimal(wz/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
+        String s7 = df.format(xx / zs * 100.00);//String.valueOf(new BigDecimal(xx/zs).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue()*100);
+        String s8 = df.format(lh / zs * 100.00);
+        return s1 + "-" + s2 + "-" + s3 + "-" + s4 + "-" + s5 + "-" + s6 + "-" + s7 + "-" + s8;
     }
 
     //判断当前项目是否可以申请
@@ -202,46 +203,46 @@ public class ProjectController {
 
     //项目id查询项目
     @RequestMapping("/selectXmById")
-    public Project selectXm(String projectId){
+    public Project selectXm(String projectId) {
         return projectMapper.selectByPrimaryKey(projectId);
     }
 
     //项目名称模糊搜索
     @RequestMapping("/xmmcss")
-    public List<Project> xmmcss(String projectName,String declarationDep) {
-        if(declarationDep.equals("工程技术部")||declarationDep.equals("办公室"))//工程技术部搜索不分部门
+    public List<Project> xmmcss(String projectName, String declarationDep) {
+        if (declarationDep.equals("工程技术部") || declarationDep.equals("办公室"))//工程技术部搜索不分部门
             return projectMapper.gcjsbxmmcss(projectName);
-        return projectMapper.xmmcss(projectName,declarationDep);
+        return projectMapper.xmmcss(projectName, declarationDep);
     }
 
     //项目编号模糊搜索
     @RequestMapping("/xmbhss")
-    public List<Project> xmbhss(String projectNo,String declarationDep) {
-        if(declarationDep.equals("工程技术部")||declarationDep.equals("办公室"))//工程技术部搜索不分部门
+    public List<Project> xmbhss(String projectNo, String declarationDep) {
+        if (declarationDep.equals("工程技术部") || declarationDep.equals("办公室"))//工程技术部搜索不分部门
             return projectMapper.gcjsbxmbhss(projectNo);
-        return projectMapper.xmbhss(projectNo,declarationDep);
+        return projectMapper.xmbhss(projectNo, declarationDep);
     }
 
-  //  拿到有多少页
+    //  拿到有多少页
     @RequestMapping("/AllCounts")
-    public int AllCounts(String dpt){
-        if(dpt.equals("工程技术部")||dpt.equals("办公室"))
+    public int AllCounts(String dpt) {
+        if (dpt.equals("工程技术部") || dpt.equals("办公室"))
             return projectMapper.AllCounts();
         return projectMapper.selfAllCounts(dpt);
     }
 
     //拿所有的项目
     @RequestMapping("/getAllProject")
-    public List<Project> getAllProject(int pageNum,String userId) {
-        ProcessEngine processEngine=ProcessEngines.getDefaultProcessEngine();
-        IdentityService identityService=processEngine.getIdentityService();
-        String departmentId=identityService.getUserInfo(userId,"departmentId");
-        if(departmentId.equals("20190123022801622")||departmentId.equals("20190125102616787")){//工程技术部或者办公室拿所有
-            PageHelper.startPage(pageNum,10);
+    public List<Project> getAllProject(int pageNum, String userId) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
+        String departmentId = identityService.getUserInfo(userId, "departmentId");
+        if (departmentId.equals("20190123022801622") || departmentId.equals("20190125102616787")) {//工程技术部或者办公室拿所有
+            PageHelper.startPage(pageNum, 10);
             return projectMapper.selectAll();
         }
-        String departmentName=departmentMapper.selectByPrimaryKey(departmentId).getdNam();
-        PageHelper.startPage(pageNum,10);
+        String departmentName = departmentMapper.selectByPrimaryKey(departmentId).getdNam();
+        PageHelper.startPage(pageNum, 10);
         return projectMapper.selectByDepartmentName(departmentName);
     }
 
@@ -250,7 +251,7 @@ public class ProjectController {
     @RequestMapping("/qqglStartSq")
     public boolean qqglStartSq(@RequestBody Project project) {
         try {
-            if (project.getPid() == null || project.getPid().equals("")) {//还没有流程id,
+            if (project.getPid() == null || project.getPid().equals("")) {//还没有流程id,第一次
                 ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
                 IdentityService identityService = engine.getIdentityService();
                 TaskService taskService = engine.getTaskService();
@@ -267,10 +268,26 @@ public class ProjectController {
                 taskService.setVariable(task.getId(), "project", project);
                 //设置任务受理人
                 taskService.setAssignee(task.getId(), user.getId());
+                if (!groupName.equals("技术部办事员")) {
+                    //处理前期还是申请时候的附件
+                    Contractfile contractfile = new Contractfile();
+                    contractfile.setCid(project.getId());
+                    List<Contractfile> contractfiles = contractfileMapper.select(contractfile);
+                    RepositoryService repositoryService = engine.getRepositoryService();
+                    for (Contractfile contractfile1 : contractfiles) {
+                        //上传附件  参数：附件类型、任务id，流程id，附件名称，附件描述，文件流
+                        Attachment attachment = taskService.createAttachment("", task.getId(), pi.getId(), contractfile1.getFname(), "", repositoryService.getResourceAsStream(contractfile1.getFid(), contractfile1.getFname()));
+                        Attachmentlink attachmentlink = new Attachmentlink();
+                        attachmentlink.setUserid(project.getProposer());
+                        attachmentlink.setAttachment(attachment.getId());
+                        attachmentlinkMapper.insert(attachmentlink);
+                    }
+                }
                 //完成填写申请项目
                 taskService.complete(task.getId());
+
                 //如果申请人是技术部办事员,前面不用走,直接通过
-                if(groupName.equals("技术部办事员")) {
+                if (groupName.equals("技术部办事员")) {
                     task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
                     taskService.setVariable(task.getId(), "zgjl", true);
                     taskService.complete(task.getId());
@@ -282,14 +299,30 @@ public class ProjectController {
                     task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
                     taskService.setVariable(task.getId(), "jbr", true);
                     taskService.setAssignee(task.getId(), user.getId());
+
+                    //处理前期还是申请时候的附件
+                    Contractfile contractfile = new Contractfile();
+                    contractfile.setCid(project.getId());
+                    List<Contractfile> contractfiles = contractfileMapper.select(contractfile);
+                    RepositoryService repositoryService = engine.getRepositoryService();
+                    for (Contractfile contractfile1 : contractfiles) {
+                        //上传附件  参数：附件类型、任务id，流程id，附件名称，附件描述，文件流
+                        Attachment attachment = taskService.createAttachment("", task.getId(), pi.getId(), contractfile1.getFname(), "", repositoryService.getResourceAsStream(contractfile1.getFid(), contractfile1.getFname()));
+                        Attachmentlink attachmentlink = new Attachmentlink();
+                        attachmentlink.setUserid(project.getProposer());
+                        attachmentlink.setAttachment(attachment.getId());
+                        attachmentlinkMapper.insert(attachmentlink);
+                    }
+
                     taskService.complete(task.getId());
                 }
+
                 return true;
             } else {//有流程id
                 cxsq(project);
                 return true;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
 
@@ -348,7 +381,7 @@ public class ProjectController {
     //技术部经办人修改项目信息
     @Transactional
     @RequestMapping("/jsbdomanXgxm")
-    public void jsbdomanXgxm(@RequestBody Project project){
+    public void jsbdomanXgxm(@RequestBody Project project) {
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         TaskService taskService = engine.getTaskService();
         Task task = taskService.createTaskQuery().processInstanceId(project.getPid()).singleResult();
@@ -380,15 +413,15 @@ public class ProjectController {
         try {
             TaskService taskService = processEngine.getTaskService();
             Task task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
-            if(!comment.equals("")&&comment!=null){
+            if (!comment.equals("") && comment != null) {
                 //添加评论
                 Authentication.setAuthenticatedUserId(userId);
                 taskService.addComment(task.getId(), pid, comment);
             }
-            IdentityService identityService=processEngine.getIdentityService();
-            String groupId=identityService.createGroupQuery().groupMember(userId).singleResult().getId();
-            if(groupId.equals("jsb_doman")){//处理人为技术部办事人,设置
-                Project project=(Project)taskService.getVariable(task.getId(), "project");
+            IdentityService identityService = processEngine.getIdentityService();
+            String groupId = identityService.createGroupQuery().groupMember(userId).singleResult().getId();
+            if (groupId.equals("jsb_doman")) {//处理人为技术部办事人,设置
+                Project project = (Project) taskService.getVariable(task.getId(), "project");
                 //设置经办人
                 project.setBider(identityService.createUserQuery().userId(userId).singleResult().getFirstName());
                 //重新设置项目参数
@@ -542,12 +575,12 @@ public class ProjectController {
             }
         }
         //如果是办事员，拿到项目，判定是不是自己的申请人，
-        if(group.getName().equals("办事员")){
-            List<Project> res=new ArrayList<>();
+        if (group.getName().equals("办事员")) {
+            List<Project> res = new ArrayList<>();
             //用户名
-            String userName=identityService.createUserQuery().userId(userId).singleResult().getFirstName();
-            for(int i=0;i<projects.size();i++){
-                if(projects.get(i).getProposer().equals(userName)){
+            String userName = identityService.createUserQuery().userId(userId).singleResult().getFirstName();
+            for (int i = 0; i < projects.size(); i++) {
+                if (projects.get(i).getProposer().equals(userName)) {
                     res.add(projects.get(i));
                 }
             }
@@ -686,16 +719,16 @@ public class ProjectController {
     }
 
     //判断项目是否可删
-    boolean canDelet(String projectId){
-        List<String> xmids=projectMapper.getGlXmid();//关联表的xmid;
-        for(String xmid:xmids){
-            if(xmid.equals(projectId)) //有关联数据,不可删除
+    boolean canDelet(String projectId) {
+        List<String> xmids = projectMapper.getGlXmid();//关联表的xmid;
+        for (String xmid : xmids) {
+            if (xmid.equals(projectId)) //有关联数据,不可删除
                 return false;
         }
 
-        Project project=projectMapper.selectByPrimaryKey(projectId);
+        Project project = projectMapper.selectByPrimaryKey(projectId);
 
-        if(project.getPid()!=null&&!project.getPid().equals("")&&!getPidNode(project.getPid()).equals("填写申请表"))//有pid
+        if (project.getPid() != null && !project.getPid().equals("") && !getPidNode(project.getPid()).equals("填写申请表"))//有pid
             return false;
 
         return true;
@@ -705,20 +738,26 @@ public class ProjectController {
     @Transactional
     @RequestMapping("/deletXm")
     public boolean deletXm(@RequestBody Project po) {
-        if(canDelet(po.getId())){
+        if (canDelet(po.getId())) {
             projectMapper.delete(po);
-            if(po.getPid()!=null&&!po.getPid().equals("")){
+            if (po.getPid() != null && !po.getPid().equals("")) {
                 ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
                 RuntimeService runtimeService = engine.getRuntimeService();
                 //删流程
                 runtimeService.deleteProcessInstance(po.getPid(), "");
                 //删除历史
-                HistoryService historyService=engine.getHistoryService();
-                historyService.deleteHistoricProcessInstance(po.getId());
+                HistoryService historyService = engine.getHistoryService();
+                historyService.deleteHistoricProcessInstance(po.getPid());
             }
             return true;
         }
         return false;
+    }
+
+    //项目id拿到项目申请部门
+    @RequestMapping("/xmidTosqbm")
+    public String xmidTosqbm(String xmid) {
+        return projectMapper.selectByPrimaryKey(xmid).getDeclarationDep();
     }
 
     //确定申请人
@@ -742,20 +781,20 @@ public class ProjectController {
     //修改项目表单的项目号
     @Transactional
     @RequestMapping("/xgxmbh")
-    public boolean xgxmbh(String xmid,String xmbh){
+    public boolean xgxmbh(String xmid, String xmbh) {
         try {
-            Project project=projectMapper.selectByPrimaryKey(xmid);
+            Project project = projectMapper.selectByPrimaryKey(xmid);
             project.setProjectNo(xmbh);
             //修改项目表
             projectMapper.updateByPrimaryKeySelective(project);
             //修改流程项目
-            ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+            ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
             TaskService taskService = engine.getTaskService();
             Task task = taskService.createTaskQuery().processInstanceId(project.getPid()).singleResult();
             //重新设置项目参数
             taskService.setVariable(task.getId(), "project", project);
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
@@ -787,16 +826,16 @@ public class ProjectController {
 
     //拿到本部门未开始招标的项目id和项目name
     @RequestMapping("/getSelfWzzXmidAndXmname")
-    public List<Xm> getSelfWzzXmidAndXmname(String dpt){
-        List<Xm> xms=getSelfXmidAndXmname(dpt);
+    public List<Xm> getSelfWzzXmidAndXmname(String dpt) {
+        List<Xm> xms = getSelfXmidAndXmname(dpt);
         //所有招标了的项目
-        List<String> projectIds=new ArrayList<>();
-        for(Zhaobiao zhaobiao:zhaobiaoMapper.selectAll()){
+        List<String> projectIds = new ArrayList<>();
+        for (Zhaobiao zhaobiao : zhaobiaoMapper.selectAll()) {
             projectIds.add(zhaobiao.getXmid());
         }
-        List<Xm> res=new ArrayList<>();
-        for (Xm xm:xms){
-            if(!projectIds.contains(xm.value)){
+        List<Xm> res = new ArrayList<>();
+        for (Xm xm : xms) {
+            if (!projectIds.contains(xm.value)) {
                 res.add(xm);
             }
         }
@@ -805,11 +844,11 @@ public class ProjectController {
 
     //拿到本部门项目id和项目name
     @RequestMapping("/getSelfXmidAndXmname")
-    public List<Xm> getSelfXmidAndXmname(String dpt){
+    public List<Xm> getSelfXmidAndXmname(String dpt) {
         List<Project> projects = projectMapper.selectAll();
         List<Xm> xms = new ArrayList<>();
         for (Project project : projects) {
-            if(project.getDeclarationDep().equals(dpt)){
+            if (project.getDeclarationDep().equals(dpt)) {
                 Xm xm = new Xm();
                 xm.value = project.getId();
                 xm.label = project.getProjectNam();
@@ -836,13 +875,13 @@ public class ProjectController {
 
     //拿到还可以验收的项目id和项目name
     @RequestMapping("/selectYsXm")
-    public List<Xm> selectYsXm(){
-        List<Map> xms=projectMapper.selectYsXm();
-        List<Xm> xmList=new ArrayList<>();
-        for(int i=0;i<xms.size();i++){
-            Xm xm=new Xm();
-            xm.value=xms.get(i).get("ID").toString();
-            xm.label=xms.get(i).get("PROJECT_NAM").toString();
+    public List<Xm> selectYsXm() {
+        List<Map> xms = projectMapper.selectYsXm();
+        List<Xm> xmList = new ArrayList<>();
+        for (int i = 0; i < xms.size(); i++) {
+            Xm xm = new Xm();
+            xm.value = xms.get(i).get("ID").toString();
+            xm.label = xms.get(i).get("PROJECT_NAM").toString();
             xmList.add(xm);
         }
         return xmList;
