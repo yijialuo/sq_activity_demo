@@ -57,6 +57,28 @@ public class ProjectController {
     @Autowired
     ContractfileMapper contractfileMapper;
 
+    //施工状态的搜索
+    @RequestMapping("/sgztss")
+    public List<Project> sgztss(String sgzt,String departmentName){
+        if(departmentName.equals("工程技术部")||departmentName.equals("办公室")){
+            if(sgzt.equals("已完工")){
+                return projectMapper.ssywgxm();
+            }else if(sgzt.equals("未开工")){
+                return projectMapper.sswkgxm();
+            }else {
+                return projectMapper.ssjxzxm();
+            }
+        }else {
+            if(sgzt.equals("已完工")){
+                return projectMapper.zjssywgxm(departmentName);
+            }else if(sgzt.equals("未开工")){
+                return projectMapper.zjsswkgxm(departmentName);
+            }else {
+                return projectMapper.zjssjxzxm(departmentName);
+            }
+        }
+    }
+
     //搜索项目
     @RequestMapping("zhSearch")
     public List<Project> zhSearch(String select_dptnm, String select_jd, String select_xmfl, String select_xmlb) {
@@ -226,6 +248,9 @@ public class ProjectController {
     //  拿到有多少页
     @RequestMapping("/AllCounts")
     public int AllCounts(String dpt) {
+
+        if(dpt==null||dpt.equals(""))
+            return 0;
         if (dpt.equals("工程技术部") || dpt.equals("办公室"))
             return projectMapper.AllCounts();
         return projectMapper.selfAllCounts(dpt);

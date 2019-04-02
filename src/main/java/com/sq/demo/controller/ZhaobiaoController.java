@@ -375,4 +375,12 @@ public class ZhaobiaoController {
         return return_comments;
     }
 
+    //拿流程的当前节点
+    @RequestMapping(value = "/getZhaobiaoNode")
+    public String getZhaobiaoNode(String zbpid) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        TaskService taskService = processEngine.getTaskService();
+        Task task = taskService.createTaskQuery().processInstanceId(zbpid).singleResult();
+        return task.getName();
+    }
 }

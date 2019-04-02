@@ -6,14 +6,17 @@ import com.sq.demo.Entity.Hetong;
 import com.sq.demo.mapper.ContractMapper;
 import com.sq.demo.mapper.ContractfileMapper;
 import com.sq.demo.mapper.ProjectMapper;
+import com.sq.demo.pojo.Attachmentlink;
 import com.sq.demo.pojo.Contract;
 import com.sq.demo.pojo.Contractfile;
 import com.sq.demo.pojo.Project;
 import com.sq.demo.utils.IdCreate;
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.ProcessEngines;
-import org.activiti.engine.RepositoryService;
+import org.activiti.engine.*;
+import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.repository.DeploymentBuilder;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Attachment;
+import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +44,159 @@ public class ContractController {
     @Autowired
     ContractfileMapper contractfileMapper;
 
+    //确认合同已接受
+    @RequestMapping("qrhtyjs")
+    public boolean qrhtyjs(String dwyj,String htno){
+        try {
+            Contract contract=new Contract();
+            contract.setDwyj(dwyj);
+            contract=contractMapper.selectOne(contract);
+            contract.setContractNo(htno);
+            contractMapper.updateByPrimaryKeySelective(contract);
+            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = processEngine.getTaskService();
+            Task task = taskService.createTaskQuery().processInstanceId(dwyj).singleResult();
+            taskService.complete(task.getId());
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+
+    }
+    //合同再次审批
+    @RequestMapping("htzcsp")
+    public boolean htzcsp(@RequestBody Contract contract){
+        try {
+            contractMapper.updateByPrimaryKeySelective(contract);
+            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = processEngine.getTaskService();
+            Task task = taskService.createTaskQuery().processInstanceId(contract.getDwyj()).singleResult();
+            taskService.complete(task.getId());
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+
+    }
+    //合同作废
+    @RequestMapping("htzf")
+    public boolean htzf(String htid){
+        try {
+            Contract contract=contractMapper.selectByPrimaryKey(htid);
+            //删表
+            contractMapper.delete(contract);
+            //删流程
+            ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+            RuntimeService runtimeService = engine.getRuntimeService();
+            runtimeService.deleteProcessInstance(contract.getDwyj(), "");
+            //删除历史
+            HistoryService historyService=engine.getHistoryService();
+            historyService.deleteHistoricProcessInstance(contract.getDwyj());
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+    //技术部经理处理合同
+    @RequestMapping("jsbjldoht")
+    public boolean jsbjldoht(String dwyj,String userId, String value,String comment){
+        try {
+            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = processEngine.getTaskService();
+            Task task = taskService.createTaskQuery().processInstanceId(dwyj).singleResult();
+            Authentication.setAuthenticatedUserId(userId);
+            if(comment==null)
+                comment="";
+            taskService.addComment(task.getId(), dwyj, comment);
+            taskService.setVariable(task.getId(), "jsb_jl", value);
+            //完成任务
+            taskService.complete(task.getId());
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+
+    }
+
+    //技术部经理领到合同getBgsHtsgetJsbdomanHts
+    @RequestMapping(value = "/getJsbjlHts")
+    public List<Contract_return>  getJbsjlHts(){
+        List<Contract_return> res=new ArrayList<>();
+        for(Contract contract:contractMapper.selectYlc()){
+            if(getPidNode(contract.getDwyj()).equals("技术部经理审批")){
+                res.add(contractTocontractreturn(contract));
+            }
+        }
+        return res;
+    }
+
+    //经办人领到合同getJsbdomanHts
+    @RequestMapping(value = "/getJsbdomanHts")
+    public List<Contract_return>  getJsbdomanHts(){
+        List<Contract_return> res=new ArrayList<>();
+        for(Contract contract:contractMapper.selectYlc()){
+            if(getPidNode(contract.getDwyj()).equals("填写合同表单")){
+                res.add(contractTocontractreturn(contract));
+            }
+        }
+        return res;
+    }
+
+    //办公室领到需要处理的合同
+    @RequestMapping(value = "/getBgsHts")
+    public List<Contract_return>  getBgsHts(){
+        List<Contract_return> res=new ArrayList<>();
+        for(Contract contract:contractMapper.selectYlc()){
+            if(getPidNode(contract.getDwyj()).equals("办公室确认")){
+                res.add(contractTocontractreturn(contract));
+            }
+        }
+        return res;
+    }
+
+    //拿流程的当前节点
+    @RequestMapping(value = "/getHtNode")
+    public String getPidNode(String dwyj) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        TaskService taskService = processEngine.getTaskService();
+        Task task = taskService.createTaskQuery().processInstanceId(dwyj).singleResult();
+        return task.getName();
+    }
+
+    //开始合同审批
+    @RequestMapping("/startHtsp")
+    @Transactional
+    public boolean startHtsp(String htid){
+        try {
+            Contract contract=contractMapper.selectByPrimaryKey(htid);
+            if(contract.getDwyj()==null||contract.getDwyj().equals("")){
+                ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+                TaskService taskService = engine.getTaskService();
+                RuntimeService runtimeService = engine.getRuntimeService();
+                ProcessInstance pi = runtimeService.startProcessInstanceByKey("htsp");
+                contract.setDwyj(pi.getId());
+                //填写流程id
+                contractMapper.updateByPrimaryKeySelective(contract);
+                Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+                //处理前期还未申请时候的附件
+                Contractfile contractfile = new Contractfile();
+                contractfile.setCid(htid);
+                List<Contractfile> contractfiles = contractfileMapper.select(contractfile);
+                RepositoryService repositoryService = engine.getRepositoryService();
+                for (Contractfile contractfile1 : contractfiles) {
+                    //上传附件  参数：附件类型、任务id，流程id，附件名称，附件描述，文件流
+                    taskService.createAttachment("", task.getId(), pi.getId(), contractfile1.getFname(), "", repositoryService.getResourceAsStream(contractfile1.getFid(), contractfile1.getFname()));
+                }
+                taskService.complete(task.getId());
+                return true;
+            }else {
+                return htzcsp(contract);
+            }
+        }catch (Exception e){
+            return false;
+        }
+
+    }
     //归档
     @RequestMapping("/guidang")
     @Transactional

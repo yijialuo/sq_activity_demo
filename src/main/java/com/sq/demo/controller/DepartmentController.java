@@ -28,6 +28,27 @@ public class DepartmentController {
     DepartmentMapper departmentMapper;
 
 
+    //部门名字拿到部门经理
+//    @RequestMapping("/dptnTOjl")
+//    public String dptnTojl(String dptn){
+//        Department department=new Department();
+//        department.setdNam(dptn);
+//        department=departmentMapper.selectOne(department);
+//        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+//        IdentityService identityService=engine.getIdentityService();
+//        List<User> users=identityService.createUserQuery().list();
+//        for(User user:users){
+//            //用户是这个部门
+//            if(identityService.getUserInfo(user.getId(),"departmentId").equals(department.getId())){
+//                //用户是经理
+//                if(identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId().equals("jl")){
+//                    return user.getFirstName();
+//                }
+//            }
+//        }
+//        return "";
+//    }
+
     //查询所有部门的名称(过滤办公室)
     @RequestMapping("/getAllDptName")
     List<String> getAllDptName(){

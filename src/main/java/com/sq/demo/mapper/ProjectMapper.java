@@ -12,6 +12,30 @@ import java.util.Map;
 
 
 public interface ProjectMapper extends MyMapper<Project> {
+    //搜索进行中项目
+    @Select("SELECT * FROM project p WHERE p.DECLARATION_DEP=#{s} and p.ID  in (  SELECT DISTINCT project_id FROM  jindu) and( p.FINISH_DTE is null or p.FINISH_DTE='')")
+    List<Project> zjssjxzxm(String s);
+
+    //搜索未开工项目
+    @Select("SELECT * FROM project p WHERE p.DECLARATION_DEP=#{s} and p.ID  not in (  SELECT DISTINCT project_id FROM  jindu)")
+    List<Project> zjsswkgxm(String s);
+
+    //搜索已完工项目
+    @Select("SELECT * FROM project  WHERE DECLARATION_DEP=#{s} and FINISH_DTE is NOT null and FINISH_DTE!=''")
+    List<Project> zjssywgxm(String s);
+
+    //搜索进行中项目
+    @Select("SELECT * FROM project p WHERE  p.ID  in (  SELECT DISTINCT project_id FROM  jindu) and( p.FINISH_DTE is null or p.FINISH_DTE='')")
+    List<Project> ssjxzxm();
+
+    //搜索未开工项目
+    @Select("SELECT * FROM project p WHERE  p.ID  not in (  SELECT DISTINCT project_id FROM  jindu)")
+    List<Project> sswkgxm();
+
+    //搜索已完工项目
+    @Select("SELECT * FROM project WHERE FINISH_DTE is NOT null and FINISH_DTE!=''")
+    List<Project> ssywgxm();
+
     //工程技术部项目名称搜索
     @Select("select * from project where project_nam like CONCAT('%',#{s},'%')")
     List<Project> gcjsbxmmcss(@Param("s") String s);
