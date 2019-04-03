@@ -57,6 +57,22 @@ public class ProjectController {
     @Autowired
     ContractfileMapper contractfileMapper;
 
+    //拿到经办人的项目
+    @RequestMapping("/jbrToXm")
+    public List<Project> jbrToXm(String jbr){
+        Project project=new Project();
+        project.setBider(jbr);
+        return projectMapper.select(project);
+    }
+
+    //拿到发起人的项目
+    @RequestMapping("/fqrToXm")
+    public List<Project> fqrToXm(String fqr){
+        Project project=new Project();
+        project.setPersonInCharge(fqr);
+        return projectMapper.select(project);
+    }
+
     //施工状态的搜索
     @RequestMapping("/sgztss")
     public List<Project> sgztss(String sgzt,String departmentName){

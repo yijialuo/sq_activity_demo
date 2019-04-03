@@ -397,10 +397,12 @@ public class ContractController {
         List<Contract> contracts = contractMapper.selectAll();
         List<Hetong> hetongs = new ArrayList<>();
         for (Contract contract : contracts) {
-            Hetong hetong = new Hetong();
-            hetong.value = contract.getId();
-            hetong.label = contract.getContractNo();
-            hetongs.add(hetong);
+            if(contract.getContractNo()!=null&&!contract.getContractNo().equals("")){
+                Hetong hetong = new Hetong();
+                hetong.value = contract.getId();
+                hetong.label = contract.getContractNo();
+                hetongs.add(hetong);
+            }
         }
         return hetongs;
     }

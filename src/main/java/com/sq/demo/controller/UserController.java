@@ -2,7 +2,9 @@ package com.sq.demo.controller;
 
 import com.sq.demo.Entity.UserOV;
 import com.sq.demo.mapper.DepartmentMapper;
+import com.sq.demo.mapper.ProjectMapper;
 import com.sq.demo.pojo.Department;
+import com.sq.demo.pojo.Project;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
@@ -24,9 +26,89 @@ import java.util.List;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-
     @Autowired
     DepartmentMapper departmentMapper;
+    @Autowired
+    ProjectMapper projectMapper;
+
+    //根据用户名字查询用户id
+    public String getUserIdByUserName(String userName) {
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
+        User user = identityService.createUserQuery().userFirstName(userName).singleResult();
+        return user.getId();
+    }
+
+    //拿到项目的经办人
+    @RequestMapping("/getDepartmentjbr")
+    public List<UserOV> getSelfDepartmentjbr(String departmentName) {
+        List<Project> projects = projectMapper.selectAll();
+        List<UserOV> userOVS = new ArrayList<>();
+        if (!departmentName.equals("工程技术部")) {
+            List<String> userNames = new ArrayList<>();
+            for (Project project : projects) {
+                if (project.getDeclarationDep().equals(departmentName) && project.getBider() != null && !project.getBider().equals("")) {
+                    UserOV userOV = new UserOV();
+                    userOV.userName = project.getBider();
+                    if (!userNames.contains(userOV.userName)) {//过滤重复
+                        userOV.userId = getUserIdByUserName(userOV.userName);
+                        userOVS.add(userOV);
+                        userNames.add(userOV.userName);
+                    }
+                }
+            }
+            return userOVS;
+        } else {//是工程技术部
+            List<String> userNames = new ArrayList<>();
+            for (Project project : projects) {
+                if (project.getBider() != null && !project.getBider().equals("")) {
+                    UserOV userOV = new UserOV();
+                    userOV.userName = project.getBider();
+                    if (!userNames.contains(userOV.userName)) {//过滤重复
+                        userOV.userId = getUserIdByUserName(userOV.userName);
+                        userOVS.add(userOV);
+                        userNames.add(userOV.userName);
+                    }
+                }
+            }
+            return userOVS;
+        }
+    }
+
+    //拿到部门的所有doman
+    @RequestMapping("/getDepartmentDoman")
+    public List<UserOV> getDeparmentDoman(String departmentId) {
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
+        List<User> users = identityService.createUserQuery().list();
+        List<UserOV> res = new ArrayList<>();
+        //如果不是工程技术部，只能拿直接部门的办事员
+        if (!departmentId.equals("20190123022801622")) {
+            for (User user : users) {
+                //找到部门的人
+                if (identityService.getUserInfo(user.getId(), "departmentId").equals(departmentId)) {
+                    //找到doman
+                    if (identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId().equals("doman")) {
+                        UserOV userOV = new UserOV();
+                        userOV.userId = user.getId();
+                        userOV.userName = user.getFirstName();
+                        res.add(userOV);
+                    }
+                }
+            }
+        } else {//如果是工程技术部拿所有的
+            for (User user : users) {
+                String grouoId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
+                if (grouoId.equals("doman") || grouoId.equals("jsb_doman")) {
+                    UserOV userOV = new UserOV();
+                    userOV.userId = user.getId();
+                    userOV.userName = user.getFirstName();
+                    res.add(userOV);
+                }
+            }
+        }
+        return res;
+    }
 
     @RequestMapping("/login")
     public boolean dologin(String username, String password) {
@@ -94,8 +176,8 @@ public class UserController {
     //修改密码
     @Transactional
     @RequestMapping("/xgmm")
-    public boolean xgmm(String userId,String oldPass,String newPass){
-        if(dologin(userId,oldPass)){
+    public boolean xgmm(String userId, String oldPass, String newPass) {
+        if (dologin(userId, oldPass)) {
             ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
             IdentityService identityService = processEngine.getIdentityService();
             User user = identityService.createUserQuery().userId(userId).singleResult();
@@ -181,8 +263,8 @@ public class UserController {
     //userId To userName
     @RequestMapping("userIdTouserName")
     public String userIdTouserName(String userId) {
-        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
-        IdentityService identityService=engine.getIdentityService();
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
         User user = identityService.createUserQuery().userId(userId).singleResult();
         String username = user.getFirstName();
         return username;
@@ -190,10 +272,10 @@ public class UserController {
 
     //根据uerId拿部门名称
     @RequestMapping("userIdToDept")
-    public String userIdToDept(String userId){
-        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
-        IdentityService identityService=engine.getIdentityService();
-        String departmentId=identityService.getUserInfo(userId,"departmentId");
+    public String userIdToDept(String userId) {
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
+        String departmentId = identityService.getUserInfo(userId, "departmentId");
         return departmentMapper.selectByPrimaryKey(departmentId).getdNam();
     }
 }
