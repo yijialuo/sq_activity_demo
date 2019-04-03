@@ -7,6 +7,7 @@ public class Payable {
     /**
      * 主键
      */
+    @Id
     @Column(name = "ID")
     private String id;
 

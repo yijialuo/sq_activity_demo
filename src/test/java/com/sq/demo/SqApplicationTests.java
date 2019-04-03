@@ -667,6 +667,12 @@ public class SqApplicationTests {
         tbdw1.setDw("oooo");
         tbdwMapper.insert(tbdw1);
     }
+
+    @Test
+    public void asd4f(){
+        Payable payable=payableMapper.selectByPrimaryKey("eabc2bb5-14c5-4099-96fc-fc46bc8e6d78");
+        System.out.println(payable.getRq());
+    }
 }
 
 

@@ -1,15 +1,15 @@
 package com.sq.demo.controller;
 
 import com.sq.demo.Entity.Return_Comments;
-import com.sq.demo.mapper.DepartmentMapper;
-import com.sq.demo.mapper.ProjectMapper;
+import com.sq.demo.mapper.*;
 
-import com.sq.demo.pojo.Department;
-import com.sq.demo.pojo.Project;
+import com.sq.demo.pojo.*;
 
 
 import com.sq.demo.utils.FileUtil;
-import com.sq.demo.utils.WordUtils;
+import com.sq.demo.utils.Money;
+import com.sq.demo.utils.NumberToCn;
+import com.sun.javafx.collections.MappingChange;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,12 @@ public class printController {
     ProjectMapper projectMapper;
     @Autowired
     DepartmentMapper departmentMapper;
+    @Autowired
+    ContractMapper contractMapper;
+    @Autowired
+    PayableMapper payableMapper;
+    @Autowired
+    ContractfileMapper contractfileMapper;
 
     public String dptnTojl(String dptn){
         Department department=new Department();
@@ -51,131 +58,146 @@ public class printController {
         return "";
     }
 
+    public String cidToPnam(String cid){
+        Contract contract = new Contract();
+        contract.setId(cid);
+        String pid = contractMapper.selectOne(contract).getProjectId();
+        Project project = new Project();
+        project.setId(pid);
+        String pnam = projectMapper.selectOne(project).getProjectNam();
+        return pnam;
+    }
 
-//    @RequestMapping("export")
-//    public void export(String id,HttpServletRequest request, HttpServletResponse response){
-//        Project project=projectMapper.selectByPrimaryKey(id);
-//        Map<String, Object> mmap = new HashMap<String, Object>();
-//        mmap.put("declarationDep", project.getDeclarationDep());
-//        mmap.put("projectNo", project.getProjectNo()==null?"   ":project.getProjectNo());
-//        mmap.put("projectNam", project.getProjectNam());
-//        mmap.put("projectType",project.getProjectType());
-//        mmap.put("investmentEstimate", project.getInvestmentEstimate()==null?"  ":project.getInvestmentEstimate());
-//        mmap.put("personInCharge", project.getPersonInCharge()==null?" ":project.getPersonInCharge());
-//        mmap.put("establishReason",project.getEstablishReason()==null?" ":project.getEstablishReason());
-//        mmap.put("scale", project.getScale()==null?" ":project.getScale());
-//        mmap.put("illustration", project.getIllustration()==null?" ":project.getIllustration());
-//        //拿到该部门的部门经理名字
-//        String jl=dptnTojl(project.getDeclarationDep());
-//        ProjectController projectController=new ProjectController();
-//        //部门所有审核意见
-//        List<Return_Comments> return_comments = projectController.projecttocomment(project.getPid());
-//        System.out.println(return_comments.size());
-//        for(Return_Comments return_comment:return_comments){
-//            if(return_comment.getUsernam().equals(jl)){
-//                mmap.put("bmshyj",return_comment.getComment());
-//                mmap.put("jl",jl);
-//                mmap.put("bmspsj",return_comment.getTime().substring(0,10));
-//                break;
-//            }
-//            if(return_comment.getUsernam().equals("元少麟")){
-//                mmap.put("sjbjlyj",return_comment.getComment());
-//                mmap.put("jsbjl","元少麟");
-//                mmap.put("jsbspsj",return_comment.getTime().substring(0,10));
-//                break;
-//            }
-//        }
-//        if(mmap.get("bmshyj")==null){
-//            mmap.put("bmshyj"," ");
-//            mmap.put("jl"," ");
-//            mmap.put("bmspsj"," ");
-//        }
-//        if(mmap.get("sjbjlyj")==null){
-//            mmap.put("sjbjlyj"," ");
-//            mmap.put("jsbjl"," ");
-//            mmap.put("jsbspsj"," ");
-//        }
-//        //FileUtil.exportWord("word/xmlxb.doc","D:/test",project.getProjectNam()+"立项申请表.docx",mmap,request,response);
-//    }
+    public BigDecimal cidToYf(String cid){
+        Contract contract = new Contract();
+        contract.setId(cid);
+        String pid = contractMapper.selectOne(contract).getProjectId();
+        BigDecimal zje = contractMapper.selectOne(contract).getPrice();
+        Payable payable = payableMapper.selectlatest(pid);
+        if(payable==null){
+            return new BigDecimal(0);
+        }
+        BigDecimal wf = payable.getWzf();
+        BigDecimal yf = zje.subtract(wf);
+        return yf;
+    }
 
-//    public void download(String id, HttpServletResponse response, HttpServletRequest request)
-//    {
-//        Project project=projectMapper.selectByPrimaryKey(id);
-//        Map<String, Object> mmap = new HashMap<String, Object>();
-//        mmap.put("declarationDep", project.getDeclarationDep());
-//        mmap.put("projectNo", project.getProjectNo()==null?" ":project.getProjectNo());
-//        mmap.put("projectNam", project.getProjectNam());
-//        mmap.put("investmentEstimate", project.getInvestmentEstimate()==null?" ":project.getInvestmentEstimate());
-//        mmap.put("personInCharge", project.getPersonInCharge()==null?" ":project.getPersonInCharge());
-//        mmap.put("establishReason",project.getEstablishReason()==null?" ":project.getEstablishReason());
-//        mmap.put("scale", project.getScale()==null?" ":project.getScale());
-//        mmap.put("illustration", project.getIllustration()==null?" ":project.getIllustration());
-//
-//        //拿到该部门的部门经理名字
-//        String jl=departmentController.dptnTojl(project.getDeclarationDep());
-//        ProjectController projectController=new ProjectController();
-//        //部门所有审核意见
-//        List<Return_Comments> return_comments = projectController.projecttocomment(project.getPid());
-//        for(Return_Comments return_comment:return_comments){
-//            if(return_comment.getUsernam().equals(jl)){
-//                mmap.put("bmshyj",return_comment.getComment());
-//                mmap.put("jl",jl);
-//                mmap.put("bmspsj",return_comment.getTime().substring(0,10));
-//                break;
-//            }
-//            if(return_comment.getUsernam().equals("元少麟")){
-//                mmap.put("sjbjlyj",return_comment.getComment());
-//                mmap.put("jsbjl","元少麟");
-//                mmap.put("jsbspsj",return_comment.getTime().substring(0,10));
-//                break;
-//            }
-//        }
-//        UUID uuid = UUID.randomUUID();
-//        try {
-//            //生成
-//            File file = new File(Global.getWordPath(), uuid + "_sqb.doc");
-//            if (!file.createNewFile()) {
-//                System.out.println("生成失败");
-//            }
-//        } catch (Exception e) {
-//            System.out.println("异常");
-//        }
-//        String xmlPath = "xmlxb.xml";
-//        int generatedWordResult = new DynamicallyGeneratedWordService().genWordFile(Global.getWordPath() + uuid + "_tjb.doc", xmlPath, mmap, "xmlxb.xml");
-//        if (generatedWordResult == 1)
-//        {
-//            try {
-//                String filePath = Global.getWordPath() + uuid + "_tjb.doc";
-//                response.setCharacterEncoding("utf-8");
-//                response.setContentType("multipart/form-data");
-//                response.setHeader("Content-Disposition",
-//                        "attachment;fileName=" + setFileDownloadHeader(request, "推荐表.doc"));
-//                FileUtils.writeBytes(filePath, response.getOutputStream());
-//            } catch (Exception e) {
-//                System.out.println("下载文件失败"+e);
-//            }
-//        }
-//    }
-//
-//    //设置下载头文件
-//    public String setFileDownloadHeader(HttpServletRequest request, String fileName) throws UnsupportedEncodingException {
-//        final String agent = request.getHeader("USER-AGENT");
-//        String filename = fileName;
-//        if (agent.contains("MSIE")) {
-//            // IE浏览器
-//            filename = URLEncoder.encode(filename, "utf-8");
-//            filename = filename.replace("+", " ");
-//        } else if (agent.contains("Firefox")) {
-//            // 火狐浏览器
-//            filename = new String(fileName.getBytes(), "ISO8859-1");
-//        } else if (agent.contains("Chrome")) {
-//            // google浏览器
-//            filename = URLEncoder.encode(filename, "utf-8");
-//        } else {
-//            // 其它浏览器
-//            filename = URLEncoder.encode(filename, "utf-8");
-//        }
-//        return filename;
-//    }
+    public BigDecimal cidToWf(String cid){
+        Contract contract = new Contract();
+        contract.setId(cid);
+        String pid = contractMapper.selectOne(contract).getProjectId();
+        BigDecimal zje = contractMapper.selectOne(contract).getPrice();
+        Payable payable = payableMapper.selectlatest(pid);
+        if(payable==null){
+            return zje;
+        }
+        BigDecimal wf = payable.getWzf();
+        return wf;
+    }
+
+    //下载支付审批表
+    @RequestMapping("/zfspd")
+    public void zfspd(String id,HttpServletRequest request, HttpServletResponse response){
+        Payable payable=payableMapper.selectByPrimaryKey(id);
+        Map<String,Object> map=new HashMap<>();
+        map.put("jbbm",payable.getJbbm());
+        map.put("jbr",payable.getJbr());
+        map.put("yszmr",payable.getYszmr());
+        Contractfile contractfile=new Contractfile();
+        contractfile.setCid(id);
+        map.put("fjzs",contractfileMapper.select(contractfile).size());
+        map.put("invoiceNo",payable.getInvoiceNo());
+        Contract contract=contractMapper.selectByPrimaryKey(payable.getContractId());
+        map.put("skdw",contract.getDfdsr());
+        map.put("yhzh",payable.getAccount());
+        map.put("khyh",payable.getBank());
+        String zfxm=cidToPnam(contract.getId());
+        map.put("zfxm",zfxm);
+        map.put("hth",contract.getContractNo());
+        map.put("htrq",contract.getRq());
+        map.put("htzje",contract.getPrice());
+        map.put("yzfje",cidToYf(contract.getId()).subtract(payable.getBqyf()));
+        map.put("wzf",cidToWf(contract.getId()).add(payable.getBqyf()));
+        map.put("bqyf",payable.getBqyf().toString());
+        FileUtil.exportWord("word/zfspd.docx",zfxm+"支付审批单.docx",map,request,response);
+    }
+
+    //下载合同审批表
+    @RequestMapping("/ht")
+    public void ht(String id,HttpServletRequest request, HttpServletResponse response){
+        Contract contract=contractMapper.selectByPrimaryKey(id);
+        Map<String,Object> map=new HashMap<>();
+        Project project=projectMapper.selectByPrimaryKey(contract.getProjectId());
+        String projectname=project.getProjectNam();
+        map.put("projectName",projectname);
+        map.put("contractNo",contract.getContractNo()==null?" ":contract.getContractNo());
+        map.put("dfdsr",contract.getDfdsr()==null?" ":contract.getDfdsr());
+        map.put("tzwh",contract.getTzwh()==null?" ":contract.getTzwh());
+        map.put("price",contract.getPrice()==null?" ":contract.getPrice());
+        map.put("dx", NumberToCn.number2CNMontrayUnit(contract.getPrice()));
+        map.put("jbr",contract.getJbr()==null?" ":contract.getJbr());
+        ProjectController projectController=new ProjectController();
+        List<Return_Comments> return_comments = projectController.projecttocomment(contract.getDwyj());
+        for(Return_Comments return_comment:return_comments) {
+            if(return_comment.getUsernam().equals("元少麟")) {
+                map.put("zbdwyj",return_comment.getComment());
+                String sj=return_comment.getTime().substring(0,4)+"年"+return_comment.getTime().substring(5,7)+"月"+return_comment.getTime().substring(8,10)+"日";
+                map.put("sj",sj);
+                break;
+            }
+        }
+        if(map.get("zbdwyj")==null){
+            map.put("zbdwyj"," ");
+            map.put("sj","年    月    日");
+        }
+
+        FileUtil.exportWord("word/htpsb.docx",project.getProjectNam()+"合同评审表.docx",map,request,response);
+    }
+
+    //下载申请表
+    @RequestMapping("/sqb")
+    public void export(String id,HttpServletRequest request, HttpServletResponse response){
+        Project project=projectMapper.selectByPrimaryKey(id);
+        Map<String, Object> mmap = new HashMap<String, Object>();
+        mmap.put("declarationDep", project.getDeclarationDep());
+        mmap.put("projectNo", project.getProjectNo()==null?"   ":project.getProjectNo());
+        mmap.put("projectNam", project.getProjectNam());
+        mmap.put("projectType",project.getProjectType());
+        mmap.put("investmentEstimate", project.getInvestmentEstimate()==null?"  ":project.getInvestmentEstimate());
+        mmap.put("personInCharge", project.getPersonInCharge()==null?" ":project.getPersonInCharge());
+        mmap.put("establishReason",project.getEstablishReason()==null?" ":project.getEstablishReason());
+        mmap.put("scale", project.getScale()==null?" ":project.getScale());
+        mmap.put("illustration", project.getIllustration()==null?" ":project.getIllustration());
+        //拿到该部门的部门经理名字
+        String jl=dptnTojl(project.getDeclarationDep());
+        ProjectController projectController=new ProjectController();
+        //列出所有审核意见
+        List<Return_Comments> return_comments = projectController.projecttocomment(project.getPid());
+        for(Return_Comments return_comment:return_comments){
+            if(return_comment.getUsernam().equals(jl)){
+                mmap.put("bmshyj",return_comment.getComment());
+                mmap.put("jl",jl);
+                mmap.put("bmspsj",return_comment.getTime().substring(0,10));
+                continue;
+            }
+            if(return_comment.getUsernam().equals("元少麟")){
+                mmap.put("sjbjlyj",return_comment.getComment());
+                mmap.put("jsbjl","元少麟");
+                mmap.put("jsbspsj",return_comment.getTime().substring(0,10));
+                continue;
+            }
+        }
+        if(mmap.get("bmshyj")==null){
+            mmap.put("bmshyj"," ");
+            mmap.put("jl"," ");
+            mmap.put("bmspsj"," ");
+        }
+        if(mmap.get("sjbjlyj")==null){
+            mmap.put("sjbjlyj"," ");
+            mmap.put("jsbjl"," ");
+            mmap.put("jsbspsj"," ");
+        }
+        FileUtil.exportWord("word/xmlxb.docx",project.getProjectNam()+"立项申请表.docx",mmap,request,response);
+    }
 
 }
