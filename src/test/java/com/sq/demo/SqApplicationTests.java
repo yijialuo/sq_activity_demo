@@ -588,20 +588,6 @@ public class SqApplicationTests {
         historyService.deleteHistoricProcessInstance(pid);
     }
 
-
-    //    52557
-//            22529
-//            52543
-//            52571
-//            45083
-//            52515
-//            52501
-//            30026
-//            52529
-//            52585
-//            52599
-//            32528
-//            32512
     //招标
     @Test
     public void dezb() {

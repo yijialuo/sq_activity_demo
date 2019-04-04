@@ -19,7 +19,6 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
-import org.apache.ibatis.annotations.Select;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,45 +58,46 @@ public class ProjectController {
 
     //拿到经办人的项目
     @RequestMapping("/jbrToXm")
-    public List<Project> jbrToXm(String jbr){
-        Project project=new Project();
+    public List<Project> jbrToXm(String jbr) {
+        Project project = new Project();
         project.setBider(jbr);
         return projectMapper.select(project);
     }
 
     //拿到发起人的项目
     @RequestMapping("/fqrToXm")
-    public List<Project> fqrToXm(String fqr){
-        Project project=new Project();
+    public List<Project> fqrToXm(String fqr) {
+        Project project = new Project();
         project.setPersonInCharge(fqr);
         return projectMapper.select(project);
     }
 
     //施工状态的搜索
     @RequestMapping("/sgztss")
-    public List<Project> sgztss(String sgzt,String departmentName){
-        if(departmentName.equals("工程技术部")||departmentName.equals("办公室")){
-            if(sgzt.equals("已完工")){
+    public List<Project> sgztss(String sgzt, String departmentName) {
+        if (departmentName.equals("工程技术部") || departmentName.equals("办公室")) {
+            if (sgzt.equals("已完工")) {
                 return projectMapper.ssywgxm();
-            }else if(sgzt.equals("未开工")){
+            } else if (sgzt.equals("未开工")) {
                 return projectMapper.sswkgxm();
-            }else {
+            } else {
                 return projectMapper.ssjxzxm();
             }
-        }else {
-            if(sgzt.equals("已完工")){
+        } else {
+            if (sgzt.equals("已完工")) {
                 return projectMapper.zjssywgxm(departmentName);
-            }else if(sgzt.equals("未开工")){
+            } else if (sgzt.equals("未开工")) {
                 return projectMapper.zjsswkgxm(departmentName);
-            }else {
+            } else {
                 return projectMapper.zjssjxzxm(departmentName);
             }
         }
     }
 
     //搜索项目
-    @RequestMapping("zhSearch")
-    public List<Project> zhSearch(String select_dptnm, String select_jd, String select_xmfl, String select_xmlb) {
+    @RequestMapping("search")
+    public List<Project> zhSearch(String select_xmmc, String select_code, String select_dptnm, String select_jd, String select_xmfl, String select_xmlb) {
+        System.out.println(select_code);
         Project project = new Project();
         if (select_dptnm != null && !select_dptnm.equals(""))
             project.setDeclarationDep(select_dptnm);
@@ -108,7 +108,7 @@ public class ProjectController {
         List<Project> projects = projectMapper.select(project);
         List<Project> res = new ArrayList<>();
         if (select_jd == null || select_jd.equals("")) {//没有节点搜索条件
-            return projects;
+            return xxmcAndxmbhGl(projects, select_xmmc, select_code);
         }
         //有节点搜索条件
         if (select_jd.equals("未申请")) {//没有pid
@@ -117,15 +117,42 @@ public class ProjectController {
                     res.add(project1);
                 }
             }
-            return res;
+            return xxmcAndxmbhGl(res, select_xmmc, select_code);
         } else {//其他
             for (Project project1 : projects) {
                 if (project1.getPid() != null && !project1.getPid().equals("") && getPidNode(project1.getPid()).equals(select_jd)) {
                     res.add(project1);
                 }
             }
-            return res;
+            return xxmcAndxmbhGl(res, select_xmmc, select_code); //res
         }
+    }
+
+    //项目名称和项目编号过滤
+    public List<Project> xxmcAndxmbhGl(List<Project> projects, String select_xmmc, String select_code) {
+        List<Project> res = new ArrayList<>();
+        if (select_xmmc != null && !select_xmmc.equals("") && select_code != null && !select_code.equals("")) {//xmmc，code有东西
+            for (int i = 0; i < projects.size(); i++) {
+                if (projects.get(i).getProjectNam().contains(select_xmmc) && projects.get(i).getProjectNo() != null && projects.get(i).getProjectNo().contains(select_code)) {
+                    res.add(projects.get(i));
+                }
+            }
+        } else if (select_xmmc != null && !select_xmmc.equals("") && (select_code == null || select_code.equals(""))) {//xmmc有东西，code没东西
+            for (int i = 0; i < projects.size(); i++) {
+                if (projects.get(i).getProjectNam().contains(select_xmmc)) {
+                    res.add(projects.get(i));
+                }
+            }
+        } else if ((select_xmmc == null || select_xmmc.equals("")) && select_code != null && !select_code.equals("")) {//xmmc没东西，code有东西
+            for (int i = 0; i < projects.size(); i++) {
+                if (projects.get(i).getProjectNo() != null && projects.get(i).getProjectNo().contains(select_code)) {
+                    res.add(projects.get(i));
+                }
+            }
+        } else {//都没数据  不用过滤
+            return projects;
+        }
+        return res;
     }
 
     //根据部门搜索项目
@@ -265,7 +292,7 @@ public class ProjectController {
     @RequestMapping("/AllCounts")
     public int AllCounts(String dpt) {
 
-        if(dpt==null||dpt.equals(""))
+        if (dpt == null || dpt.equals(""))
             return 0;
         if (dpt.equals("工程技术部") || dpt.equals("办公室"))
             return projectMapper.AllCounts();
