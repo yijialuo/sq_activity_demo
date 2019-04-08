@@ -7,9 +7,7 @@ import com.sq.demo.pojo.*;
 
 
 import com.sq.demo.utils.FileUtil;
-import com.sq.demo.utils.Money;
 import com.sq.demo.utils.NumberToCn;
-import com.sun.javafx.collections.MappingChange;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
@@ -144,14 +142,14 @@ public class printController {
         ProjectController projectController = new ProjectController();
         List<Return_Comments> return_comments = projectController.projecttocomment(contract.getDwyj());
         for (Return_Comments return_comment : return_comments) {
-            if (return_comment.getUsernam().equals("元少麟")) {
+            if (return_comment.getUsernam().equals("元少麟")&&map.get("zbdwyj")==null) {
                 map.put("zbdwyj", return_comment.getComment());
                 String sj = return_comment.getTime().substring(0, 4) + "年" + return_comment.getTime().substring(5, 7) + "月" + return_comment.getTime().substring(8, 10) + "日";
                 map.put("sj", sj);
                 break;
             }
         }
-        if (map.get("zbdwyj") == null) {
+        if (map.get("zbdwyj") == null||map.get("zbdwyj").equals("")) {
             map.put("zbdwyj", " ");
             map.put("sj", "年    月    日");
         }
@@ -165,10 +163,10 @@ public class printController {
         Project project = projectMapper.selectByPrimaryKey(id);
         Map<String, Object> mmap = new HashMap<String, Object>();
         mmap.put("declarationDep", project.getDeclarationDep());
-        mmap.put("projectNo", project.getProjectNo() == null ? "   " : project.getProjectNo());
+        mmap.put("projectNo", project.getProjectNo() == null||project.getProjectNo().equals("")? " " : project.getProjectNo());
         mmap.put("projectNam", project.getProjectNam());
         mmap.put("projectType", project.getProjectType());
-        mmap.put("investmentEstimate", project.getInvestmentEstimate() == null ? "  " : project.getInvestmentEstimate());
+        mmap.put("investmentEstimate", project.getInvestmentEstimate() == null? "  " : project.getInvestmentEstimate());
         mmap.put("personInCharge", project.getPersonInCharge() == null ? " " : project.getPersonInCharge());
         mmap.put("establishReason", project.getEstablishReason() == null ? " " : project.getEstablishReason());
         mmap.put("scale", project.getScale() == null ? " " : project.getScale());
@@ -179,13 +177,13 @@ public class printController {
         //列出所有审核意见
         List<Return_Comments> return_comments = projectController.projecttocomment(project.getPid());
         for (Return_Comments return_comment : return_comments) {
-            if (return_comment.getUsernam().equals(jl)) {
+            if (return_comment.getUsernam().equals(jl)&&mmap.get("jl")==null) {
                 mmap.put("bmshyj", return_comment.getComment());
                 mmap.put("jl", jl);
                 mmap.put("bmspsj", return_comment.getTime().substring(0, 10));
                 continue;
             }
-            if (return_comment.getUsernam().equals("元少麟")) {
+            if (return_comment.getUsernam().equals("元少麟")&&mmap.get("jsbjl")==null) {
                 mmap.put("sjbjlyj", return_comment.getComment());
                 mmap.put("jsbjl", "元少麟");
                 mmap.put("jsbspsj", return_comment.getTime().substring(0, 10));

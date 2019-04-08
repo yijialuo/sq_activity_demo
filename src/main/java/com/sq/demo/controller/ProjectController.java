@@ -96,36 +96,101 @@ public class ProjectController {
 
     //搜索项目
     @RequestMapping("search")
-    public List<Project> zhSearch(String select_xmmc, String select_code, String select_dptnm, String select_jd, String select_xmfl, String select_xmlb) {
-        System.out.println(select_code);
-        Project project = new Project();
-        if (select_dptnm != null && !select_dptnm.equals(""))
-            project.setDeclarationDep(select_dptnm);
-        if (select_xmfl != null && !select_xmfl.equals(""))
-            project.setReviser(select_xmfl);
-        if (select_xmlb != null && !select_xmlb.equals(""))
-            project.setProjectType(select_xmlb);
-        List<Project> projects = projectMapper.select(project);
-        List<Project> res = new ArrayList<>();
-        if (select_jd == null || select_jd.equals("")) {//没有节点搜索条件
-            return xxmcAndxmbhGl(projects, select_xmmc, select_code);
-        }
-        //有节点搜索条件
-        if (select_jd.equals("未申请")) {//没有pid
-            for (Project project1 : projects) {
-                if (project1.getPid() == null || project1.getPid().equals("")) {
-                    res.add(project1);
-                }
-            }
-            return xxmcAndxmbhGl(res, select_xmmc, select_code);
-        } else {//其他
-            for (Project project1 : projects) {
-                if (project1.getPid() != null && !project1.getPid().equals("") && getPidNode(project1.getPid()).equals(select_jd)) {
-                    res.add(project1);
-                }
-            }
-            return xxmcAndxmbhGl(res, select_xmmc, select_code); //res
-        }
+    public List<Project> Search(String select_xmmc, String select_code, String select_dptnm, String select_jd, @RequestBody String[] select_xmfl, @RequestBody String[] select_xmlb,@RequestBody String[] select_fqr,@RequestBody String[] select_jbr) {
+        System.out.println("select_xmmc:"+select_xmmc);
+        System.out.println("select_code:"+select_code);
+        System.out.println("select_dptnm"+select_dptnm);
+        System.out.println("select_jd"+select_jd);
+        if(select_xmfl!=null)
+        System.out.println(select_xmfl.length);
+        if(select_xmlb!=null)
+        System.out.println(select_xmlb.length);
+        if(select_fqr!=null)
+        System.out.println(select_fqr.length);
+        if(select_jbr!=null)
+        System.out.println(select_jbr.length);
+        //       String sql="select * from project where ";
+//        if(select_xmmc!=null&&!select_xmmc.equals("")){
+//            sql=sql+"PROJECT_NAM like '%select_xmmc%'";
+//        }
+//        if(select_code!=null&&!select_code.equals("")){
+//            sql=sql+" and PROJECT_NO like '%select_code'";
+//        }
+//        if(select_dptnm!=null&&!select_dptnm.equals("")){
+//           sql=sql+" and DECLARATION_DEP='select_dptnm'";
+//        }
+//        if(select_xmfl!=null&&select_xmfl.length!=0){
+//            sql=sql+"and (REVISER =";
+//            for(int i=0;i<select_xmfl.length;i++){
+//                sql=sql+select_xmfl[i];
+//                if(i!=select_xmfl.length-1)
+//                    sql=sql+" or REVISER =";
+//            }
+//            sql=sql+")";
+//        }
+//        if(select_xmlb!=null&&select_xmlb.length!=0){
+//            sql=sql+"and (PROJECT_TYPE =";
+//            for(int i=0;i<select_xmlb.length;i++){
+//                sql=sql+select_xmlb[i];
+//                if(i!=select_xmlb.length-1)
+//                    sql=sql+" or PROJECT_TYPE =";
+//            }
+//            sql=sql+")";
+//        }
+//        if(select_fqr!=null&&select_fqr.length!=0){
+//            sql=sql+"and (proposer =";
+//            for(int i=0;i<select_fqr.length;i++){
+//                sql=sql+select_fqr[i];
+//                if(i!=select_fqr.length-1)
+//                    sql=sql+" or PROJECT_TYPE =";
+//            }
+//            sql=sql+")";
+//        }
+//        if(select_jbr!=null&&select_jbr.length!=0){
+//            sql=sql+"and (bider =";
+//            for(int i=0;i<select_jbr.length;i++){
+//                sql=sql+select_fqr[i];
+//                if(i!=select_fqr.length-1)
+//                    sql=sql+" or bider =";
+//            }
+//            sql=sql+")";
+//        }
+//        System.out.println(sql);
+     //   if(select_jd==null||select_jd.equals(""))
+
+        //        Project project = new Project();
+//        if (select_dptnm != null && !select_dptnm.equals(""))
+//            project.setDeclarationDep(select_dptnm);
+//        if (select_xmfl != null && !select_xmfl.equals(""))
+//            project.setReviser(select_xmfl);
+//        if (select_xmlb != null && !select_xmlb.equals(""))
+//            project.setProjectType(select_xmlb);
+//        if(select_fqr!=null&&!select_fqr.equals(""))
+//            project.setProposer(select_fqr);
+//        if(select_jbr!=null&&!select_jbr.equals(""))
+//            project.setBider(select_jbr);
+//        List<Project> projects = projectMapper.select(project);
+//        List<Project> res = new ArrayList<>();
+//        if (select_jd == null || select_jd.equals("")) {//没有节点搜索条件
+//            return xxmcAndxmbhGl(projects, select_xmmc, select_code);
+//        }
+//        //有节点搜索条件
+//        if (select_jd.equals("未申请")) {//没有pid
+//            for (Project project1 : projects) {
+//                if (project1.getPid() == null || project1.getPid().equals("")) {
+//                    res.add(project1);
+//                }
+//            }
+//            return xxmcAndxmbhGl(res, select_xmmc, select_code);
+//        } else {//其他
+//            for (Project project1 : projects) {
+//                if (project1.getPid() != null && !project1.getPid().equals("") && getPidNode(project1.getPid()).equals(select_jd)) {
+//                    res.add(project1);
+//                }
+//            }
+//            return xxmcAndxmbhGl(res, select_xmmc, select_code); //res
+//        }
+        return null;
     }
 
     //项目名称和项目编号过滤
