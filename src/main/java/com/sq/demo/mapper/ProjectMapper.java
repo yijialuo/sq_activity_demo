@@ -98,4 +98,11 @@ public interface ProjectMapper extends MyMapper<Project> {
     //项目类别搜索
     @Select("SELECT * FROM project WHERE PROJECT_TYPE=#{s}")
     List<Project> selectByXmlb(@Param("s") String s);
+
+    List<Project> search(@Param("select_code") String select_code,@Param("select_xmmc") String select_xmmc,@Param("select_dptnm") String select_dptnm,@Param("select_fqr") String[] select_fqr,@Param("select_jbr") String[] select_jbr,@Param("select_jd") String select_jd,@Param("select_xmfl") String[] select_xmfl,@Param("select_xmlb") String[] select_xmlb);
+
+    @Select("${s}")
+    int ttt(@Param("s") String s);
+
+    List<Project> sgSearch( String projectName,String departmentName,String fzr,String xmlb,String yjgq);
 }

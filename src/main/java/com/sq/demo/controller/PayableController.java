@@ -154,9 +154,9 @@ public class PayableController {
         BigDecimal htje = contractMapper.selectOne(contract).getPrice();
         String rq = contractMapper.selectOne(contract).getRq();
         String skdw = contractMapper.selectOne(contract).getDfdsr();
-        Project project = new Project();
-        project.setId(payable1.getProject());
-        String project_name = projectMapper.selectOne(project).getProjectNam();
+        Project project = projectMapper.selectByPrimaryKey(payable1.getProject());
+        String project_name = project.getProjectNam();
+        payable_return.setXmNo(project.getProjectNo());
         payable_return.setAccount(payable1.getAccount());
         payable_return.setBank(payable1.getBank());
         payable_return.setBqyf(payable1.getBqyf());

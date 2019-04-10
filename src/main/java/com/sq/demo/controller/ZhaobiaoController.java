@@ -92,10 +92,11 @@ public class ZhaobiaoController {
             TaskService taskService = engine.getTaskService();
             Task task = taskService.createTaskQuery().processInstanceId(zhaobiao.getZbpid()).singleResult();
             //添加评论
-            if(comment!=null&&!comment.equals("")) {
+            if(comment==null)
+                comment="";
                 Authentication.setAuthenticatedUserId(userId);
                 taskService.addComment(task.getId(), zhaobiao.getZbpid(), comment);
-            }
+
             //设置招标表参数
             taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
             //设置任务受理人
@@ -306,11 +307,12 @@ public class ZhaobiaoController {
             Task task = taskService.createTaskQuery().processInstanceId(zhaobiao.getZbpid()).singleResult();
             //重新设置项目参数
             taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
-            if(comment!=null&&!comment.equals("")){
+            if(comment==null)
+                comment="";
                 //添加评论
-                Authentication.setAuthenticatedUserId(userId);
-                taskService.addComment(task.getId(), zhaobiao.getZbpid(), comment);
-            }
+            Authentication.setAuthenticatedUserId(userId);
+            taskService.addComment(task.getId(), zhaobiao.getZbpid(), comment);
+
             //设置任务代理人
             taskService.setAssignee(task.getId(), userId);
             //完成任务
@@ -329,11 +331,12 @@ public class ZhaobiaoController {
         try {
             TaskService taskService = processEngine.getTaskService();
             Task task = taskService.createTaskQuery().processInstanceId(zbpid).singleResult();
-            if(comment!=null&&!comment.equals("")){
+            if(comment==null)
+                comment="";
                 //添加评论
                 Authentication.setAuthenticatedUserId(userId);
                 taskService.addComment(task.getId(), zbpid, comment);
-            }
+
             //设置任务代理人
             taskService.setAssignee(task.getId(), userId);
             //设置参数

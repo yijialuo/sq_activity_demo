@@ -12,6 +12,7 @@ public class Contract_return implements Serializable {
     private String contractNo;
     private String projectName;
     private String projectId;
+    private String xmNo;
     private String dfdsr;
     private String tzwh;
     private BigDecimal price;
@@ -169,5 +170,13 @@ public class Contract_return implements Serializable {
 
     public void setGd(String gd) {
         this.gd = gd;
+    }
+
+    public String getXmNo() {
+        return xmNo;
+    }
+
+    public void setXmNo(String xmNo) {
+        this.xmNo = xmNo;
     }
 }

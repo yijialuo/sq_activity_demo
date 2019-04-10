@@ -44,6 +44,51 @@ public class ContractController {
     @Autowired
     ContractfileMapper contractfileMapper;
 
+    //综合搜索
+    @RequestMapping("search")
+    public List<Contract_return> search(String contractNo,String projectName, String ContractDate,String dfdsr, String tzwh,String dqjd){
+        List<Contract> contracts=contractMapper.search(contractNo,ContractDate,dfdsr,tzwh);
+        List<Contract_return> res=new ArrayList<>();
+        if((projectName==null||projectName.equals(""))&&(dqjd==null||dqjd.equals(""))){//项目名称和节点没选择
+            for(Contract contract:contracts){
+                res.add(contractTocontractreturn(contract));
+            }
+            return res;
+        }else if((projectName!=null&&!projectName.equals(""))&&(dqjd==null||dqjd.equals(""))){//项目名称搜索，节点没搜索
+            for (Contract contract:contracts){
+                Project project=projectMapper.selectByPrimaryKey(contract.getProjectId());
+                if(project.getProjectNam().contains(projectName)){
+                    res.add(contractTocontractreturn(contract));
+                }
+            }
+            return res;
+        }else if((projectName==null||projectName.equals(""))&&dqjd!=null&&!dqjd.equals("")){//项目名称没搜索、节点有搜索
+            if(dqjd.equals("未申请")){
+                for(Contract contract:contracts){
+                    if(contract.getDwyj()==null||contract.getDwyj().equals("")){
+                        res.add(contractTocontractreturn(contract));
+                    }
+                }
+                return res;
+            }else {
+                for(Contract contract:contracts){
+                    if(contract.getDwyj()!=null&&!contract.getDwyj().equals("")&&getPidNode(contract.getDwyj()).equals(dqjd)){
+                        res.add(contractTocontractreturn(contract));
+                    }
+                }
+                return res;
+            }
+        }else {//项目名称和节点都有搜索
+            for(Contract contract:contracts){
+                Project project=projectMapper.selectByPrimaryKey(contract.getProjectId());
+                if(project.getProjectNam().contains(projectName)&&contract.getDwyj()!=null&&!contract.getDwyj().equals("")&&getPidNode(contract.getDwyj()).equals(dqjd)){
+                    res.add(contractTocontractreturn(contract));
+                }
+            }
+            return res;
+        }
+    }
+
     //确认合同已接受
     @RequestMapping("qrhtyjs")
     public boolean qrhtyjs(String dwyj,String htno){
@@ -288,6 +333,7 @@ public class ContractController {
         Project p1 = projectMapper.selectOne(project);
         String projectname = p1.getProjectNam();
         Contract_return c = new Contract_return();
+        c.setXmNo(p1.getProjectNo());
         c.setContractNo(contract.getContractNo());
         c.setCwbmyj(contract.getCwbmyj());
         c.setDfdsr(contract.getDfdsr());

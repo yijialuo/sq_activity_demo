@@ -26,4 +26,65 @@
     <result column="ILLUSTRATION" property="illustration" jdbcType="VARCHAR" />
     <result column="PID" property="pid" jdbcType="VARCHAR" />
   </resultMap>
+
+    <select id="sgSearch" resultType="com.sq.demo.pojo.Project">
+        select * from project
+        <trim prefix="where" prefixOverrides="and">
+            <if test="projectName!=null and projectName!='' ">
+                and project_Nam like concat('%',#{projectName},'%')
+            </if>
+            <if test="departmentName!=null and departmentName!='' ">
+                and DECLARATION_DEP like concat ('%', #{departmentName},'%')
+            </if>
+            <if test="fzr!=null and fzr!='' ">
+                and PERSON_IN_CHARGE like concat ('%',#{fzr},'%')
+            </if>
+            <if test="xmlb!=null and xmlb!='' ">
+                and PROJECT_TYPE like concat ('%',#{xmlb},'%')
+            </if>
+            <if test="yjgq!=null and yjgq!='' ">
+                and TECH_AUDIT_OPINION like concat ('%',#{yjgq},'%')
+            </if>
+        </trim>
+    </select>
+
+    <select id="search" resultType="com.sq.demo.pojo.Project">
+        select * from project
+        <trim prefix="where" prefixOverrides="and">
+            <if test="select_code!=null and select_code!=''">
+                and project_No like concat('%',#{select_code},'%')
+            </if>
+            <if test="select_xmmc!=null and select_xmmc!=''">
+                and project_Nam like concat('%',#{select_xmmc},'%')
+            </if>
+            <if test="select_dptnm!=null and select_dptnm!=''">
+                and DECLARATION_DEP like concat('%',#{select_dptnm},'%')
+            </if>
+            <if test="select_fqr!=null and select_fqr!=''">
+                and
+                <foreach item="item" index="index" collection="select_fqr" open="(" separator="or" close=")">
+                    proposer like concat('%',#{item},'%')
+                </foreach>
+            </if>
+            <if test="select_jbr!=null and select_jbr!=''">
+                and
+                <foreach item="item" index="index" collection="select_jbr" open="(" separator="or" close=")">
+                    bider like concat('%',#{item},'%')
+                </foreach>
+            </if>
+            <if test="select_xmfl!=null and select_xmfl!=''">
+                and
+                <foreach item="item" index="index" collection="select_xmfl" open="(" separator="or" close=")">
+                    reviser like concat('%',#{item},'%')
+                </foreach>
+            </if>
+            <if test="select_xmlb!=null and select_xmlb!=''">
+                and
+                <foreach item="item" index="index" collection="select_xmlb" open="(" separator="or" close=")">
+                    project_Type like concat('%',#{item},'%')
+                </foreach>
+            </if>
+        </trim>
+    </select>
+
 </mapper>

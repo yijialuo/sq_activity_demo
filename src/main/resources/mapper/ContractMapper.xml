@@ -22,4 +22,22 @@
     <result column="RQ" property="rq" jdbcType="VARCHAR" />
     <result column="GD" property="gd" jdbcType="VARCHAR" />
   </resultMap>
+
+  <select id="search" resultType="com.sq.demo.pojo.Contract">
+      select * from contract
+    <trim prefix="where" prefixOverrides="and">
+      <if test="contractNo!=null and contractNo!=''">
+        and CONTRACT_NO like concat('%',#{contractNo},'%')
+      </if>
+      <if test="ContractDate!=null and ContractDate!=''">
+        and RQ like concat('%',#{ContractDate},'%')
+      </if>
+      <if test="dfdsr!=null and dfdsr!='' ">
+        and dfdsr like concat('%',#{dfdsr},'%')
+      </if>
+      <if test="tzwh!=null and tzwh!=''">
+        and tzwh like concat('%',#{tzwh},'%')
+      </if>
+    </trim>
+  </select>
 </mapper>

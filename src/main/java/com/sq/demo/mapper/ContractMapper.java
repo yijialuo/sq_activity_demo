@@ -15,4 +15,6 @@ public interface ContractMapper extends MyMapper<Contract> {
     int AllCounts();
     @Select("SELECT * FROM contract WHERE dwyj is not null and dwyj != ''")
     List<Contract> selectYlc();
+
+    List<Contract> search(String contractNo,String ContractDate,String dfdsr,String tzwh);
 }

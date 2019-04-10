@@ -15,6 +15,7 @@ public class Payable_Return implements Serializable {
     private String account;
     private String bank;
     private String project_name;
+    private String xmNo;
     private String contract_no;
     private BigDecimal bqyf;
     private String jbbmfzr;
@@ -195,5 +196,13 @@ public class Payable_Return implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getXmNo() {
+        return xmNo;
+    }
+
+    public void setXmNo(String xmNo) {
+        this.xmNo = xmNo;
     }
 }
