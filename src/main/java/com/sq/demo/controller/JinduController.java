@@ -2,9 +2,15 @@ package com.sq.demo.controller;
 
 import com.sq.demo.mapper.JinduMapper;
 import com.sq.demo.mapper.ProjectMapper;
+import com.sq.demo.mapper.ZhaobiaoMapper;
 import com.sq.demo.pojo.Jindu;
 import com.sq.demo.pojo.Project;
+import com.sq.demo.pojo.Zhaobiao;
 import com.sq.demo.utils.IdCreate;
+import org.activiti.engine.ProcessEngine;
+import org.activiti.engine.ProcessEngines;
+import org.activiti.engine.TaskService;
+import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +28,26 @@ public class JinduController {
     ProjectMapper projectMapper;
     @Autowired
     JinduMapper jinduMapper;
+    @Autowired
+    ZhaobiaoMapper zhaobiaoMapper;
 
+    //判断该项目是否可以
+    @RequestMapping("/canAddjd")
+    public boolean canAddjd(String projectId){
+        Zhaobiao zhaobiao=new Zhaobiao();
+        zhaobiao.setXmid(projectId);
+        zhaobiao=zhaobiaoMapper.selectOne(zhaobiao);
+        if(zhaobiao!=null&&zhaobiao.getZbpid()!=null&&!zhaobiao.getZbpid().equals("")){
+            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = processEngine.getTaskService();
+            String node = taskService.createTaskQuery().processInstanceId(zhaobiao.getZbpid()).singleResult().getName();
+            if(node.equals("定标")||node.equals("招标结束"))
+                return true;
+            else
+                return false;
+        }
+        return false;
+    }
 
     //拿项目施工状态
     @RequestMapping("/getSgzt")

@@ -73,7 +73,6 @@ public class ProjectController {
     @RequestMapping("/sgSearch")
     public List<Project> sgSearch(String projectName, String departmentName, String fzr, String xmlb, String yjgq, String zt) {
         List<Project> projects = projectMapper.sgSearch(projectName, departmentName, fzr, xmlb, yjgq);
-        System.out.println(projects.size());
         if (zt == null || zt.equals("")) {
             return projects;
         } else {
@@ -1055,7 +1054,7 @@ public class ProjectController {
         }
     }
 
-    //拿到本部门未开始招标的项目id和项目name
+    //拿到本部门未开始招标的项目id和项目name,且项目流程得走到两会才行
     @RequestMapping("/getSelfWzzXmidAndXmname")
     public List<Xm> getSelfWzzXmidAndXmname(String dpt) {
         List<Xm> xms = getSelfXmidAndXmname(dpt);
@@ -1066,8 +1065,12 @@ public class ProjectController {
         }
         List<Xm> res = new ArrayList<>();
         for (Xm xm : xms) {
-            if (!projectIds.contains(xm.value)) {
-                res.add(xm);
+            Project project=projectMapper.selectByPrimaryKey(xm.value);
+            if(project.getPid()!=null&&!project.getPid().equals("")){
+                String node=getPidNode(project.getPid());
+                if (!projectIds.contains(xm.value)&&(node.equals("两会")||node.equals("招标结束")||node.equals("总经理办公会")||node.equals("备案"))) {
+                    res.add(xm);
+                }
             }
         }
         return res;
@@ -1089,6 +1092,31 @@ public class ProjectController {
         }
         return xms;
     }
+
+    //拿所有可以新建合同得项目id和项目name
+    @RequestMapping("/getCanHtXmIdAndXmname")
+    public List<Xm> getCanHtXmIdAndXmname() {
+        List<Project> projects = projectMapper.selectAll();
+        List<Xm> xms = new ArrayList<>();
+        for (Project project : projects) {
+            Zhaobiao zhaobiao=new Zhaobiao();
+            zhaobiao.setXmid(project.getId());
+            zhaobiao=zhaobiaoMapper.selectOne(zhaobiao);
+            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = processEngine.getTaskService();
+            if(zhaobiao!=null&&zhaobiao.getZbpid()!=null&&!zhaobiao.getZbpid().equals("")){
+                String nodeName = taskService.createTaskQuery().processInstanceId(zhaobiao.getZbpid()).singleResult().getName();
+                if(nodeName.equals("定标")||nodeName.equals("招标结束")){
+                    Xm xm = new Xm();
+                    xm.value = project.getId();
+                    xm.label = project.getProjectNam();
+                    xms.add(xm);
+                }
+            }
+        }
+        return xms;
+    }
+
 
     //拿所有项目id和项目name
     @RequestMapping("/getAllXmIdAndXmname")

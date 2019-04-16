@@ -42,53 +42,69 @@ public class UserController {
     //拿到项目的经办人
     @RequestMapping("/getDepartmentjbr")
     public List<UserOV> getSelfDepartmentjbr(String departmentName) {
-        List<Project> projects = projectMapper.selectAll();
-        List<UserOV> userOVS = new ArrayList<>();
-        if (!departmentName.equals("工程技术部")) {
-            List<String> userNames = new ArrayList<>();
-            for (Project project : projects) {
-                if (project.getDeclarationDep().equals(departmentName) && project.getBider() != null && !project.getBider().equals("")) {
-                    UserOV userOV = new UserOV();
-                    userOV.userName = project.getBider();
-                    if (!userNames.contains(userOV.userName)) {//过滤重复
-                        userOV.userId = getUserIdByUserName(userOV.userName);
-                        userOVS.add(userOV);
-                        userNames.add(userOV.userName);
+        try {
+            List<Project> projects = projectMapper.selectAll();
+            List<UserOV> userOVS = new ArrayList<>();
+            if (!departmentName.equals("工程技术部")) {
+                List<String> userNames = new ArrayList<>();
+                for (Project project : projects) {
+                    if (project.getDeclarationDep().equals(departmentName) && project.getBider() != null && !project.getBider().equals("")) {
+                        UserOV userOV = new UserOV();
+                        userOV.userName = project.getBider();
+                        if (!userNames.contains(userOV.userName)) {//过滤重复
+                            userOV.userId = getUserIdByUserName(userOV.userName);
+                            userOVS.add(userOV);
+                            userNames.add(userOV.userName);
+                        }
                     }
                 }
-            }
-            return userOVS;
-        } else {//是工程技术部
-            List<String> userNames = new ArrayList<>();
-            for (Project project : projects) {
-                if (project.getBider() != null && !project.getBider().equals("")) {
-                    UserOV userOV = new UserOV();
-                    userOV.userName = project.getBider();
-                    if (!userNames.contains(userOV.userName)) {//过滤重复
-                        userOV.userId = getUserIdByUserName(userOV.userName);
-                        userOVS.add(userOV);
-                        userNames.add(userOV.userName);
+                return userOVS;
+            } else {//是工程技术部
+                List<String> userNames = new ArrayList<>();
+                for (Project project : projects) {
+                    if (project.getBider() != null && !project.getBider().equals("")) {
+                        UserOV userOV = new UserOV();
+                        userOV.userName = project.getBider();
+                        if (!userNames.contains(userOV.userName)) {//过滤重复
+                            userOV.userId = getUserIdByUserName(userOV.userName);
+                            userOVS.add(userOV);
+                            userNames.add(userOV.userName);
+                        }
                     }
                 }
+                return userOVS;
             }
-            return userOVS;
+        }catch (Exception e){
+            return null;
         }
     }
 
     //拿到部门的所有doman
     @RequestMapping("/getDepartmentDoman")
     public List<UserOV> getDeparmentDoman(String departmentId) {
-        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
-        IdentityService identityService = engine.getIdentityService();
-        List<User> users = identityService.createUserQuery().list();
-        List<UserOV> res = new ArrayList<>();
-        //如果不是工程技术部，只能拿直接部门的办事员
-        if (!departmentId.equals("20190123022801622")) {
-            for (User user : users) {
-                //找到部门的人
-                if (identityService.getUserInfo(user.getId(), "departmentId").equals(departmentId)) {
-                    //找到doman
-                    if (identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId().equals("doman")) {
+        try {
+            ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+            IdentityService identityService = engine.getIdentityService();
+            List<User> users = identityService.createUserQuery().list();
+            List<UserOV> res = new ArrayList<>();
+            //如果不是工程技术部，只能拿自己部门的办事员
+            if (!departmentId.equals("20190123022801622")) {
+                for (User user : users) {
+                    //找到部门的人
+                    if (identityService.getUserInfo(user.getId(), "departmentId").equals(departmentId)) {
+                        //找到doman
+                        if (identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId().equals("doman")) {
+                            UserOV userOV = new UserOV();
+                            userOV.userId = user.getId();
+                            userOV.userName = user.getFirstName();
+                            res.add(userOV);
+                        }
+                    }
+                }
+            } else {//如果是工程技术部拿所有的
+                for (User user : users) {
+                    String grouoId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
+                    if (grouoId.equals("doman") || grouoId.equals("jsb_doman")) {
                         UserOV userOV = new UserOV();
                         userOV.userId = user.getId();
                         userOV.userName = user.getFirstName();
@@ -96,18 +112,10 @@ public class UserController {
                     }
                 }
             }
-        } else {//如果是工程技术部拿所有的
-            for (User user : users) {
-                String grouoId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
-                if (grouoId.equals("doman") || grouoId.equals("jsb_doman")) {
-                    UserOV userOV = new UserOV();
-                    userOV.userId = user.getId();
-                    userOV.userName = user.getFirstName();
-                    res.add(userOV);
-                }
-            }
+            return res;
+        }catch (Exception e){
+            return null;
         }
-        return res;
     }
 
     @RequestMapping("/login")

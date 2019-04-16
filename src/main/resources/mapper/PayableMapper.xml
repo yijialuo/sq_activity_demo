@@ -23,4 +23,74 @@
     <result column="RQ" property="rq" jdbcType="VARCHAR" />
     <result column="WZF" property="wzf" jdbcType="DECIMAL" />
   </resultMap>
+
+  <!--<resultMap id="ssResultMap" type="com.sq.demo.Entity.Payable_Return">-->
+    <!--<result column="ID" property="id" jdbcType="VARCHAR" />-->
+    <!--<result column="JBBM" property="jbbm" jdbcType="VARCHAR" />-->
+    <!--<result column="JBR" property="jbr" jdbcType="VARCHAR" />-->
+    <!--<result column="YSZMR" property="yszmr" jdbcType="VARCHAR" />-->
+    <!--<result column="INVOICE_NO" property="invoice_no" jdbcType="VARCHAR" />-->
+    <!--<result column="ACCOUNT" property="account" jdbcType="VARCHAR" />-->
+    <!--<result column="BANK" property="bank" jdbcType="VARCHAR" />-->
+    <!--<result column="PROJECT_NAM" property="project_name" jdbcType="VARCHAR" />-->
+    <!--<result column="PROJECT_NO" property="xmNo" jdbcType="DECIMAL" />-->
+    <!--<result column="CONTRACT_NO" property="contract_no" jdbcType="VARCHAR" />-->
+    <!--<result column="BQYF" property="bqyf" jdbcType="VARCHAR" />-->
+    <!--<result column="JBBMFZR" property="jbbmfzr" jdbcType="VARCHAR" />-->
+    <!--<result column="FGLD" property="zgbmfzr" jdbcType="VARCHAR" />-->
+    <!--<result column="JBR" property="fgld" jdbcType="VARCHAR" />-->
+    <!--<result column="RQ" property="rq" jdbcType="DECIMAL" />-->
+    <!--<result column="DFDSR" property="skdw" jdbcType="VARCHAR" />-->
+    <!--<result column="PRICE" property="htje" jdbcType="VARCHAR" />-->
+    <!--<result column="RQ" property="yzfje" jdbcType="VARCHAR" />-->
+    <!--<result column="WZF" property="wfje" jdbcType="DECIMAL" />-->
+  <!--</resultMap>-->
+  
+  <select id="search" resultMap="BaseResultMap">
+    SELECT pa.ID,
+    pa.JBBM,
+    pa.YSZMR,
+    pa.INVOICE_NO,
+    pa.ACCOUNT,
+    pa.BANK,
+    pa.PROJECT,
+    pa.CONTRACT_ID,
+    pa.BQYF,
+    pa.JBBMFZR,
+    pa.ZGBMFZR,
+    pa.CWZJ,
+    pa.FGLD,
+    pa.GSZJL,
+    pa.JBR,
+    pa.RQ,
+    pa.WZF
+    FROM payable pa,project pr,contract co
+    <trim prefix="where" prefixOverrides="and">
+      <if test="rq!=null and rq!=''">
+        and pa.RQ like concat('%',#{rq},'%')
+      </if>
+      <if test="jbbm!=null and jbbm!=''">
+        and JBBM like  concat('%',#{jbbm},'%')
+      </if>
+      <if test="jbr!=null and jbr!=''">
+        and pa.JBR like  concat('%',#{jbr},'%')
+      </if>
+      <if test="yszmr!=null and yszmr!=''">
+        and YSZMR like  concat('%',#{yszmr},'%')
+      </if>
+      <if test="projectName!=null and projectName!=''">
+        and pr.PROJECT_NAM like  concat('%',#{projectName},'%')
+      </if>
+      <if test="contractNo!=null and contractNo!=''">
+        and co.CONTRACT_NO like  concat('%',#{contractNo},'%')
+      </if>
+      <if test="skdw!=null and skdw!=''">
+        and co.DFDSR like  concat('%',#{skdw},'%')
+      </if>
+      <if test="projectNo!=null and projectNo!=''">
+        and pr.PROJECT_NO like  concat('%',#{projectNo},'%')
+      </if>
+      and pa.PROJECT=pr.ID and co.ID=pa.CONTRACT_ID
+    </trim>
+  </select>
 </mapper>

@@ -3,6 +3,7 @@ package com.sq.demo.controller;
 import com.github.pagehelper.PageHelper;
 import com.sq.demo.Entity.Contract_return;
 import com.sq.demo.Entity.Hetong;
+import com.sq.demo.Entity.Return_Comments;
 import com.sq.demo.mapper.ContractMapper;
 import com.sq.demo.mapper.ContractfileMapper;
 import com.sq.demo.mapper.ProjectMapper;
@@ -12,6 +13,8 @@ import com.sq.demo.pojo.Contractfile;
 import com.sq.demo.pojo.Project;
 import com.sq.demo.utils.IdCreate;
 import org.activiti.engine.*;
+import org.activiti.engine.identity.Group;
+import org.activiti.engine.identity.User;
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.repository.DeploymentBuilder;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -177,10 +180,10 @@ public class ContractController {
 
     //经办人领到合同getJsbdomanHts
     @RequestMapping(value = "/getJsbdomanHts")
-    public List<Contract_return>  getJsbdomanHts(){
+    public List<Contract_return>  getJsbdomanHts(String userId){
         List<Contract_return> res=new ArrayList<>();
         for(Contract contract:contractMapper.selectYlc()){
-            if(getPidNode(contract.getDwyj()).equals("填写合同表单")){
+            if(contract.getCwbmyj()!=null&&contract.getCwbmyj().equals(userId)&&getPidNode(contract.getDwyj()).equals("填写合同表单")){
                 res.add(contractTocontractreturn(contract));
             }
         }
@@ -189,11 +192,26 @@ public class ContractController {
 
     //办公室领到需要处理的合同
     @RequestMapping(value = "/getBgsHts")
-    public List<Contract_return>  getBgsHts(){
+    public List<Contract_return>  getBgsHts(String userId){
         List<Contract_return> res=new ArrayList<>();
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
         for(Contract contract:contractMapper.selectYlc()){
-            if(getPidNode(contract.getDwyj()).equals("办公室确认")){
-                res.add(contractTocontractreturn(contract));
+            //判断该项目是不是自己前期处理的项目
+            Project project=projectMapper.selectByPrimaryKey(contract.getProjectId());
+            //那评论
+            ProjectController controller=new ProjectController();
+            List<Return_Comments> return_comments=controller.projecttocomment(project.getPid());
+            for(int i=0;i<return_comments.size();i++){
+                //评论人
+                User user=identityService.createUserQuery().userFirstName(return_comments.get(i).getUsernam()).singleResult();
+                //评论人的group
+                Group group1=identityService.createGroupQuery().groupMember(user.getId()).singleResult();
+                //如果评论人的职位是办公室，同时评论人是自己
+                if(group1.getId().equals("bgs")&&user.getId().equals(userId)&&getPidNode(contract.getDwyj()).equals("办公室确认")){
+                    res.add(contractTocontractreturn(contract));
+                    break;
+                }
             }
         }
         return res;

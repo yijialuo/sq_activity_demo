@@ -22,4 +22,22 @@
     <result column="ZGBMPD" property="zgbmpd" jdbcType="VARCHAR" />
     <result column="YSJL" property="ysjl" jdbcType="VARCHAR" />
   </resultMap>
+
+  <select id="search" resultType="com.sq.demo.pojo.Yanshou">
+    select * from yanshou
+    <trim prefix="where" prefixOverrides="and">
+      <if test="ysNo!=null and ysNo!=''">
+        and ysno like concat('%',#{ysNo},'%')
+      </if>
+      <if test="kgrq!=null and kgrq!=''">
+        and kgrq like concat('%',#{kgrq},'%')
+      </if>
+      <if test="sjjgrq!=null and sjjgrq!=''">
+        and sjjgrq like concat('%',#{sjjgrq},'%')
+      </if>
+      <if test="ysrq!=null and ysrq!=''">
+        and ysrq like concat('%',#{ysrq},'%')
+      </if>
+    </trim>
+  </select>
 </mapper>

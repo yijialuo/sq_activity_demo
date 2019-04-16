@@ -13,6 +13,7 @@ public interface ContractMapper extends MyMapper<Contract> {
     List<Contract> selectAll();
     @Select("select count(*) from contract")
     int AllCounts();
+    //有流程
     @Select("SELECT * FROM contract WHERE dwyj is not null and dwyj != ''")
     List<Contract> selectYlc();
 

@@ -2,14 +2,8 @@ package com.sq.demo.controller;
 
 
 import com.sq.demo.Entity.Return_Comments;
-import com.sq.demo.mapper.AttachmentlinkMapper;
-import com.sq.demo.mapper.TbdwMapper;
-import com.sq.demo.mapper.ZhaobiaoMapper;
-import com.sq.demo.mapper.ZhongbiaoMapper;
-import com.sq.demo.pojo.Attachmentlink;
-import com.sq.demo.pojo.Tbdw;
-import com.sq.demo.pojo.Zhaobiao;
-import com.sq.demo.pojo.Zhongbiao;
+import com.sq.demo.mapper.*;
+import com.sq.demo.pojo.*;
 import com.sq.demo.utils.IdCreate;
 import com.sq.demo.utils.Time;
 import org.activiti.engine.*;
@@ -43,6 +37,8 @@ public class ZhaobiaoController {
     TbdwMapper tbdwMapper;
     @Autowired
     ZhongbiaoMapper zhongbiaoMapper;
+    @Autowired
+    ProjectMapper projectMapper;
 
     //重新申请
     @Transactional
@@ -257,7 +253,7 @@ public class ZhaobiaoController {
                 }
             }
         }
-        //如果是办事员，拿到项目，判定是不是自己的申请人，
+        //如果是办事员，拿到招标，判定是不是自己的申请人，
         if(group.getId().equals("doman")){
             List<Zhaobiao> res=new ArrayList<>();
             for(int i=0;i<zhaobiaos.size();i++){
@@ -267,7 +263,68 @@ public class ZhaobiaoController {
             }
             return res;
         }
-        return zhaobiaos;
+        //如果是技术部经办人、拿到招标、判断改项目的经办人是不是自己
+        if(group.getId().equals("jsb_doman")){
+            List<Zhaobiao> res=new ArrayList<>();
+            for(Zhaobiao zhaobiao:zhaobiaos){
+                Project project=projectMapper.selectByPrimaryKey(zhaobiao.getXmid());
+                String userName=identityService.createUserQuery().userId(userId).singleResult().getFirstName();
+                if(project.getBider()!=null&&!project.getBider().equals("")&&project.getBider().equals(userName)){
+                    res.add(zhaobiao);
+                }
+            }
+            return res;
+        }
+        //如果是技术部主管经理，拿到招标，判断该项目的技术部主管经理的审批是不是自己
+        if(group.getId().equals("jsb_zgjl")){
+            List<Zhaobiao> res=new ArrayList<>();
+            for (Zhaobiao zhaobiao:zhaobiaos){
+                Project project=projectMapper.selectByPrimaryKey(zhaobiao.getXmid());
+                if(project.getPid()!=null&&!project.getPid().equals("")) {
+                    ProjectController projectController = new ProjectController();
+                    //列出所有审核意见,找到主管经理
+                    List<Return_Comments> return_comments = projectController.projecttocomment(project.getPid());
+                    for (int i = 0; i < return_comments.size(); i++) {
+                        //评论人
+                        User user = identityService.createUserQuery().userFirstName(return_comments.get(i).getUsernam()).singleResult();
+                        //评论人的group
+                        Group group1 = identityService.createGroupQuery().groupMember(user.getId()).singleResult();
+                        //如果评论人的职位是技术部主管经理，同时评论人是自己
+                        if (group1.getId().equals("jsb_zgjl") && user.getId().equals(userId)) {
+                            res.add(zhaobiao);
+                            break;
+                        }
+                    }
+                }
+            }
+            return res;
+        }
+        //办公室
+        if(group.getId().equals("bgs")){
+            List<Zhaobiao> res=new ArrayList<>();
+            for (Zhaobiao zhaobiao:zhaobiaos){
+                Project project=projectMapper.selectByPrimaryKey(zhaobiao.getXmid());
+                //列出所有审核意见,
+                if(project.getPid()!=null&&!project.getPid().equals("")){
+                    ProjectController projectController = new ProjectController();
+                    List<Return_Comments> return_comments = projectController.projecttocomment(project.getPid());
+                    for(int i=0;i<return_comments.size();i++){
+                        //评论人
+                        User user=identityService.createUserQuery().userFirstName(return_comments.get(i).getUsernam()).singleResult();
+                        //评论人的group
+                        Group group1=identityService.createGroupQuery().groupMember(user.getId()).singleResult();
+                        //如果评论人的职位是技术部主管经理，同时评论人是自己
+                        if(group1.getId().equals("bgs")&&user.getId().equals(userId)){
+                            res.add(zhaobiao);
+                            break;
+                        }
+                    }
+                }
+            }
+            return res;
+        }
+        //技术部经理就一个人、不用过滤
+            return zhaobiaos;
     }
 
     //上传附件

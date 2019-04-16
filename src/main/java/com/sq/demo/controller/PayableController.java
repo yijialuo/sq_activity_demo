@@ -35,6 +35,16 @@ public class PayableController {
     @Autowired
     ProjectMapper projectMapper;
 
+
+    @RequestMapping("/search")
+    public List<Payable_Return> search(String projectNo,String projectName,String contractNo,String rq,String jbbm, String jbr,String yszmr,String skdw){
+        List<Payable_Return> res=new ArrayList<>();
+        for(Payable payable:payableMapper.search(projectNo,projectName,contractNo,rq,jbbm, jbr,yszmr,skdw)){
+            res.add(payableTopayable_Return(payable));
+        }
+        return res;
+    }
+
     //添加应付信息
     @Transactional
     @RequestMapping("/addPayable")
