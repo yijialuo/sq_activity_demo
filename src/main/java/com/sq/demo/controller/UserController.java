@@ -2,9 +2,12 @@ package com.sq.demo.controller;
 
 import com.sq.demo.Entity.UserOV;
 import com.sq.demo.mapper.DepartmentMapper;
+import com.sq.demo.mapper.FsMapper;
 import com.sq.demo.mapper.ProjectMapper;
 import com.sq.demo.pojo.Department;
+import com.sq.demo.pojo.Fs;
 import com.sq.demo.pojo.Project;
+import com.sq.demo.utils.ArrayToString;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
@@ -30,6 +33,77 @@ public class UserController {
     DepartmentMapper departmentMapper;
     @Autowired
     ProjectMapper projectMapper;
+    @Autowired
+    FsMapper fsMapper;
+
+
+    //拿主管经理
+    @RequestMapping("/getAllJsbZgjl")
+    public List<UserOV> getAllJsbZgjl(String manageType,String projectId){
+        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService=engine.getIdentityService();
+        List<UserOV> userOVS=new ArrayList<>();
+        if(projectId==null||projectId.equals("")){
+            List<User> users=identityService.createUserQuery().list();
+            for(User user:users){
+                Group group=identityService.createGroupQuery().groupMember(user.getId()).singleResult();
+                if(group.getId().equals("jsb_zgjl")&&identityService.getUserInfo(user.getId(),"manageType").contains(manageType)){
+                    UserOV userOV=new UserOV();
+                    userOV.userId=user.getId();
+                    userOV.userName=user.getFirstName();
+                    userOVS.add(userOV);
+                }
+            }
+            return userOVS;
+        }else {//拿到处理的技术部主管经理
+            Fs fs=new Fs();
+            fs.setProjectid(projectId);
+            fs=fsMapper.selectOne(fs);
+            if(fs==null){
+                Project project=projectMapper.selectByPrimaryKey(projectId);
+                return getAllJsbZgjl(project.getReviser(),null);
+            }
+            UserOV userOV=new UserOV();
+            userOV.userId=fs.getDojsbzgjl();
+            userOV.userName=identityService.createUserQuery().userId(fs.getDojsbzgjl()).singleResult().getFirstName();
+            userOVS.add(userOV);
+            return userOVS;
+        }
+    }
+
+    //拿技术部经办人
+    @RequestMapping("/getAllJsbDoman")
+    public List<UserOV> getAllJsbDoman(String manageType,String projectId){
+        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService=engine.getIdentityService();
+        List<UserOV> userOVS=new ArrayList<>();
+        if(projectId==null||projectId.equals("")){//拿所有
+            List<User> users=identityService.createUserQuery().list();
+            for(User user:users){
+                Group group=identityService.createGroupQuery().groupMember(user.getId()).singleResult();
+                if(group.getId().equals("jsb_doman")&&identityService.getUserInfo(user.getId(),"manageType").contains(manageType)){
+                    UserOV userOV=new UserOV();
+                    userOV.userId=user.getId();
+                    userOV.userName=user.getFirstName();
+                    userOVS.add(userOV);
+                }
+            }
+            return userOVS;
+        }else {//拿处理的经办人
+            Fs fs=new Fs();
+            fs.setProjectid(projectId);
+            fs=fsMapper.selectOne(fs);
+            if(fs==null){
+                Project project=projectMapper.selectByPrimaryKey(projectId);
+                return getAllJsbDoman(project.getReviser(),null);
+            }
+            UserOV userOV=new UserOV();
+            userOV.userId=fs.getDojsbjbr();
+            userOV.userName=identityService.createUserQuery().userId(fs.getDojsbjbr()).singleResult().getFirstName();
+            userOVS.add(userOV);
+            return userOVS;
+        }
+    }
 
     //根据用户名字查询用户id
     public String getUserIdByUserName(String userName) {
@@ -166,6 +240,11 @@ public class UserController {
         user.setPassword(userOV.passWord);
         //保存用户部门
         identityService.setUserInfo(user.getId(), "departmentId", userOV.departmentId);
+        //选择了manageType
+        if(userOV.manageType!=null&&userOV.manageType.length!=0){
+            identityService.setUserInfo(user.getId(),"manageType", ArrayToString.array(userOV.manageType));
+        }
+
         identityService.saveUser(user);
         identityService.createMembership(user.getId(), userOV.groupId);
         return true;
@@ -212,6 +291,11 @@ public class UserController {
         }
         //修改部门ID
         identityService.setUserInfo(user.getId(), "departmentId", userOV.departmentId);
+        //修改处理类型
+        if(userOV.manageType!=null&&userOV.manageType.length!=0){
+            identityService.setUserInfo(user.getId(),"manageType",ArrayToString.array(userOV.manageType));
+
+        }
         identityService.saveUser(user);
         return true;
     }
@@ -233,6 +317,10 @@ public class UserController {
                         userOV.userName = user.getFirstName();
                         userOV.passWord = user.getPassword();
                         userOV.departmentId = identityService.getUserInfo(user.getId(), "departmentId");
+                        if(identityService.getUserInfo(user.getId(),"manageType")!=null){
+                            System.out.println(identityService.getUserInfo(user.getId(),"manageType"));
+                            userOV.manageType=identityService.getUserInfo(user.getId(),"manageType").split(",");
+                        }
                         //查询用户所在的组
                         String groupId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
                         userOV.groupId = groupId;

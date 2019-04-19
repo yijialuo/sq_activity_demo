@@ -1,10 +1,7 @@
 package com.sq.demo.controller;
 
 import com.github.pagehelper.PageHelper;
-import com.sq.demo.Entity.Project_Receive;
-import com.sq.demo.Entity.Return_Comments;
-import com.sq.demo.Entity.Search;
-import com.sq.demo.Entity.Xm;
+import com.sq.demo.Entity.*;
 import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.*;
 import com.sq.demo.utils.IdCreate;
@@ -29,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import sun.misc.BASE64Encoder;
 
+import javax.persistence.Id;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +43,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/projectApplication")
 public class ProjectController {
+    @Autowired
+    FsMapper fsMapper;
     @Autowired
     ProjectMapper projectMapper;
     @Autowired
@@ -68,6 +68,8 @@ public class ProjectController {
         jindu.setProjectId(projectId);
         return jinduMapper.select(jindu).size() == 0 ? "未开工" : "进行中";
     }
+
+
 
     //施工管理的搜索
     @RequestMapping("/sgSearch")
@@ -135,122 +137,6 @@ public class ProjectController {
     //搜索项目
     @RequestMapping("search")
     public List<Project> Search(String select_xmmc, String select_code, String select_dptnm, String select_jd, @RequestParam(value = "select_xmfl[]", required = false) String[] select_xmfl, @RequestParam(value = "select_xmlb[]", required = false) String[] select_xmlb, @RequestParam(value = "select_fqr[]", required = false) String[] select_fqr, @RequestParam(value = "select_jbr[]", required = false) String[] select_jbr) {
-//        System.out.println("select_xmmc:"+select_xmmc);
-//        System.out.println("select_code:"+select_code);
-//        System.out.println("select_dptnm:"+select_dptnm);
-//        System.out.println("select_jd:"+select_jd);
-//        if(select_xmfl!=null){
-//            System.out.println("select_xmfl:");
-//            for(String x:select_xmfl){
-//                System.out.println(x);
-//            }
-//        }
-//        if(select_xmlb!=null){
-//            System.out.println("select_xmlb:");
-//            for(String x:select_xmlb){
-//                System.out.println(x);
-//            }
-//        }
-//        if(select_fqr!=null){
-//            System.out.println("select_fqr:");
-//            for(String x:select_fqr){
-//                System.out.println(x);
-//            }
-//        }
-//        if(select_jbr!=null){
-//            System.out.println("select_jbr:");
-//            for(String x:select_jbr){
-//                System.out.println(x);
-//            }
-//        }
-//
-//        String sql="select * from project where ";
-//        if(select_xmmc!=null&&!select_xmmc.equals("")){
-//            sql=sql+"PROJECT_NAM like '%"+select_xmmc+"%'";
-//        }
-//        if(select_code!=null&&!select_code.equals("")){
-//            if(select_xmmc!=null&&!select_xmmc.equals(""))
-//                sql=sql+" and ";
-//            sql=sql+"PROJECT_NO like '%"+select_code+"'";
-//        }
-//        if(select_dptnm!=null&&!select_dptnm.equals("")){
-//            if((select_xmmc==null||select_xmmc.equals(""))&&(select_code==null||select_code.equals("")))//前面没有
-//                sql=sql+" DECLARATION_DEP='"+select_dptnm+"'";
-//            else
-//                sql=sql+" and DECLARATION_DEP='"+select_dptnm+"'";
-//        }
-//        if(select_xmfl!=null&&select_xmfl.length!=0){
-//            sql=sql+"and (REVISER ='";
-//            for(int i=0;i<select_xmfl.length;i++){
-//                sql=sql+select_xmfl[i];
-//                if(i!=select_xmfl.length-1)
-//                    sql=sql+"' or REVISER =";
-//            }
-//            sql=sql+")";
-//        }
-//        if(select_xmlb!=null&&select_xmlb.length!=0){
-//            sql=sql+"and (PROJECT_TYPE ='";
-//            for(int i=0;i<select_xmlb.length;i++){
-//                sql=sql+select_xmlb[i];
-//                if(i!=select_xmlb.length-1)
-//                    sql=sql+"' or PROJECT_TYPE =";
-//            }
-//            sql=sql+")";
-//        }
-//        if(select_fqr!=null&&select_fqr.length!=0){
-//            sql=sql+"and (proposer ='";
-//            for(int i=0;i<select_fqr.length;i++){
-//                sql=sql+select_fqr[i];
-//                if(i!=select_fqr.length-1)
-//                    sql=sql+"' or PROJECT_TYPE =";
-//            }
-//            sql=sql+")";
-//        }
-//        if(select_jbr!=null&&select_jbr.length!=0){
-//            sql=sql+"and (bider ='";
-//            for(int i=0;i<select_jbr.length;i++){
-//                sql=sql+select_jbr[i];
-//                if(i!=select_jbr.length-1)
-//                    sql=sql+"' or bider =";
-//            }
-//            sql=sql+")";
-//        }
-//        System.out.println(sql);
-
-
-        //        Project project = new Project();
-//        if (select_dptnm != null && !select_dptnm.equals(""))
-//            project.setDeclarationDep(select_dptnm);
-//        if (select_xmfl != null && !select_xmfl.equals(""))
-//            project.setReviser(select_xmfl);
-//        if (select_xmlb != null && !select_xmlb.equals(""))
-//            project.setProjectType(select_xmlb);
-//        if(select_fqr!=null&&!select_fqr.equals(""))
-//            project.setProposer(select_fqr);
-//        if(select_jbr!=null&&!select_jbr.equals(""))
-//            project.setBider(select_jbr);
-//        List<Project> projects = projectMapper.select(project);
-//        List<Project> res = new ArrayList<>();
-//        if (select_jd == null || select_jd.equals("")) {//没有节点搜索条件
-//            return xxmcAndxmbhGl(projects, select_xmmc, select_code);
-//        }
-//        //有节点搜索条件
-//        if (select_jd.equals("未申请")) {//没有pid
-//            for (Project project1 : projects) {
-//                if (project1.getPid() == null || project1.getPid().equals("")) {
-//                    res.add(project1);
-//                }
-//            }
-//            return xxmcAndxmbhGl(res, select_xmmc, select_code);
-//        } else {//其他
-//            for (Project project1 : projects) {
-//                if (project1.getPid() != null && !project1.getPid().equals("") && getPidNode(project1.getPid()).equals(select_jd)) {
-//                    res.add(project1);
-//                }
-//            }
-//            return xxmcAndxmbhGl(res, select_xmmc, select_code); //res
-//        }
-
         List<Project> list = projectMapper.search(select_code, select_xmmc, select_dptnm, select_fqr, select_jbr, select_jd, select_xmfl, select_xmlb);
         if (select_jd == null || select_jd.equals("")) {//没有节点搜索条件
             return list;
@@ -439,7 +325,7 @@ public class ProjectController {
     public int AllCounts(String dpt) {
         if (dpt == null || dpt.equals(""))
             return 0;
-        if (dpt.equals("工程技术部") || dpt.equals("办公室"))
+        if (dpt.equals("工程技术部") || dpt.equals("办公室")||dpt.equals("办公室."))
             return projectMapper.AllCounts();
         return projectMapper.selfAllCounts(dpt);
     }
@@ -456,7 +342,7 @@ public class ProjectController {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = processEngine.getIdentityService();
         String departmentId = identityService.getUserInfo(userId, "departmentId");
-        if (departmentId.equals("20190123022801622") || departmentId.equals("20190125102616787")) {//工程技术部或者办公室拿所有
+        if (departmentId.equals("20190123022801622") || departmentId.equals("20190125102616787")||departmentId.equals("103a990b-a59a-40bc-8ac9-a505076ca0ae")) {//工程技术部或者办公室拿所有
             PageHelper.startPage(pageNum, 10);
             return projectMapper.selectAll();
         }
@@ -533,6 +419,26 @@ public class ProjectController {
                         attachmentlinkMapper.insert(attachmentlink);
                     }
 
+                    //插入发送表
+                    Fs fs=new Fs();
+                    fs.setId(IdCreate.id());
+                    fs.setProjectid(project.getId());
+                    UserController userController=new UserController();
+                    List<UserOV> jbrs=userController.getAllJsbDoman(project.getReviser(),null);
+                    String jbrss=jbrs.get(0).userId;
+                    for(int i=1;i<jbrs.size();i++){
+                        jbrss=jbrss+","+jbrs.get(i).userId;
+                    }
+                    fs.setJsbjbr(jbrss);
+
+                    List<UserOV> jbzgjls=userController.getAllJsbZgjl(project.getReviser(),null);
+                    String jbzgjlss=jbzgjls.get(0).userId;
+                    for(int i=1;i<jbzgjls.size();i++){
+                        jbzgjlss=jbzgjlss+","+jbzgjls.get(i).userId;
+                    }
+                    fs.setJsbzgjl(jbzgjlss);
+                    fs.setDojsbjbr(user.getId());
+                    fsMapper.insert(fs);
                     taskService.complete(task.getId());
                 }
                 return true;
@@ -626,19 +532,43 @@ public class ProjectController {
     //处理节点
     @Transactional
     @RequestMapping("/doNode")
-    public boolean doNode(String pid, String userId, String comment, String varName, String value) {
+    public boolean doNode(String pid, String userId, String comment, String varName, String value,@RequestParam(value = "peoples[]", required = false) String[] peoples) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-        try {
+//        try {
             TaskService taskService = processEngine.getTaskService();
             Task task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
-            if (comment == null)
-                comment = "";
-            //添加评论
-            Authentication.setAuthenticatedUserId(userId);
-            taskService.addComment(task.getId(), pid, comment);
             IdentityService identityService = processEngine.getIdentityService();
-            String groupId = identityService.createGroupQuery().groupMember(userId).singleResult().getId();
-            if (groupId.equals("jsb_doman")) {//处理人为技术部办事人,设置
+            Group group=identityService.createGroupQuery().groupMember(userId).singleResult();
+            Project project2=new Project();
+            project2.setPid(pid);
+            project2=projectMapper.selectOne(project2);
+            //立项部门经理处理顺利项目(peoples是技术部经办人)
+            if(group.getId().equals("jl")&&value.equals("true")){
+                UserController userController=new UserController();
+                //拿到该项目类型的所有技术部经办人
+                List<UserOV> userOVS=userController.getAllJsbDoman(project2.getReviser(),null);
+                String  jbrs=userOVS.get(0).userId;
+                for(int i=1;i<userOVS.size();i++){
+                    jbrs=jbrs+","+userOVS.get(i).userId;
+                }
+                Fs fs=new Fs();
+                fs.setProjectid(project2.getId());
+                fs=fsMapper.selectOne(fs);
+                //没有数据插入
+                if(fs==null){
+                    fs=new Fs();
+                    fs.setProjectid(project2.getId());
+                    fs.setId(IdCreate.id());
+                    fs.setJsbjbr(jbrs);
+                    fsMapper.insert(fs);
+                }else {//有数据就更新
+                    fs.setJsbjbr(jbrs);
+                    fsMapper.updateByPrimaryKeySelective(fs);
+                }
+
+            }
+
+            if (group.getId().equals("jsb_doman")) {//处理人为技术部办事人,设置经办人
                 Project project = (Project) taskService.getVariable(task.getId(), "project");
                 //设置经办人
                 project.setBider(identityService.createUserQuery().userId(userId).singleResult().getFirstName());
@@ -646,7 +576,49 @@ public class ProjectController {
                 taskService.setVariable(task.getId(), "project", project);
                 //修改项目表
                 projectMapper.updateByPrimaryKeySelective(project);
+                Fs fs=new Fs();
+                fs.setProjectid(project.getId());
+                fs=fsMapper.selectOne(fs);
+                if(fs==null){
+                    fs=new Fs();
+                    fs.setId(IdCreate.id());
+                    fs.setProjectid(project.getId());
+                    fsMapper.insert(fs);
+                }
+                fs.setDojsbjbr(userId);
+                if(!isReject(project.getId())&&value.equals("true")){//同意顺流项目
+                    //修改发送表的技术部经办人和选择的技术部主管经理
+                    String jsbzgjls=peoples[0];
+                    for(int i=1;i<peoples.length;i++){
+                        jsbzgjls=jsbzgjls+","+peoples[i];
+                    }
+                    fs.setJsbzgjl(jsbzgjls);
+                }
+                fsMapper.updateByPrimaryKeySelective(fs);
+
             }
+
+            //如果技术部主管经理处理，更新发送表，设置项目主管经理处理人
+            if(group.getId().equals("jsb_zgjl")){
+                Fs fs=new Fs();
+                fs.setProjectid(project2.getId());
+                fs=fsMapper.selectOne(fs);
+                if(fs==null){
+                    fs=new Fs();
+                    fs.setId(IdCreate.id());
+                    fs.setProjectid(project2.getId());
+                    fsMapper.insert(fs);
+                }
+                fs.setDojsbzgjl(userId);
+                fsMapper.updateByPrimaryKeySelective(fs);
+            }
+
+            if (comment == null)
+                comment = "";
+            //添加评论
+            Authentication.setAuthenticatedUserId(userId);
+            taskService.addComment(task.getId(), pid, comment);
+
             //设置任务代理人
             taskService.setAssignee(task.getId(), userId);
             //设置参数
@@ -654,9 +626,9 @@ public class ProjectController {
             //完成任务
             taskService.complete(task.getId());
             return true;
-        } catch (Exception e) {
-            return false;
-        }
+//        } catch (Exception e) {
+//            return false;
+//        }
     }
 
     //完成备案
@@ -780,7 +752,7 @@ public class ProjectController {
         List<Project> projects = new ArrayList<>();
         if (did.equals("20190123022801622") || did.equals("20190125102616787")) {//工程技术部或者办公室不用过滤
             for (Task task : tasks) {
-                Project project = (Project) taskService.getVariable(task.getId(), "project");
+                Project project = (Project) taskService.getVariable (task.getId(), "project");
                 if (project != null)
                     projects.add(project);
             }
@@ -802,8 +774,77 @@ public class ProjectController {
                     res.add(projects.get(i));
                 }
             }
+            //如果用户是邓博，李泽恩拿到总经会，
+            if(userId.equals("db")||userId.equals("lze")){
+                //查询办公室下面的任务
+                List<Task> tasks2 = taskService.createTaskQuery().taskCandidateGroup(group.getId()).list();
+                for (Task task:tasks2){
+
+                }
+            }
             return res;
         }
+        //技术部办事员领取项目
+        if(group.getId().equals("jsb_doman")){
+            List<Project> res =new ArrayList<>();
+            for(Project project:projects){
+                Fs fs=new Fs();
+                fs.setProjectid(project.getId());
+                fs=fsMapper.selectOne(fs);
+                //以前的没有数据，都发送
+                if(fs==null){
+                    res.add(project);
+                    continue;
+                }
+                if(isReject(project.getId())){//如果是驳回项目，判断发送表中的dojsbjbr是不是自己
+                    if(fs.getDojsbjbr()==null||fs.getDojsbjbr().equals("")||fs.getDojsbjbr().equals(userId)){
+                        res.add(project);
+                    }
+                }else {//如果是顺流项目，判断发送表中的jsbjbr有没有自己
+                    String[] jbrs=fs.getJsbjbr().split(",");
+                    for (int i=0;i<jbrs.length;i++){
+                        if(jbrs[i].equals(userId)){
+                            res.add(project);
+                            break;
+                        }
+                    }
+                }
+            }
+            return res;
+        }
+        //技术部主管经理领取项目
+        if(group.getId().equals("jsb_zgjl")){
+            List<Project> res =new ArrayList<>();
+            for(Project project:projects){
+                Fs fs=new Fs();
+                fs.setProjectid(project.getId());
+                fs=fsMapper.selectOne(fs);
+                //以前的没有数据，都发送
+                if(fs==null){
+                    res.add(project);
+                    continue;
+                }
+                if(isReject(project.getId())){//如果是驳回项目，判断发送表中的dojsbzgjl是不是自己
+                    if(fs.getDojsbzgjl().equals(userId)){
+                        res.add(project);
+                    }
+                }else {//如果是顺流项目，判断发送表中的jsbzgjl有没有自己
+                    if(fs.getJsbzgjl()==null||fs.getJsbzgjl().equals("")){
+                        res.add(project);
+                        continue;
+                    }
+                    String[] jsbzgjls=fs.getJsbzgjl().split(",");
+                    for (int i=0;i<jsbzgjls.length;i++){
+                        if(jsbzgjls[i].equals(userId)){
+                            res.add(project);
+                            break;
+                        }
+                    }
+                }
+            }
+            return res;
+        }
+
         return projects;
     }
 
@@ -882,6 +923,34 @@ public class ProjectController {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    //判断项目是否是驳回项目
+    @RequestMapping(value = "/isReject")
+    public boolean isReject(String projectId) {
+        Project project = projectMapper.selectByPrimaryKey(projectId);
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        TaskService taskService = engine.getTaskService();
+        List<Comment> comments = taskService.getProcessInstanceComments(project.getPid());
+        for (int i = 0; i < comments.size(); i++) {
+            if (comments.get(i).getType().equals("event")) {
+                comments.remove(i);
+                i--;
+            }
+        }
+        if (comments.size() != 0) {
+            if(comments.get(0).getFullMessage().length()>=3){
+                if (comments.get(0).getFullMessage().substring(0, 3).equals("驳回：")) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }else {
+                return false;
+            }
+
+        }
+        return false;
     }
 
     //pid拿评论
@@ -1065,10 +1134,10 @@ public class ProjectController {
         }
         List<Xm> res = new ArrayList<>();
         for (Xm xm : xms) {
-            Project project=projectMapper.selectByPrimaryKey(xm.value);
-            if(project.getPid()!=null&&!project.getPid().equals("")){
-                String node=getPidNode(project.getPid());
-                if (!projectIds.contains(xm.value)&&(node.equals("两会")||node.equals("招标结束")||node.equals("总经理办公会")||node.equals("备案"))) {
+            Project project = projectMapper.selectByPrimaryKey(xm.value);
+            if (project.getPid() != null && !project.getPid().equals("")) {
+                String node = getPidNode(project.getPid());
+                if (!projectIds.contains(xm.value) && (node.equals("两会") || node.equals("招标结束") || node.equals("总经理办公会") || node.equals("备案"))) {
                     res.add(xm);
                 }
             }
@@ -1099,14 +1168,14 @@ public class ProjectController {
         List<Project> projects = projectMapper.selectAll();
         List<Xm> xms = new ArrayList<>();
         for (Project project : projects) {
-            Zhaobiao zhaobiao=new Zhaobiao();
+            Zhaobiao zhaobiao = new Zhaobiao();
             zhaobiao.setXmid(project.getId());
-            zhaobiao=zhaobiaoMapper.selectOne(zhaobiao);
+            zhaobiao = zhaobiaoMapper.selectOne(zhaobiao);
             ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
             TaskService taskService = processEngine.getTaskService();
-            if(zhaobiao!=null&&zhaobiao.getZbpid()!=null&&!zhaobiao.getZbpid().equals("")){
+            if (zhaobiao != null && zhaobiao.getZbpid() != null && !zhaobiao.getZbpid().equals("")) {
                 String nodeName = taskService.createTaskQuery().processInstanceId(zhaobiao.getZbpid()).singleResult().getName();
-                if(nodeName.equals("定标")||nodeName.equals("招标结束")){
+                if (nodeName.equals("定标") || nodeName.equals("招标结束")) {
                     Xm xm = new Xm();
                     xm.value = project.getId();
                     xm.label = project.getProjectNam();

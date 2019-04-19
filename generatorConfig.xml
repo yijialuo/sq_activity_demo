@@ -13,7 +13,7 @@
         </plugin>
 
         <jdbcConnection driverClass="com.mysql.jdbc.Driver"
-                        connectionURL="jdbc:mysql://localhost:3306/activity_test?useSSL=true"
+                        connectionURL="jdbc:mysql://localhost:3306/activity_test4?useSSL=true"
                         userId="root"
                         password="yijialuo666">
         </jdbcConnection>
@@ -28,6 +28,6 @@
         <javaClientGenerator targetPackage="com.sq.demo.mapper" targetProject="src/main/java"
                              type="XMLMAPPER"/>
 
-		<table tableName="zhongbiao"></table>
+		<table tableName="fs"></table>
     </context>
 </generatorConfiguration>

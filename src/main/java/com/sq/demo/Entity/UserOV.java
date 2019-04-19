@@ -11,5 +11,5 @@ public class UserOV {
    public String groupName;
    public String departmentId;//部门
    public String departmentName;
-
+   public String[] manageType;
 }
