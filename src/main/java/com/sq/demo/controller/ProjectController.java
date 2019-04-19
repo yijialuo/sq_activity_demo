@@ -825,7 +825,7 @@ public class ProjectController {
                     continue;
                 }
                 if(isReject(project.getId())){//如果是驳回项目，判断发送表中的dojsbzgjl是不是自己
-                    if(fs.getDojsbzgjl().equals(userId)){
+                    if(fs.getDojsbzgjl()==null||fs.getDojsbzgjl().equals("")||fs.getDojsbzgjl().equals(userId)){
                         res.add(project);
                     }
                 }else {//如果是顺流项目，判断发送表中的jsbzgjl有没有自己
