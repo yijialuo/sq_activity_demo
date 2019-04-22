@@ -318,7 +318,6 @@ public class UserController {
                         userOV.passWord = user.getPassword();
                         userOV.departmentId = identityService.getUserInfo(user.getId(), "departmentId");
                         if(identityService.getUserInfo(user.getId(),"manageType")!=null){
-                            System.out.println(identityService.getUserInfo(user.getId(),"manageType"));
                             userOV.manageType=identityService.getUserInfo(user.getId(),"manageType").split(",");
                         }
                         //查询用户所在的组

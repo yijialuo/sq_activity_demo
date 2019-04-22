@@ -586,7 +586,8 @@ public class ProjectController {
                     fsMapper.insert(fs);
                 }
                 fs.setDojsbjbr(userId);
-                if(!isReject(project.getId())&&value.equals("true")){//同意顺流项目
+                //!isReject(project.getId())&&
+                if(value.equals("true")){//同意顺流项目
                     //修改发送表的技术部经办人和选择的技术部主管经理
                     String jsbzgjls=peoples[0];
                     for(int i=1;i<peoples.length;i++){
@@ -750,10 +751,16 @@ public class ProjectController {
         List<Task> tasks = taskService.createTaskQuery().taskCandidateGroup(group.getId()).list();
         //过滤，查询自己部门下的任务,找到后返回
         List<Project> projects = new ArrayList<>();
-        if (did.equals("20190123022801622") || did.equals("20190125102616787")) {//工程技术部或者办公室不用过滤
+        if (did.equals("20190123022801622") ) {//工程技术部
             for (Task task : tasks) {
                 Project project = (Project) taskService.getVariable (task.getId(), "project");
                 if (project != null)
+                    projects.add(project);
+            }
+        } else if( did.equals("20190125102616787")){//办公室拿两会
+            for (Task task : tasks) {
+                Project project = (Project) taskService.getVariable (task.getId(), "project");
+                if (project != null&&getPidNode(project.getPid()).equals("两会"))
                     projects.add(project);
             }
         } else {//其他部门就需要过滤
@@ -777,9 +784,12 @@ public class ProjectController {
             //如果用户是邓博，李泽恩拿到总经会，
             if(userId.equals("db")||userId.equals("lze")){
                 //查询办公室下面的任务
-                List<Task> tasks2 = taskService.createTaskQuery().taskCandidateGroup(group.getId()).list();
+                List<Task> tasks2 = taskService.createTaskQuery().taskCandidateGroup("bgs").list();
                 for (Task task:tasks2){
-
+                    Project project = (Project) taskService.getVariable(task.getId(), "project");
+                    if (project != null &&project.getPid()!=null&&!project.getPid().equals("")&&getPidNode(project.getPid()).equals("总经理办公会")) {
+                        res.add(project);
+                    }
                 }
             }
             return res;
