@@ -114,7 +114,7 @@ public class OperateManualController {
         builder.contentLength(file.length());
         builder.contentType(MediaType.APPLICATION_OCTET_STREAM);
         //builder.header("Content-Disposition","attachment;filename*=UTF-8''"+file.getName());
-        builder.header("Content-Disposition","attachment;filename*=UTF-8''"+operateManual.getName());
+        builder.header("Content-Disposition","attachment;filename*=UTF-8''"+operateManual.getName()+operateManual.getAddress().substring(operateManual.getAddress().lastIndexOf('.')));
         return builder.body(FileUtils.readFileToByteArray(file));
     }
 
