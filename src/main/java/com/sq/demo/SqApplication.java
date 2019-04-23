@@ -24,6 +24,8 @@ public class SqApplication {
         corsConfiguration.addAllowedOrigin("*");
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.addExposedHeader("allCount");
+        corsConfiguration.addExposedHeader("pageCount");
         return corsConfiguration;
     }
 

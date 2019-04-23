@@ -48,7 +48,7 @@ public class ZhaobiaoController {
         TaskService taskService = engine.getTaskService();
         Task task = taskService.createTaskQuery().processInstanceId(zhaobiao.getZbpid()).singleResult();
         //重新设置项目参数
-        taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
+        //taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
         //修改项目表
         zhaobiaoMapper.updateByPrimaryKeySelective(zhaobiao);
         taskService.complete(task.getId());
@@ -94,7 +94,7 @@ public class ZhaobiaoController {
                 taskService.addComment(task.getId(), zhaobiao.getZbpid(), comment);
 
             //设置招标表参数
-            taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
+            //taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
             //设置任务受理人
             taskService.setAssignee(task.getId(), userId);
             //设置参数
@@ -149,7 +149,7 @@ public class ZhaobiaoController {
         zhaobiaoMapper.insert(zhaobiao);
         Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
         //设置招标表参数
-        taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
+        //taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
         //设置任务受理人
         taskService.setAssignee(task.getId(), zhaobiao.getSqr());
         //完成填写申请项目
@@ -225,6 +225,13 @@ public class ZhaobiaoController {
         return zhaobiaoMapper.selectAll();
     }
 
+    //pid拿招标
+    Zhaobiao pidToZhaobiao(String pid){
+        Zhaobiao zhaobiao=new Zhaobiao();
+        zhaobiao.setZbpid(pid);
+        return zhaobiaoMapper.selectOne(zhaobiao);
+    }
+
     //领取招标表单
     @RequestMapping("/lqzhaobiao")
     public List<Zhaobiao> lqzhaobiao(String userId) {
@@ -241,13 +248,13 @@ public class ZhaobiaoController {
         List<Zhaobiao> zhaobiaos = new ArrayList<>();
         if (did.equals("20190123022801622") || did.equals("20190125102616787")) {//工程技术部或者办公室不用过滤
             for (Task task : tasks) {
-                Zhaobiao zhaobiao = (Zhaobiao) taskService.getVariable(task.getId(), "zhaobiao");
+                Zhaobiao zhaobiao = pidToZhaobiao(task.getProcessInstanceId());//(Zhaobiao) taskService.getVariable(task.getId(), "zhaobiao");
                 if (zhaobiao != null)
                     zhaobiaos.add(zhaobiao);
             }
         } else {//其他部门就需要过滤
             for (Task task : tasks) {
-                Zhaobiao zhaobiao = (Zhaobiao) taskService.getVariable(task.getId(), "zhaobiao");
+                Zhaobiao zhaobiao = pidToZhaobiao(task.getProcessInstanceId());//(Zhaobiao) taskService.getVariable(task.getId(), "zhaobiao");
                 if (zhaobiao != null && identityService.getUserInfo(zhaobiao.getSqr(), "departmentId").equals(did)) {//申请人部门一样
                     zhaobiaos.add(zhaobiao);
                 }
@@ -363,7 +370,7 @@ public class ZhaobiaoController {
             TaskService taskService = engine.getTaskService();
             Task task = taskService.createTaskQuery().processInstanceId(zhaobiao.getZbpid()).singleResult();
             //重新设置项目参数
-            taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
+            //taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
             if(comment==null)
                 comment="";
                 //添加评论

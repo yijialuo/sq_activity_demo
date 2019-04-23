@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import sun.misc.BASE64Encoder;
 
-import javax.persistence.Id;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -370,7 +369,7 @@ public class ProjectController {
                 project.setPid(pi.getId());
                 projectMapper.updateByPrimaryKeySelective(project);
                 //设置项目参数
-                taskService.setVariable(task.getId(), "project", project);
+                //taskService.setVariable(task.getId(), "project", project);
                 //设置任务受理人
                 taskService.setAssignee(task.getId(), user.getId());
                 if (!groupName.equals("技术部办事员")) {
@@ -493,7 +492,7 @@ public class ProjectController {
         project.setPid(pi.getId());
         projectMapper.insert(project);
         //设置项目参数
-        taskService.setVariable(task.getId(), "project", project);
+        //taskService.setVariable(task.getId(), "project", project);
         //设置任务受理人
         taskService.setAssignee(task.getId(), pa.getUserId());
         //完成填写申请项目
@@ -510,7 +509,7 @@ public class ProjectController {
         TaskService taskService = engine.getTaskService();
         Task task = taskService.createTaskQuery().processInstanceId(project.getPid()).singleResult();
         //重新设置项目参数
-        taskService.setVariable(task.getId(), "project", project);
+        //taskService.setVariable(task.getId(), "project", project);
         //修改项目表
         projectMapper.updateByPrimaryKeySelective(project);
     }
@@ -523,7 +522,7 @@ public class ProjectController {
         TaskService taskService = engine.getTaskService();
         Task task = taskService.createTaskQuery().processInstanceId(project.getPid()).singleResult();
         //重新设置项目参数
-        taskService.setVariable(task.getId(), "project", project);
+        //taskService.setVariable(task.getId(), "project", project);
         //修改项目表
         projectMapper.updateByPrimaryKeySelective(project);
         taskService.complete(task.getId());
@@ -569,11 +568,11 @@ public class ProjectController {
             }
 
             if (group.getId().equals("jsb_doman")) {//处理人为技术部办事人,设置经办人
-                Project project = (Project) taskService.getVariable(task.getId(), "project");
+                Project project =pidToProject(task.getProcessInstanceId());// (Project) taskService.getVariable(task.getId(), "project");
                 //设置经办人
                 project.setBider(identityService.createUserQuery().userId(userId).singleResult().getFirstName());
                 //重新设置项目参数
-                taskService.setVariable(task.getId(), "project", project);
+                //taskService.setVariable(task.getId(), "project", project);
                 //修改项目表
                 projectMapper.updateByPrimaryKeySelective(project);
                 Fs fs=new Fs();
@@ -737,12 +736,20 @@ public class ProjectController {
         return bas;
     }
 
+    //pidToProject
+    Project pidToProject(String pid){
+        Project project=new Project();
+        project.setPid(pid);
+        return projectMapper.selectOne(project);
+    }
+
     //领取项目
     @RequestMapping("/lqxm")
     public List<Project> lqxm(String userId) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = processEngine.getIdentityService();
         TaskService taskService = processEngine.getTaskService();
+        RuntimeService runtimeService=processEngine.getRuntimeService();
         //查询职位
         Group group = identityService.createGroupQuery().groupMember(userId).singleResult();
         //查询部门
@@ -753,19 +760,19 @@ public class ProjectController {
         List<Project> projects = new ArrayList<>();
         if (did.equals("20190123022801622") ) {//工程技术部
             for (Task task : tasks) {
-                Project project = (Project) taskService.getVariable (task.getId(), "project");
+                Project project = pidToProject(task.getProcessInstanceId());
                 if (project != null)
                     projects.add(project);
             }
         } else if( did.equals("20190125102616787")){//办公室拿两会
             for (Task task : tasks) {
-                Project project = (Project) taskService.getVariable (task.getId(), "project");
+                Project project = pidToProject(task.getProcessInstanceId()); //(Project) taskService.getVariable (task.getId(), "project");
                 if (project != null&&getPidNode(project.getPid()).equals("两会"))
                     projects.add(project);
             }
         } else {//其他部门就需要过滤
             for (Task task : tasks) {
-                Project project = (Project) taskService.getVariable(task.getId(), "project");
+                Project project = pidToProject(task.getProcessInstanceId());//(Project) taskService.getVariable(task.getId(), "project");
                 if (project != null && project.getDeclarationDep().equals(dnam(did))) {
                     projects.add(project);
                 }
@@ -786,7 +793,7 @@ public class ProjectController {
                 //查询办公室下面的任务
                 List<Task> tasks2 = taskService.createTaskQuery().taskCandidateGroup("bgs").list();
                 for (Task task:tasks2){
-                    Project project = (Project) taskService.getVariable(task.getId(), "project");
+                    Project project = pidToProject(task.getProcessInstanceId());//(Project) taskService.getVariable(task.getId(), "project");
                     if (project != null &&project.getPid()!=null&&!project.getPid().equals("")&&getPidNode(project.getPid()).equals("总经理办公会")) {
                         res.add(project);
                     }
@@ -1087,21 +1094,30 @@ public class ProjectController {
         }
     }
 
-    //修改项目表单的项目号
+    //总经会时间的添加
     @Transactional
-    @RequestMapping("/xgxmbh")
-    public boolean xgxmbh(String xmid, String xmbh) {
+    @RequestMapping("/xgzjhsj")
+    public boolean xgzjhsj(String xmid,String zjhsj){
+        try {
+            Project project=projectMapper.selectByPrimaryKey(xmid);
+            project.setZjhsj(zjhsj);
+            projectMapper.updateByPrimaryKeySelective(project);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+    //办公室修改项目表单的项目号和两会时间
+    @Transactional
+    @RequestMapping("/xgxmbhAndlhsj")
+    public boolean xgxmbh(String xmid, String xmbh, String lhsj) {
         try {
             Project project = projectMapper.selectByPrimaryKey(xmid);
             project.setProjectNo(xmbh);
+            project.setLhsj(lhsj);
             //修改项目表
             projectMapper.updateByPrimaryKeySelective(project);
-            //修改流程项目
-            ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
-            TaskService taskService = engine.getTaskService();
-            Task task = taskService.createTaskQuery().processInstanceId(project.getPid()).singleResult();
-            //重新设置项目参数
-            taskService.setVariable(task.getId(), "project", project);
             return true;
         } catch (Exception e) {
             return false;
@@ -1113,17 +1129,7 @@ public class ProjectController {
     @RequestMapping("/updataXm")
     public boolean xgxmbd(@RequestBody Project po) {
         try {
-            if (po.getPid() == null || po.getPid().equals("")) {//没有pid，还没开始审批，可以修改
-                projectMapper.updateByPrimaryKeySelective(po);
-                return true;
-            }
-            if (getPidNode(po.getPid()).equals("填写申请表")) { //或者 该项目流程在填写审批表
-                ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
-                TaskService taskService = engine.getTaskService();
-                Task task = taskService.createTaskQuery().processInstanceId(po.getPid()).singleResult();
-                //重新设置项目参数
-                taskService.setVariable(task.getId(), "project", po);
-                //修改项目表
+            if (po.getPid() == null || po.getPid().equals("")||getPidNode(po.getPid()).equals("填写申请表")) {//没有pid，还没开始审批，可以修改
                 projectMapper.updateByPrimaryKeySelective(po);
                 return true;
             }

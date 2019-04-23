@@ -45,6 +45,14 @@ public class PayableController {
         return res;
     }
 
+    //拿到合同付款的次数
+    @RequestMapping("/count")
+    public int count(String contractId){
+        Payable payable=new Payable();
+        payable.setContractId(contractId);
+        return payableMapper.selectCount(payable);
+    }
+
     //添加应付信息
     @Transactional
     @RequestMapping("/addPayable")

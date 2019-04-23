@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.sq.demo.mapper.ProjectMapper" >
-  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Project" >
-    <!--
-      WARNING - @mbg.generated
-    -->
-    <result column="ID" property="id" jdbcType="VARCHAR" />
-    <result column="PROJECT_NO" property="projectNo" jdbcType="VARCHAR" />
-    <result column="PROJECT_TYPE" property="projectType" jdbcType="VARCHAR" />
-    <result column="PROJECT_NAM" property="projectNam" jdbcType="VARCHAR" />
-    <result column="DECLARATION_DEP" property="declarationDep" jdbcType="VARCHAR" />
-    <result column="PERSON_IN_CHARGE" property="personInCharge" jdbcType="VARCHAR" />
-    <result column="INVESTMENT_ESTIMATE" property="investmentEstimate" jdbcType="VARCHAR" />
-    <result column="ESTABLISH_REASON" property="establishReason" jdbcType="VARCHAR" />
-    <result column="SCALE" property="scale" jdbcType="VARCHAR" />
-    <result column="DEP_AUDIT_OPINION" property="depAuditOpinion" jdbcType="VARCHAR" />
-    <result column="TECH_AUDIT_OPINION" property="techAuditOpinion" jdbcType="VARCHAR" />
-    <result column="ENG_TECH_AUDIT_OPINION" property="engTechAuditOpinion" jdbcType="VARCHAR" />
-    <result column="BIDER" property="bider" jdbcType="VARCHAR" />
-    <result column="FINISH_DTE" property="finishDte" jdbcType="DATE" />
-    <result column="PROPOSER" property="proposer" jdbcType="VARCHAR" />
-    <result column="APPLICATION_DTE" property="applicationDte" jdbcType="DATE" />
-    <result column="REVISER" property="reviser" jdbcType="VARCHAR" />
-    <result column="REVISE_DTE" property="reviseDte" jdbcType="DATE" />
-    <result column="ILLUSTRATION" property="illustration" jdbcType="VARCHAR" />
-    <result column="PID" property="pid" jdbcType="VARCHAR" />
-  </resultMap>
+<mapper namespace="com.sq.demo.mapper.ProjectMapper">
+    <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Project">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <result column="ID" property="id" jdbcType="VARCHAR"/>
+        <result column="PROJECT_NO" property="projectNo" jdbcType="VARCHAR"/>
+        <result column="PROJECT_TYPE" property="projectType" jdbcType="VARCHAR"/>
+        <result column="PROJECT_NAM" property="projectNam" jdbcType="VARCHAR"/>
+        <result column="DECLARATION_DEP" property="declarationDep" jdbcType="VARCHAR"/>
+        <result column="PERSON_IN_CHARGE" property="personInCharge" jdbcType="VARCHAR"/>
+        <result column="INVESTMENT_ESTIMATE" property="investmentEstimate" jdbcType="VARCHAR"/>
+        <result column="ESTABLISH_REASON" property="establishReason" jdbcType="VARCHAR"/>
+        <result column="SCALE" property="scale" jdbcType="VARCHAR"/>
+        <result column="DEP_AUDIT_OPINION" property="depAuditOpinion" jdbcType="VARCHAR"/>
+        <result column="TECH_AUDIT_OPINION" property="techAuditOpinion" jdbcType="VARCHAR"/>
+        <result column="ENG_TECH_AUDIT_OPINION" property="engTechAuditOpinion" jdbcType="VARCHAR"/>
+        <result column="BIDER" property="bider" jdbcType="VARCHAR"/>
+        <result column="FINISH_DTE" property="finishDte" jdbcType="DATE"/>
+        <result column="PROPOSER" property="proposer" jdbcType="VARCHAR"/>
+        <result column="APPLICATION_DTE" property="applicationDte" jdbcType="DATE"/>
+        <result column="REVISER" property="reviser" jdbcType="VARCHAR"/>
+        <result column="REVISE_DTE" property="reviseDte" jdbcType="DATE"/>
+        <result column="ILLUSTRATION" property="illustration" jdbcType="VARCHAR"/>
+        <result column="ZJHSJ" property="zjhsj" jdbcType="VARCHAR"/>
+        <result column="LHSJ" property="lhsj" jdbcType="VARCHAR"/>
+        <result column="PID" property="pid" jdbcType="VARCHAR"/>
+    </resultMap>
 
     <select id="sgSearch" resultType="com.sq.demo.pojo.Project">
         select * from project

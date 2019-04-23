@@ -121,6 +121,15 @@ public class Project implements Serializable {
     @Column(name = "ILLUSTRATION")
     private String illustration;
 
+    //两会时间、
+    @Column(name = "LHSJ")
+    private String lhsj;
+
+
+    //总经会时间、
+    @Column(name = "ZJHSJ")
+    private String  zjhsj;
+
     @Column(name = "PID")
     private String pid;
 
@@ -478,5 +487,21 @@ public class Project implements Serializable {
      */
     public void setPid(String pid) {
         this.pid = pid;
+    }
+
+    public String getZjhsj() {
+        return zjhsj;
+    }
+
+    public void setZjhsj(String zjhsj) {
+        this.zjhsj = zjhsj;
+    }
+
+    public String getLhsj() {
+        return lhsj;
+    }
+
+    public void setLhsj(String lhsj) {
+        this.lhsj = lhsj;
     }
 }
