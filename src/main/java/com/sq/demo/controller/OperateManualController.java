@@ -114,7 +114,10 @@ public class OperateManualController {
         builder.contentLength(file.length());
         builder.contentType(MediaType.APPLICATION_OCTET_STREAM);
         //builder.header("Content-Disposition","attachment;filename*=UTF-8''"+file.getName());
-        builder.header("Content-Disposition","attachment;filename*=UTF-8''"+operateManual.getName()+operateManual.getAddress().substring(operateManual.getAddress().lastIndexOf('.')));
+        //中文文件名不行，需要转码
+        String file_name = new String((operateManual.getName()+operateManual.getAddress().substring(operateManual.getAddress().lastIndexOf('.'))).getBytes(), "ISO-8859-1");
+        //res.setHeader("Content-Disposition", "attachment;filename=" + file_name);
+        builder.header("Content-Disposition","attachment;filename="+file_name);
         return builder.body(FileUtils.readFileToByteArray(file));
     }
 

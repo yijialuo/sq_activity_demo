@@ -533,7 +533,7 @@ public class ProjectController {
     @RequestMapping("/doNode")
     public boolean doNode(String pid, String userId, String comment, String varName, String value,@RequestParam(value = "peoples[]", required = false) String[] peoples) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-//        try {
+        try {
             TaskService taskService = processEngine.getTaskService();
             Task task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
             IdentityService identityService = processEngine.getIdentityService();
@@ -541,6 +541,54 @@ public class ProjectController {
             Project project2=new Project();
             project2.setPid(pid);
             project2=projectMapper.selectOne(project2);
+            //总经会的驳回，邓博、李泽恩
+            if(getPidNode(pid).equals("总经理办公会")&&value.equals("1")){
+                if (comment == null)
+                    comment = "";
+                //添加评论
+                Authentication.setAuthenticatedUserId(userId);
+                taskService.addComment(task.getId(), pid, comment);
+                //设置任务代理人
+                taskService.setAssignee(task.getId(), userId);
+                //设置任务代理人
+                taskService.setAssignee(task.getId(), userId);
+                //设置总经会驳回参数
+                taskService.setVariable(task.getId(), varName, value);
+                //完成任务
+                taskService.complete(task.getId());
+                if(project2.getDepAuditOpinion().equals("股份项目")){//股份项目的驳回，直接退到技术部经理
+                    task=taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                    //直接设置两会驳回参数
+                    taskService.setVariable(task.getId(),"lh",2);
+                    //完成任务
+                    taskService.complete(task.getId());
+                    return true;
+                }else {//内部的驳回
+                    return true;
+                }
+            }
+            //技术部经理同意股份项目
+            if(group.getId().equals("jsb_jl")&&value.equals("true")&&project2.getDepAuditOpinion().equals("股份项目")){
+                if (comment == null)
+                    comment = "";
+                //添加评论
+                Authentication.setAuthenticatedUserId(userId);
+                taskService.addComment(task.getId(), pid, comment);
+                //设置任务代理人
+                taskService.setAssignee(task.getId(), userId);
+                //设置经理同意参数
+                taskService.setVariable(task.getId(), varName, value);
+                //完成任务
+                taskService.complete(task.getId());
+
+                task=taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                //直接设置两会同意参数，去总经会
+                taskService.setVariable(task.getId(),"lh",0);
+                //完成任务
+                taskService.complete(task.getId());
+                return true;
+            }
+
             //立项部门经理处理顺利项目(peoples是技术部经办人)
             if(group.getId().equals("jl")&&value.equals("true")){
                 UserController userController=new UserController();
@@ -626,9 +674,9 @@ public class ProjectController {
             //完成任务
             taskService.complete(task.getId());
             return true;
-//        } catch (Exception e) {
-//            return false;
-//        }
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     //完成备案
@@ -726,14 +774,25 @@ public class ProjectController {
     //获取备案项目
     @RequestMapping("/getBaXm")
     public List<Project> getBa(String userId) {
-        List<Project> bas = new ArrayList<>();
-        List<Project> projects = lqxm(userId);
-        for (Project project : projects) {
-            if (isBa(project.getPid()) && isJbs(project.getPid(), userId)) {//如果该项目到达备案，且经办人为自己
-                bas.add(project);
+        if(userId.equals("syc")){//苏燕春拿股份备案
+            List<Project> projects=projectMapper.getPidProject();
+            List<Project> res=new ArrayList<>();
+            for(Project project:projects){
+                if(project.getDepAuditOpinion().equals("股份项目")&&isBa(project.getPid())){
+                    res.add(project);
+                }
             }
+            return res;
+        }else {
+            List<Project> bas = new ArrayList<>();
+            List<Project> projects = lqxm(userId);
+            for (Project project : projects) {
+                if (isBa(project.getPid()) && isJbs(project.getPid(), userId)) {//如果该项目到达备案，且经办人为自己
+                    bas.add(project);
+                }
+            }
+            return bas;
         }
-        return bas;
     }
 
     //pidToProject

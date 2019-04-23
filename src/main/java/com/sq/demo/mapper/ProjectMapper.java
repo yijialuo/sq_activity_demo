@@ -105,4 +105,8 @@ public interface ProjectMapper extends MyMapper<Project> {
     int ttt(@Param("s") String s);
 
     List<Project> sgSearch( String projectName,String departmentName,String fzr,String xmlb,String yjgq);
+
+    //拿到有流程的项目
+    @Select("select * from project where pid is not null and pid!=''")
+    List<Project> getPidProject();
 }
