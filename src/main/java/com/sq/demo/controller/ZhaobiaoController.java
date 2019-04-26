@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.Id;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,19 @@ public class ZhaobiaoController {
     ZhongbiaoMapper zhongbiaoMapper;
     @Autowired
     ProjectMapper projectMapper;
+
+
+    //判断该项目是否可以进行招标申请
+   @RequestMapping("/canZhaobiaoSq")
+   public boolean canZhaobiaoSq(String projectId){
+       Project project=projectMapper.selectByPrimaryKey(projectId);
+       if(project.getPid()==null||project.getPid().equals(""))
+           return false;
+       String node=getZhaobiaoNode(project.getPid());
+       if(node.equals("两会") || node.equals("申请结束") || node.equals("总经理办公会") || node.equals("备案"))
+           return true;
+       return false;
+   }
 
     //重新申请
     @Transactional
@@ -135,38 +149,51 @@ public class ZhaobiaoController {
         return false;
     }
 
-    //启动招标申请流程,办事员填写招标表
+    //办事员填写招标表,插入招标标
     @Transactional
-    @RequestMapping("/startZhaobiao")
-    public String startZhaobiao(@RequestBody Zhaobiao zhaobiao) {
-        zhaobiao.setId(IdCreate.id());
-        zhaobiao.setCjsj(Time.getNow());
-        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
-        TaskService taskService = engine.getTaskService();
-        RuntimeService runtimeService = engine.getRuntimeService();
-        ProcessInstance pi = runtimeService.startProcessInstanceByKey("zbsp");
-        zhaobiao.setZbpid(pi.getId());
-        zhaobiaoMapper.insert(zhaobiao);
-        Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-        //设置招标表参数
-        //taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
-        //设置任务受理人
-        taskService.setAssignee(task.getId(), zhaobiao.getSqr());
-        //完成填写申请项目
-        taskService.complete(task.getId());
-
-        IdentityService identityService=engine.getIdentityService();
-
-        //根据userId查找职位
-        String groupName = identityService.createGroupQuery().groupMember(zhaobiao.getSqr()).singleResult().getName();
-        if(groupName.equals("技术部办事员")) {//技术部申请直接跳过办事员,
-            task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-            taskService.setVariable(task.getId(), "jbr", true);
-            taskService.setAssignee(task.getId(), zhaobiao.getSqr());
-            taskService.complete(task.getId());
+    @RequestMapping("/insertZhaobiao")
+    public boolean insertZhaobiao(@RequestBody Zhaobiao zhaobiao){
+        try {
+            zhaobiao.setId(IdCreate.id());
+            zhaobiao.setCjsj(Time.getNow());
+            zhaobiaoMapper.insert(zhaobiao);
+            return true;
+        }catch (Exception e){
+            return false;
         }
 
-        return zhaobiao.getId() + "_" + pi.getId();
+    }
+
+    //启动招标申请流程,
+    @Transactional
+    @RequestMapping("/startZhaobiao")
+    public boolean startZhaobiao(String id) {
+       try {
+           Zhaobiao zhaobiao=zhaobiaoMapper.selectByPrimaryKey(id);
+           ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+           TaskService taskService = engine.getTaskService();
+           RuntimeService runtimeService = engine.getRuntimeService();
+           ProcessInstance pi = runtimeService.startProcessInstanceByKey("zbsp");
+           zhaobiao.setZbpid(pi.getId());
+           zhaobiaoMapper.updateByPrimaryKeySelective(zhaobiao);
+           Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+           //设置任务受理人
+           taskService.setAssignee(task.getId(), zhaobiao.getSqr());
+           //完成填写申请项目
+           taskService.complete(task.getId());
+           IdentityService identityService=engine.getIdentityService();
+           //根据userId查找职位
+           String groupName = identityService.createGroupQuery().groupMember(zhaobiao.getSqr()).singleResult().getName();
+           if(groupName.equals("技术部办事员")) {//技术部申请直接跳过办事员,
+               task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+               taskService.setVariable(task.getId(), "jbr", true);
+               taskService.setAssignee(task.getId(), zhaobiao.getSqr());
+               taskService.complete(task.getId());
+           }
+           return true;
+       }catch (Exception e){
+           return false;
+       }
     }
 
     //userid查询所有项目 根据用户id拿到自己参与的项目

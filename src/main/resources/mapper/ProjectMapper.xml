@@ -89,4 +89,14 @@
         </trim>
     </select>
 
+    <select id="yfbb2" statementType="CALLABLE">
+        call yfbb(
+            #{ _year,mode=IN,jdbcType=VARCHAR},#{_month,mode=IN,jdbcType=VARCHAR},
+            #{sb_fbsl,mode=OUT,jdbcType=VARCHAR},#{sb_jssl,mode=OUT,jdbcType=VARCHAR},#{sb_jsje,mode=OUT,jdbcType=VARCHAR},
+            #{jj_fbsl,mode=OUT,jdbcType=VARCHAR},#{jj_jssl,mode=OUT,jdbcType=VARCHAR},#{jj_jsje,mode=OUT,jdbcType=VARCHAR},
+            #{xx_fbsl,mode=OUT,jdbcType=VARCHAR},#{xx_jssl,mode=OUT,jdbcType=VARCHAR},#{xx_jsje,mode=OUT,jdbcType=VARCHAR},
+            #{wz_fbsl,mode=OUT,jdbcType=VARCHAR},#{wz_jssl,mode=OUT,jdbcType=VARCHAR},#{wz_jsje,mode=OUT,jdbcType=VARCHAR},
+            #{gdzc_fbsl,mode=OUT,jdbcType=VARCHAR},#{gdzc_jssl,mode=OUT,jdbcType=VARCHAR},#{gdzc_jsje,mode=OUT,jdbcType=VARCHAR}
+            )
+    </select>
 </mapper>

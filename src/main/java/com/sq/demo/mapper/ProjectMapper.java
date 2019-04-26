@@ -1,11 +1,12 @@
 package com.sq.demo.mapper;
 
-import com.sq.demo.Entity.Xm;
+
 import com.sq.demo.pojo.Project;
-import com.sq.demo.pojo.Score;
 import com.sq.demo.utils.MyMapper;
+import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.mapping.StatementType;
 
 import java.util.List;
 import java.util.Map;
@@ -109,4 +110,21 @@ public interface ProjectMapper extends MyMapper<Project> {
     //拿到有流程的项目
     @Select("select * from project where pid is not null and pid!=''")
     List<Project> getPidProject();
+
+
+    //sb_fbsl int, out sb_jssl int, out sb_jsje int,
+    //out jj_fbsl int, out jj_jssl int, out jj_jsje int,
+    //out xx_fbsl int, out xx_jssl int, out xx_jsje int,
+    //out wz_fbsl int, out wz_jssl int, out wz_jsje int,
+    //out out gdzc_fbsl int, out gdzc_jssl int, out gdzc_jsje int
+    @Options(statementType = StatementType.CALLABLE)
+    @Select("call yfbb(#{ _year,mode=IN,jdbcType=VARCHAR},#{_month,mode=IN,jdbcType=VARCHAR}," +
+            "#{sb_fbsl,mode=OUT,jdbcType=VARCHAR},#{sb_jssl,mode=OUT,jdbcType=VARCHAR},#{sb_jsje,mode=OUT,jdbcType=VARCHAR}," +
+            "#{jj_fbsl,mode=OUT,jdbcType=VARCHAR},#{jj_jssl,mode=OUT,jdbcType=VARCHAR},#{jj_jsje,mode=OUT,jdbcType=VARCHAR}," +
+            "#{xx_fbsl,mode=OUT,jdbcType=VARCHAR},#{xx_jssl,mode=OUT,jdbcType=VARCHAR},#{xx_jsje,mode=OUT,jdbcType=VARCHAR}," +
+            "#{wz_fbsl,mode=OUT,jdbcType=VARCHAR},#{wz_jssl,mode=OUT,jdbcType=VARCHAR},#{wz_jsje,mode=OUT,jdbcType=VARCHAR}," +
+            "#{gdzc_fbsl,mode=OUT,jdbcType=VARCHAR},#{gdzc_jssl,mode=OUT,jdbcType=VARCHAR},#{gdzc_jsje,mode=OUT,jdbcType=VARCHAR})")
+    void yfbb(Map<String,String> params);
+
+    void yfbb2(Map<String,String> params);
 }
