@@ -24,12 +24,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class SqApplicationTests {
 
+
+    @Autowired
+    FsMapper fsMapper;
     @Autowired
     TbdwMapper tbdwMapper;
     @Autowired
@@ -52,6 +57,8 @@ public class SqApplicationTests {
     ContractfileMapper contractfileMapper;
     @Autowired
     PayableMapper payableMapper;
+    @Autowired
+    SgjdbMapper sgjdbMapper;
 
     //    @Autowired
 //    SupplierMapper supplierMapper;
@@ -65,16 +72,14 @@ public class SqApplicationTests {
         ProcessInstance pi = runtimeService.startProcessInstanceByKey("htsp");
         TaskService taskService=engine.getTaskService();
         Task task=taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-        System.out.println(task.getName());
+
         taskService.complete(task.getId());
 
         task=taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-        System.out.println(task.getName());
         taskService.setVariable(task.getId(),"jsb_jl",false);
         taskService.complete(task.getId());
 
         task=taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-        System.out.println(task.getName());
         taskService.complete(task.getId());
 
         task=taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
@@ -570,14 +575,19 @@ public class SqApplicationTests {
         System.out.println(projectMapper.selectByDepartmentName("粮油操作部").size());
     }
 
-
+//35120
+//        35137
+//        35152
+//        35075
+//        35090
+//        35105
     @Test
-    public void asdfas() {
-        String pid = "7726";//7726
+    public void asdfas() {//30336
+        String pid = "30336";//7726
         Project project = new Project();
         project.setPid(pid);
         //删除表
-        projectMapper.delete(project);
+       // projectMapper.delete(project);
 
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         RuntimeService runtimeService = engine.getRuntimeService();
@@ -658,6 +668,98 @@ public class SqApplicationTests {
     public void asd4f(){
         Payable payable=payableMapper.selectByPrimaryKey("eabc2bb5-14c5-4099-96fc-fc46bc8e6d78");
         System.out.println(payable.getRq());
+    }
+
+
+
+    @Test
+    public void testadsfasdf(){
+        Project project=new Project();
+        project.setId("8888888");
+        project.setIllustration("啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的" +
+                "啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的" +
+                "啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的" +
+                "啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的" +
+                "啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的" +
+                "啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的" +
+                "啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的" +
+                "啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的" +
+                "啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的" +
+                "啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的");
+        projectMapper.insert(project);
+    }
+
+    @Test
+    public void asdfasdgdfgw(){
+        System.out.println(projectMapper.ttt("select count(*) from project"));
+    }
+
+
+    @Test
+    public void ertergdfa(){
+        String[] xms=new String[13];
+        xms[0]="asd";
+        xms[1]="gad";
+        xms[2]="rt";
+        xms[3]="asdf";
+        xms[4]="atwesd";
+        xms[5]="jjfg";
+        xms[6]="er";
+        xms[7]="asjrtgd";
+        xms[8]="qwe";
+        xms[9]="sdffd";
+        xms[10]="askluyd";
+        xms[11]="rty";
+        xms[12]="sd";
+        String jbrs=xms[0];
+        for(int i=1;i<xms.length;i++){
+            jbrs=jbrs+","+xms[i];
+        }
+        Fs fs=new Fs();
+        fs.setId(IdCreate.id());
+        fs.setProjectid("465465");
+        fs.setJsbjbr(jbrs);
+        fsMapper.insert(fs);
+    }
+
+    @Test
+    public void asdgasd(){
+        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService=engine.getIdentityService();
+        String[] userIds=new String[5];
+        userIds[0]="wwj";
+        userIds[1]="zaq";
+        userIds[2]="dyt";
+        userIds[3]="fb";
+        userIds[4]="zqh";
+        for(int i=0;i<5;i++){
+           // identityService.setUserInfo(userIds[0],"");
+        }
+    }
+
+    @Test
+    public void asdfasdf(){
+        System.out.println(projectMapper.getPidProject().size());
+    }
+
+    @Test
+    public void ljl(){
+        System.out.println(sgjdbMapper.selectByPrimaryKey("069617ed-ed28-467a-b87b-b9c6edfee87d").getProjectNam());
+    }
+
+    @Test
+    public void asdgsdfgklsdf(){
+        System.out.println(sgjdbMapper.selectAll().size());
+    }
+
+
+    @Test
+    public void eraeq(){
+        Map<String,String> map=new HashMap<>();
+        map.put("_year","2019");
+        map.put("_month","4");
+        projectMapper.yfbb2(map);
+        System.out.println( String.valueOf(map.get("sb_fbsl")));
     }
 }
 
