@@ -111,20 +111,22 @@ public interface ProjectMapper extends MyMapper<Project> {
     @Select("select * from project where pid is not null and pid!=''")
     List<Project> getPidProject();
 
-
-    //sb_fbsl int, out sb_jssl int, out sb_jsje int,
-    //out jj_fbsl int, out jj_jssl int, out jj_jsje int,
-    //out xx_fbsl int, out xx_jssl int, out xx_jsje int,
-    //out wz_fbsl int, out wz_jssl int, out wz_jsje int,
-    //out out gdzc_fbsl int, out gdzc_jssl int, out gdzc_jsje int
     @Options(statementType = StatementType.CALLABLE)
     @Select("call yfbb(#{ _year,mode=IN,jdbcType=VARCHAR},#{_month,mode=IN,jdbcType=VARCHAR}," +
-            "#{sb_fbsl,mode=OUT,jdbcType=VARCHAR},#{sb_jssl,mode=OUT,jdbcType=VARCHAR},#{sb_jsje,mode=OUT,jdbcType=VARCHAR}," +
-            "#{jj_fbsl,mode=OUT,jdbcType=VARCHAR},#{jj_jssl,mode=OUT,jdbcType=VARCHAR},#{jj_jsje,mode=OUT,jdbcType=VARCHAR}," +
-            "#{xx_fbsl,mode=OUT,jdbcType=VARCHAR},#{xx_jssl,mode=OUT,jdbcType=VARCHAR},#{xx_jsje,mode=OUT,jdbcType=VARCHAR}," +
-            "#{wz_fbsl,mode=OUT,jdbcType=VARCHAR},#{wz_jssl,mode=OUT,jdbcType=VARCHAR},#{wz_jsje,mode=OUT,jdbcType=VARCHAR}," +
-            "#{gdzc_fbsl,mode=OUT,jdbcType=VARCHAR},#{gdzc_jssl,mode=OUT,jdbcType=VARCHAR},#{gdzc_jsje,mode=OUT,jdbcType=VARCHAR})")
+            "#{sb_fbsl,mode=OUT,jdbcType=INTEGER},#{sb_jssl,mode=OUT,jdbcType=INTEGER},#{sb_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{jj_fbsl,mode=OUT,jdbcType=INTEGER},#{jj_jssl,mode=OUT,jdbcType=INTEGER},#{jj_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{xx_fbsl,mode=OUT,jdbcType=INTEGER},#{xx_jssl,mode=OUT,jdbcType=INTEGER},#{xx_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER})")
     void yfbb(Map<String,String> params);
 
-    void yfbb2(Map<String,String> params);
+    @Options(statementType = StatementType.CALLABLE)
+    @Select("call nfbb(#{ _year,mode=IN,jdbcType=VARCHAR},#{_month,mode=IN,jdbcType=VARCHAR}," +
+            "#{sb_fbsl,mode=OUT,jdbcType=INTEGER},#{sb_jssl,mode=OUT,jdbcType=INTEGER},#{sb_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{jj_fbsl,mode=OUT,jdbcType=INTEGER},#{jj_jssl,mode=OUT,jdbcType=INTEGER},#{jj_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{xx_fbsl,mode=OUT,jdbcType=INTEGER},#{xx_jssl,mode=OUT,jdbcType=INTEGER},#{xx_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER})")
+    void nfbb(Map<String,String> params);
+
 }

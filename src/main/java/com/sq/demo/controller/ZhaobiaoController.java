@@ -42,6 +42,31 @@ public class ZhaobiaoController {
     ProjectMapper projectMapper;
 
 
+    //判断招标是否可删除
+    boolean canDeleZhaobiao(String id){
+        Zhaobiao zhaobiao=zhaobiaoMapper.selectByPrimaryKey(id);
+        if(zhaobiao.getZbpid()==null||!zhaobiao.getZbpid().equals(""))
+            return true;
+        if(getZhaobiaoNode(zhaobiao.getZbpid()).equals("立项部门提出技术要求"))
+            return true;
+        return false;
+    }
+
+    //删除招标
+    @RequestMapping("/delete")
+    boolean delete(String id){
+        if(canDeleZhaobiao(id)){
+            Zhaobiao zhaobiao=zhaobiaoMapper.selectByPrimaryKey(id);
+            if(zhaobiao.getZbpid()!=null&&!zhaobiao.getZbpid().equals("")){
+                zfzb(id,zhaobiao.getZbpid());
+            }else {
+                zhaobiaoMapper.deleteByPrimaryKey(id);
+            }
+            return true;
+        }
+        return false;
+    }
+
     //判断该项目是否可以进行招标申请
    @RequestMapping("/canZhaobiaoSq")
    public boolean canZhaobiaoSq(String projectId){

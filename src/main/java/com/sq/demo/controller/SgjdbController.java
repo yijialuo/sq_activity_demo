@@ -16,6 +16,10 @@ public class SgjdbController {
 
     @RequestMapping("/getAllSgjdb")
     public List<Sgjdb> getAllSgjdb(){
-        return sgjdbMapper.selectAll();
+        List<Sgjdb> res=sgjdbMapper.selectAll();
+        for (int i=0;i<res.size();i++){
+            res.get(i).setId(String.valueOf(i+1));
+        }
+        return res;
     }
 }
