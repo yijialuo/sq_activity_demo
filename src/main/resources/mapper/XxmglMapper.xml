@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sq.demo.mapper.XxmglMapper" >
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Xxmgl" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="VARCHAR" />
+    <result column="xmbh" property="xmbh" jdbcType="VARCHAR" />
+    <result column="xmmc" property="xmmc" jdbcType="VARCHAR" />
+    <result column="lxbm" property="lxbm" jdbcType="VARCHAR" />
+    <result column="sqr" property="sqr" jdbcType="VARCHAR" />
+    <result column="cjsj" property="cjsj" jdbcType="VARCHAR" />
+    <result column="y1" property="y1" jdbcType="VARCHAR" />
+    <result column="y2" property="y2" jdbcType="VARCHAR" />
+    <result column="y3" property="y3" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

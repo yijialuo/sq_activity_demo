@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sq.demo.mapper.XxmcbMapper" >
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Xxmcb" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="VARCHAR" />
+    <result column="xxmid" property="xxmid" jdbcType="VARCHAR" />
+    <result column="xh" property="xh" jdbcType="VARCHAR" />
+    <result column="gzbzmc" property="gzbzmc" jdbcType="VARCHAR" />
+    <result column="sgdw" property="sgdw" jdbcType="VARCHAR" />
+    <result column="htje" property="htje" jdbcType="DECIMAL" />
+    <result column="htqdsj" property="htqdsj" jdbcType="VARCHAR" />
+    <result column="bz" property="bz" jdbcType="VARCHAR" />
+    <result column="cjsj" property="cjsj" jdbcType="VARCHAR" />
+    <result column="xgsj" property="xgsj" jdbcType="TIMESTAMP" />
+    <result column="y1" property="y1" jdbcType="VARCHAR" />
+    <result column="y2" property="y2" jdbcType="VARCHAR" />
+    <result column="y3" property="y3" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>
