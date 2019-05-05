@@ -8,6 +8,7 @@
     <result column="id" property="id" jdbcType="VARCHAR" />
     <result column="xxmid" property="xxmid" jdbcType="VARCHAR" />
     <result column="xh" property="xh" jdbcType="VARCHAR" />
+    <result column="xxmbh" property="xxmbh" jdbcType="VARCHAR" />
     <result column="gzbzmc" property="gzbzmc" jdbcType="VARCHAR" />
     <result column="sgdw" property="sgdw" jdbcType="VARCHAR" />
     <result column="htje" property="htje" jdbcType="DECIMAL" />

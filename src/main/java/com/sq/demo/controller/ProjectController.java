@@ -6,6 +6,7 @@ import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.*;
 import com.sq.demo.utils.IdCreate;
 import com.sq.demo.utils.Time;
+import com.sun.javafx.tk.Toolkit;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricTaskInstance;
@@ -531,6 +532,61 @@ public class ProjectController {
         taskService.complete(task.getId());
     }
 
+    //技术部经理的驳回处理
+    @RequestMapping("/jsjlBh")
+    public boolean jsjlBh(String pid,String userId,String comment,String bhd){
+        try {
+            ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService=engine.getTaskService();
+            Task task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
+            if (comment == null)
+                comment = "";
+            //添加评论
+            Authentication.setAuthenticatedUserId(userId);
+            taskService.addComment(task.getId(), pid, comment);
+            //设置任务代理人
+            taskService.setAssignee(task.getId(), userId);
+            //设置参数
+            taskService.setVariable(task.getId(), "jsjl", false);
+            //完成任务
+            taskService.complete(task.getId());
+            if(bhd.equals("技术部主管")){
+                return true;
+            }else if(bhd.equals("技术部经办人")){
+                //技术主管经理的不同意
+                task=taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                //设置技术部主管经理驳回参数
+                taskService.setVariable(task.getId(),"jszgjl",false);
+                taskService.complete(task.getId());
+                return true;
+            }else {//驳回到立项部门经办人
+                //技术主管经理的不同意
+                task=taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                //设置技术部主管经理驳回参数
+                taskService.setVariable(task.getId(),"jszgjl",false);
+                taskService.complete(task.getId());
+
+                //技术部经办人不同意
+                task=taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                //设置技术部主管经理驳回参数
+                taskService.setVariable(task.getId(),"jsb",false);
+                taskService.complete(task.getId());
+
+                //立项部们经理不同意
+                task=taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                //设置技术部主管经理驳回参数
+                taskService.setVariable(task.getId(),"jl",false);
+                taskService.complete(task.getId());
+
+                //立项部门主管经理不同意
+
+                return true;
+            }
+        }catch (Exception e){
+            return false;
+        }
+    }
+
     //处理节点
     @Transactional
     @RequestMapping("/doNode")
@@ -619,11 +675,9 @@ public class ProjectController {
             }
 
             if (group.getId().equals("jsb_doman")) {//处理人为技术部办事人,设置经办人
-                Project project = pidToProject(task.getProcessInstanceId());// (Project) taskService.getVariable(task.getId(), "project");
+                Project project = pidToProject(task.getProcessInstanceId());//
                 //设置经办人
                 project.setBider(identityService.createUserQuery().userId(userId).singleResult().getFirstName());
-                //重新设置项目参数
-                //taskService.setVariable(task.getId(), "project", project);
                 //修改项目表
                 projectMapper.updateByPrimaryKeySelective(project);
                 Fs fs = new Fs();

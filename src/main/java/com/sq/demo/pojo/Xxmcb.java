@@ -21,6 +21,8 @@ public class Xxmcb {
      */
     private String xh;
 
+    private String xxmbh;
+
     /**
      * 工作步骤名称
      */
@@ -303,5 +305,13 @@ public class Xxmcb {
      */
     public void setY3(String y3) {
         this.y3 = y3;
+    }
+
+    public String getXxmbh() {
+        return xxmbh;
+    }
+
+    public void setXxmbh(String xxmbh) {
+        this.xxmbh = xxmbh;
     }
 }

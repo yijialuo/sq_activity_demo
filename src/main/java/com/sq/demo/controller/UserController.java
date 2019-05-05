@@ -59,7 +59,7 @@ public class UserController {
             Fs fs=new Fs();
             fs.setProjectid(projectId);
             fs=fsMapper.selectOne(fs);
-            if(fs==null){
+            if(fs==null||fs.getDojsbzgjl()==null||fs.getDojsbzgjl().equals("")){
                 Project project=projectMapper.selectByPrimaryKey(projectId);
                 return getAllJsbZgjl(project.getReviser(),null);
             }

@@ -102,15 +102,20 @@ public class YanshouController {
     @Transactional
     @RequestMapping("/deleteYanshou")
     public boolean deleteYanshou(String yid){
-        Contractfile contractfile=new Contractfile();
-        contractfile.setCid(yid);
-        //删文件关联表
-        contractfileMapper.delete(contractfile);
-        if(yanshouMapper.deleteByPrimaryKey(yid)==1){
-            return true;
-        }else{
+        if(yid!=null&&!yid.equals("")){
+            Contractfile contractfile=new Contractfile();
+            contractfile.setCid(yid);
+            //删文件关联表
+            contractfileMapper.delete(contractfile);
+            if(yanshouMapper.deleteByPrimaryKey(yid)==1){
+                return true;
+            }else{
+                return false;
+            }
+        }else {
             return false;
         }
+
     }
 
     //查询所有验收单

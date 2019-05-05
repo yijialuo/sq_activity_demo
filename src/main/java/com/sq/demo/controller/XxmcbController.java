@@ -3,6 +3,7 @@ package com.sq.demo.controller;
 import com.sq.demo.mapper.XxmcbMapper;
 import com.sq.demo.pojo.Xxmcb;
 import com.sq.demo.utils.IdCreate;
+import com.sq.demo.utils.Time;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,13 +21,17 @@ public class XxmcbController {
     //插入
     @Transactional
     @RequestMapping("/insert")
-    public boolean insert(String xxmid, String xh, String gzbzmc, String sgdw, String htje, String htqdsj, String bz) {
+    public boolean insert(String xxmid,String xxmbh, String gzbzmc, String sgdw, String htje, String htqdsj, String bz) {
         Xxmcb xxmcb = new Xxmcb();
-        xxmcb.setId(IdCreate.id());
         xxmcb.setXxmid(xxmid);
-        xxmcb.setXh(xh);
+        int count=xxmcbMapper.getMaxXh(xxmid);
+        xxmcb.setId(IdCreate.id());
+        xxmcb.setXh(String.valueOf(count+1));
+        xxmcb.setXxmbh(xxmbh);
         xxmcb.setGzbzmc(gzbzmc);
         xxmcb.setSgdw(sgdw);
+        xxmcb.setCjsj(Time.getNow());
+        if(htje!=null)
         xxmcb.setHtje(new BigDecimal(htje));
         xxmcb.setHtqdsj(htqdsj);
         xxmcb.setBz(bz);
@@ -41,12 +46,13 @@ public class XxmcbController {
 
     @Transactional
     @RequestMapping("/updata")
-    public boolean updata(String id, String xh, String gzbzmc, String sgdw, String htje, String htqdsj, String bz) {
+    public boolean updata(String id, String xh, String xxmbh,String gzbzmc, String sgdw, String htje, String htqdsj, String bz) {
         Xxmcb xxmcb = new Xxmcb();
         xxmcb.setId(id);
         xxmcb.setXh(xh);
         xxmcb.setGzbzmc(gzbzmc);
         xxmcb.setSgdw(sgdw);
+        xxmcb.setXxmbh(xxmbh);
         xxmcb.setHtje(new BigDecimal(htje));
         xxmcb.setHtqdsj(htqdsj);
         xxmcb.setBz(bz);

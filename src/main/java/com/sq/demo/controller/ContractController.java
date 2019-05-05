@@ -7,7 +7,6 @@ import com.sq.demo.Entity.Return_Comments;
 import com.sq.demo.mapper.ContractMapper;
 import com.sq.demo.mapper.ContractfileMapper;
 import com.sq.demo.mapper.ProjectMapper;
-import com.sq.demo.pojo.Attachmentlink;
 import com.sq.demo.pojo.Contract;
 import com.sq.demo.pojo.Contractfile;
 import com.sq.demo.pojo.Project;
@@ -18,7 +17,6 @@ import org.activiti.engine.identity.User;
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.repository.DeploymentBuilder;
 import org.activiti.engine.runtime.ProcessInstance;
-import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -293,13 +291,17 @@ public class ContractController {
     @RequestMapping("/deleteContract")
     @Transactional
     public boolean deleteContract(String cid){
-        Contractfile contractfile=new Contractfile();
-        contractfile.setCid(cid);
-        //删文件关联表
-        contractfileMapper.delete(contractfile);
-        if(contractMapper.deleteByPrimaryKey(cid)==1){
-            return true;
-        }else{
+        if(cid!=null&&!cid.equals("")){
+            Contractfile contractfile=new Contractfile();
+            contractfile.setCid(cid);
+            //删文件关联表
+            contractfileMapper.delete(contractfile);
+            if(contractMapper.deleteByPrimaryKey(cid)==1){
+                return true;
+            }else{
+                return false;
+            }
+        }else {
             return false;
         }
     }
@@ -448,10 +450,12 @@ public class ContractController {
     //删除附件
     @RequestMapping("/deletFj")
     public boolean deletFj(String fid){
-        Contractfile contractfile=new Contractfile();
-        contractfile.setFid(fid);
-        if(contractfileMapper.delete(contractfile)==1)
-            return true;
+        if(fid!=null){
+            Contractfile contractfile=new Contractfile();
+            contractfile.setFid(fid);
+            if(contractfileMapper.delete(contractfile)==1)
+                return true;
+        }
         return false;
     }
 

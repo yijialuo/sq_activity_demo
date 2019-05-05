@@ -1,7 +1,10 @@
 package com.sq.demo.controller;
 
+import com.github.pagehelper.PageHelper;
+import com.sq.demo.mapper.ProjectMapper;
 import com.sq.demo.mapper.XxmcbMapper;
 import com.sq.demo.mapper.XxmglMapper;
+import com.sq.demo.pojo.Project;
 import com.sq.demo.pojo.Xxmcb;
 import com.sq.demo.pojo.Xxmgl;
 import com.sq.demo.utils.IdCreate;
@@ -11,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,10 +26,41 @@ public class XxmglController {
     XxmglMapper xxmglMapper;
     @Autowired
     XxmcbMapper xxmcbMapper;
+    @Autowired
+    ProjectMapper projectMapper;
+
+
+    @RequestMapping("/getProjects")
+    public List<Xxmgl> getProjects(String userName) {
+        Project project = new Project();
+        project.setBider(userName);
+        List<Project> projects = projectMapper.select(project);
+        List<Xxmgl> res = new ArrayList<>();
+        for (Project project1 : projects) {
+            Xxmgl xxmgl = new Xxmgl();
+            xxmgl.setSqr(project1.getProposer());
+            xxmgl.setXmbh(project1.getProjectNo());
+            xxmgl.setXmmc(project1.getProjectNam());
+            xxmgl.setLxbm(project1.getDeclarationDep());
+            xxmgl.setY1(project1.getId());
+            res.add(xxmgl);
+        }
+        //过滤已经新建了的
+        List<String> xmids=xxmglMapper.getAllXmid();
+        if(xmids.size()==0)
+            return res;
+        List<Xxmgl> res2=new ArrayList<>();
+        for(Xxmgl xxmgl:res){
+            if(!xmids.contains(xxmgl.getY1())){
+                res2.add(xxmgl);
+            }
+        }
+        return res2;
+    }
 
     @Transactional
     @RequestMapping("/insert")
-    public boolean insert(String xmbh, String xmmc, String lxbm, String sqr) {
+    public boolean insert(String xmbh, String xmmc, String lxbm, String sqr, String y1) {
         try {
             Xxmgl xxmgl = new Xxmgl();
             xxmgl.setId(IdCreate.id());
@@ -33,6 +69,7 @@ public class XxmglController {
             xxmgl.setXmmc(xmmc);
             xxmgl.setLxbm(lxbm);
             xxmgl.setSqr(sqr);
+            xxmgl.setY1(y1);
             xxmglMapper.insert(xxmgl);
             return true;
         } catch (Exception e) {
@@ -47,21 +84,23 @@ public class XxmglController {
             //删主表
             xxmglMapper.deleteByPrimaryKey(id);
             //删从表
-            Xxmcb xxmcb=new Xxmcb();
+            Xxmcb xxmcb = new Xxmcb();
             xxmcb.setXxmid(id);
             xxmcbMapper.delete(xxmcb);
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
 
     @Transactional
     @RequestMapping("/updata")
-    public boolean update(String id, String xmbh, String xmmc, String lxbm, String sqr) {
+    public boolean update(String id, String xmbh, String xmmc, String lxbm, String sqr, String y1) {
         Xxmgl xxmgl = new Xxmgl();
         xxmgl.setId(id);
-        if (xmbh != null && !xmbh.equals(""))
+        if (xmbh == null)
+            xxmgl.setXmbh("");
+        else
             xxmgl.setXmbh(xmbh);
         if (xmmc != null && !xmmc.equals(""))
             xxmgl.setXmmc(xmmc);
@@ -69,6 +108,8 @@ public class XxmglController {
             xxmgl.setLxbm(lxbm);
         if (sqr != null && !sqr.equals(""))
             xxmgl.setSqr(sqr);
+        if (y1 != null && !y1.equals(""))
+            xxmgl.setY1(y1);
         return xxmglMapper.updateByPrimaryKeySelective(xxmgl) == 1 ? true : false;
     }
 
@@ -87,7 +128,9 @@ public class XxmglController {
     }
 
     @RequestMapping("/selectAll")
-    public List<Xxmgl> selectAll() {
+    public List<Xxmgl> selectAll(HttpServletResponse response, int pageNum) {
+        response.setHeader("allcount", "" + xxmglMapper.selectCount(null));
+        PageHelper.startPage(pageNum, 10);
         return xxmglMapper.selectAll();
     }
 }

@@ -50,14 +50,18 @@ public class AttachmentController {
     @Transactional
     public boolean deletAttachment(String userId, String attachment_id) {
         try {
-            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-            TaskService taskService = processEngine.getTaskService();
-            taskService.deleteAttachment(attachment_id);
-            //删关联表
-            Attachmentlink attachmentlink = new Attachmentlink();
-            attachmentlink.setAttachment(attachment_id);
-            attachmentlinkMapper.delete(attachmentlink);
-            return true;
+            if(attachment_id!=null){
+                //删关联表
+                Attachmentlink attachmentlink = new Attachmentlink();
+                attachmentlink.setAttachment(attachment_id);
+                attachmentlinkMapper.delete(attachmentlink);
+                ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+                TaskService taskService = processEngine.getTaskService();
+                taskService.deleteAttachment(attachment_id);
+                return true;
+            }else {
+                return false;
+            }
         }catch (Exception e){
             return false;
         }

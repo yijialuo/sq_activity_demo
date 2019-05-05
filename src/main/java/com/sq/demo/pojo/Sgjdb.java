@@ -1,5 +1,7 @@
 package com.sq.demo.pojo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.*;
@@ -36,6 +38,9 @@ public class Sgjdb {
     @Column(name = "DECLARATION_DEP")
     private String declarationDep;
 
+    @Column(name = "lxlb")
+    private String lxlb;
+
     /**
      * 修改人 项目分类
      */
@@ -44,6 +49,8 @@ public class Sgjdb {
 
     @Column(name = "xmdl")
     private String xmdl;
+
+    private String jsbjlsj;
 
     /**
      * 两会时间
@@ -65,6 +72,7 @@ public class Sgjdb {
     /**
      * 创建时间
      */
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Date httjpssj;
 
     /**
@@ -98,6 +106,9 @@ public class Sgjdb {
     private String wcjsjs;
 
     private String jsbzgjl;
+
+    @Column(name = "jsbjbr")
+    private String jsbjbr;
 
     /**
      * 中标单位
@@ -431,5 +442,29 @@ public class Sgjdb {
 
     public void setXmdl(String xmdl) {
         this.xmdl = xmdl;
+    }
+
+    public String getLxlb() {
+        return lxlb;
+    }
+
+    public void setLxlb(String lxlb) {
+        this.lxlb = lxlb;
+    }
+
+    public String getJsbjbr() {
+        return jsbjbr;
+    }
+
+    public void setJsbjbr(String jsbjbr) {
+        this.jsbjbr = jsbjbr;
+    }
+
+    public String getJsbjlsj() {
+        return jsbjlsj;
+    }
+
+    public void setJsbjlsj(String jsbjlsj) {
+        this.jsbjlsj = jsbjlsj;
     }
 }
