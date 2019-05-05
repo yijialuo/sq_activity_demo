@@ -10,4 +10,7 @@ public interface XxmglMapper extends MyMapper<Xxmgl> {
 
     @Select("select y1 from xxmgl")
     List<String> getAllXmid();
+
+    @Select("select * from xxmgl where lxbm=#{departmentName}")
+    List<Xxmgl> getSelfXxmgl(String departmentName);
 }
