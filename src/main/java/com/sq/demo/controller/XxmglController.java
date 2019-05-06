@@ -9,10 +9,7 @@ import com.sq.demo.pojo.Xxmcb;
 import com.sq.demo.pojo.Xxmgl;
 import com.sq.demo.utils.IdCreate;
 import com.sq.demo.utils.Time;
-import org.activiti.engine.IdentityService;
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.ProcessEngines;
-import org.activiti.engine.identity.Group;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -132,17 +129,9 @@ public class XxmglController {
     }
 
     @RequestMapping("/selectAll")
-    public List<Xxmgl> selectAll(HttpServletResponse response, int pageNum, String departmentName) {
-        //技术部和办公室看全部
-        if(departmentName.equals("工程技术部")||departmentName.equals("办公室")||departmentName.equals("办公室.")){
-            response.setHeader("allcount", "" + xxmglMapper.selectCount(null));
-            PageHelper.startPage(pageNum, 10);
-            return xxmglMapper.selectAll();
-        }else {//立项部门看自己的
-            List<Xxmgl> res=xxmglMapper.getSelfXxmgl(departmentName);
-            response.setHeader("allcount", "" + res.size());
-            PageHelper.startPage(pageNum, 10);
-            return res;
-        }
+    public List<Xxmgl> selectAll(HttpServletResponse response, int pageNum) {
+        response.setHeader("allcount", "" + xxmglMapper.selectCount(null));
+        PageHelper.startPage(pageNum, 10);
+        return xxmglMapper.selectAll();
     }
 }

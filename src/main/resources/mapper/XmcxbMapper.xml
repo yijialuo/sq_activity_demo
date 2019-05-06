@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sq.demo.mapper.XmcxbMapper" >
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Xmcxb" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="xmid" property="xmid" jdbcType="VARCHAR" />
+    <result column="xmbh" property="xmbh" jdbcType="VARCHAR" />
+    <result column="xmmc" property="xmmc" jdbcType="VARCHAR" />
+    <result column="lxsj" property="lxsj" jdbcType="VARCHAR" />
+    <result column="lxbm" property="lxbm" jdbcType="VARCHAR" />
+    <result column="xmdl" property="xmdl" jdbcType="VARCHAR" />
+    <result column="lxlb" property="lxlb" jdbcType="VARCHAR" />
+    <result column="xmlb" property="xmlb" jdbcType="VARCHAR" />
+    <result column="jhje" property="jhje" jdbcType="VARCHAR" />
+    <result column="htje" property="htje" jdbcType="DECIMAL" />
+    <result column="kgsj" property="kgsj" jdbcType="VARCHAR" />
+    <result column="wgsj" property="wgsj" jdbcType="VARCHAR" />
+    <result column="zjsjd" property="zjsjd" jdbcType="DECIMAL" />
+    <result column="jnjsjd" property="jnjsjd" jdbcType="DECIMAL" />
+    <result column="xmghsj" property="xmghsj" jdbcType="VARCHAR" />
+    <result column="dbsj" property="dbsj" jdbcType="VARCHAR" />
+    <result column="htqdsj" property="htqdsj" jdbcType="VARCHAR" />
+    <result column="jssj" property="jssj" jdbcType="VARCHAR" />
+    <result column="cbdw" property="cbdw" jdbcType="VARCHAR" />
+    <result column="xmfqr" property="xmfqr" jdbcType="VARCHAR" />
+    <result column="xmjbr" property="xmjbr" jdbcType="VARCHAR" />
+    <result column="spzt" property="spzt" jdbcType="VARCHAR" />
+    <result column="htzt" property="htzt" jdbcType="VARCHAR" />
+    <result column="sgzt" property="sgzt" jdbcType="VARCHAR" />
+    <result column="jszt" property="jszt" jdbcType="VARCHAR" />
+    <result column="lhzbwjsj" property="lhzbwjsj" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="select" resultType="com.sq.demo.pojo.Xmcxb" parameterType="com.sq.demo.pojo.Xmcxb">
+      select * from xmcxb
+    <trim prefix="where" prefixOverrides="and">
+      <if test="xmbh!=null and xmbh!='' ">
+        and xmbh like concat('%',#{xmbh},'%')
+      </if>
+      <if test="xmmc!=null and xmmc!='' ">
+        and xmmc like concat('%',#{xmmc},'%')
+      </if>
+      <if test="lxsj!=null and lxsj!='' ">
+        and lxsj like concat('%',#{lxsj},'%')
+      </if>
+      <if test="lxbm!=null and lxbm!='' ">
+        and lxbm like concat('%',#{lxbm},'%')
+      </if>
+      <if test="xmdl!=null and xmdl!='' ">
+        and xmdl like concat('%',#{xmdl},'%')
+      </if>
+      <if test="lxlb!=null and lxlb!='' ">
+        and lxlb like concat('%',#{lxlb},'%')
+      </if>
+      <if test="xmlb!=null and xmlb!='' ">
+        and xmlb like concat('%',#{xmlb},'%')
+      </if>
+      <if test="jhje!=null and jhje!='' ">
+        and jhje like concat('%',#{jhje},'%')
+      </if>
+      <if test="htje!=null and htje!='' ">
+        and htje like concat('%',#{htje},'%')
+      </if>
+      <if test="kgsj!=null and kgsj!='' ">
+        and kgsj like concat('%',#{kgsj},'%')
+      </if>
+      <if test="wgsj!=null and wgsj!='' ">
+        and wgsj like concat('%',#{wgsj},'%')
+      </if>
+      <if test="zjsjd!=null and zjsjd!='' ">
+        and zjsjd like concat('%',#{zjsjd},'%')
+      </if>
+      <if test="jnjsjd!=null and jnjsjd!='' ">
+        and jnjsjd like concat('%',#{jnjsjd},'%')
+      </if>
+      <if test="xmghsj!=null and xmghsj!='' ">
+        and xmghsj like concat('%',#{xmghsj},'%')
+      </if>
+      <if test="dbsj!=null and dbsj!='' ">
+        and dbsj like concat('%',#{dbsj},'%')
+      </if>
+      <if test="htqdsj!=null and htqdsj!='' ">
+        and htqdsj like concat('%',#{htqdsj},'%')
+      </if>
+      <if test="jssj!=null and jssj!='' ">
+        and jssj like concat('%',#{jssj},'%')
+      </if>
+      <if test="cbdw!=null and cbdw!='' ">
+        and cbdw like concat('%',#{cbdw},'%')
+      </if>
+      <if test="xmfqr!=null and xmfqr!='' ">
+        and xmfqr like concat('%',#{xmfqr},'%')
+      </if>
+      <if test="xmjbr!=null and xmjbr!='' ">
+        and xmjbr like concat('%',#{xmjbr},'%')
+      </if>
+      <if test="lhzbwjsj!=null and lhzbwjsj!='' ">
+        and lhzbwjsj like concat('%',#{lhzbwjsj},'%')
+      </if>
+    </trim>
+  </select>
+</mapper>

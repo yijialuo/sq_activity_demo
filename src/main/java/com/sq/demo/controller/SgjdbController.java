@@ -6,9 +6,11 @@ import com.sq.demo.mapper.SgjdbMapper;
 import com.sq.demo.pojo.Project;
 import com.sq.demo.pojo.Sgjdb;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,10 +23,7 @@ public class SgjdbController {
     @Autowired
     ProjectMapper projectMapper;
 
-    @RequestMapping("/getAllSgjdb")
-    public List<Sgjdb> getAllSgjdb() {
-
-        List<Sgjdb> res = sgjdbMapper.selectAll();
+    public List<Sgjdb> tcsj(List<Sgjdb> res){
         for (int i = 0; i < res.size(); i++) {
             //列出所有审核意见
             Project project=projectMapper.selectByPrimaryKey(res.get(i).getId());
@@ -41,5 +40,28 @@ public class SgjdbController {
             res.get(i).setId(String.valueOf(i + 1));
         }
         return res;
+    }
+
+    @RequestMapping("/getAllSgjdb")
+    public List<Sgjdb> getAllSgjdb() {
+        List<Sgjdb> res = sgjdbMapper.selectAll();
+        return tcsj(res);
+    }
+
+    //实施进度报表搜索
+    @RequestMapping("/select")
+    public List<Sgjdb> select(@RequestBody Sgjdb sgjdb){
+        List<Sgjdb> res= tcsj(sgjdbMapper.select(sgjdb));
+        if(sgjdb.getJsbjlsj()==null||sgjdb.getJsbjlsj().equals("")){
+            return res;
+        }else {
+            List<Sgjdb> res2=new ArrayList<>();
+            for(Sgjdb sgjdb1:res){
+                if(sgjdb1.getJsbjlsj().contains(sgjdb.getJsbjlsj())){
+                    res2.add(sgjdb1);
+                }
+            }
+            return res2;
+        }
     }
 }

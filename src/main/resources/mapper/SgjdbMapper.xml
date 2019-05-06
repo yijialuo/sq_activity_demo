@@ -31,4 +31,73 @@
         <result column="jsbzgjl" property="jsbzgjl" jdbcType="VARCHAR"/>
         <result column="sgdw" property="sgdw" jdbcType="VARCHAR"/>
     </resultMap>
+
+    <select id="search" resultType="com.sq.demo.pojo.Sgjdb" parameterType="com.sq.demo.pojo.Sgjdb">
+        select * from sgjdb
+        <trim prefix="where" prefixOverrides="and">
+            <if test="projectNo!=null and projectNo!='' ">
+                and project_no like concat('%',#{projectNo},'%')
+            </if>
+            <if test="projectNam!=null and projectNam!='' ">
+                and project_nam like concat('%',#{projectNam},'%')
+            </if>
+            <if test="investmentEstimate!=null and investmentEstimate!='' ">
+                and INVESTMENT_ESTIMATE like concat('%',#{investmentEstimate},'%')
+            </if>
+            <if test="declarationDep!=null and declarationDep!='' ">
+                and DECLARATION_DEP like concat('%',#{declarationDep},'%')
+            </if>
+            <if test="lxlb!=null and lxlb!='' ">
+                and lxlb like concat('%',#{lxlb},'%')
+            </if>
+            <if test="xmlb!=null and xmlb!='' ">
+                and xmlb like concat('%',#{xmlb},'%')
+            </if>
+            <if test="xmdl!=null and xmdl!='' ">
+                and xmdl like concat('%',#{xmdl},'%')
+            </if>
+            <if test="lhsj!=null and lhsj!='' ">
+                and lhsj like concat('%',#{lhsj},'%')
+            </if>
+            <if test="zjhsj!=null and zjhsj!='' ">
+                and zjhsj like concat('%',#{zjhsj},'%')
+            </if>
+            <if test="dbsj!=null and dbsj!='' ">
+                and dbsj like concat('%',#{dbsj},'%')
+            </if>
+            <if test="httjpssj!=null and httjpssj!='' ">
+                and httjpssj like concat('%',#{httjpssj},'%')
+            </if>
+            <if test="htqdsj!=null and htqdsj!='' ">
+                and htqdsj like concat('%',#{htqdsj},'%')
+            </if>
+            <if test="htje!=null and htje!='' ">
+                and htje like concat('%',#{htje},'%')
+            </if>
+            <if test="kgsj!=null and kgsj!='' ">
+                and kgsj like concat('%',#{kgsj},'%')
+            </if>
+            <if test="ysrq!=null and ysrq!='' ">
+                and kgsj like concat('%',#{ysrq},'%')
+            </if>
+            <if test="bndjsjd!=null and bndjsjd!='' ">
+                and bndjsjd like concat('%',#{bndjsjd},'%')
+            </if>
+            <if test="zjsjd!=null and zjsjd!='' ">
+                and zjsjd like concat('%',#{zjsjd},'%')
+            </if>
+            <if test="wcjsjs!=null and wcjsjs!='' ">
+                and wcjsjs like concat('%',#{wcjsjs},'%')
+            </if>
+            <if test="jsbzgjl!=null and jsbzgjl!='' ">
+                and jsbzgjl like concat('%',#{jsbzgjl},'%')
+            </if>
+            <if test=" jsbjbr!=null and  jsbjbr!='' ">
+                and  jsbjbr like concat('%',#{ jsbjbr},'%')
+            </if>
+            <if test=" sgdw!=null and  sgdw!='' ">
+                and  sgdw like concat('%',#{ sgdw},'%')
+            </if>
+        </trim>
+    </select>
 </mapper>
