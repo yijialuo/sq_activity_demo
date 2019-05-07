@@ -33,7 +33,7 @@
     <result column="lhzbwjsj" property="lhzbwjsj" jdbcType="VARCHAR" />
   </resultMap>
 
-  <select id="select" resultType="com.sq.demo.pojo.Xmcxb" parameterType="com.sq.demo.pojo.Xmcxb">
+  <select id="search" resultType="com.sq.demo.pojo.Xmcxb" parameterType="com.sq.demo.Entity.Xmcxb2">
       select * from xmcxb
     <trim prefix="where" prefixOverrides="and">
       <if test="xmbh!=null and xmbh!='' ">
@@ -45,18 +45,35 @@
       <if test="lxsj!=null and lxsj!='' ">
         and lxsj like concat('%',#{lxsj},'%')
       </if>
-      <if test="lxbm!=null and lxbm!='' ">
-        and lxbm like concat('%',#{lxbm},'%')
+
+      <if test="lxbm!=null and  lxbm.length>0 ">
+        and
+        <foreach item="item" index="index" collection="lxbm" open="(" separator="or" close=")">
+          lxbm like concat('%',#{item},'%')
+        </foreach>
       </if>
-      <if test="xmdl!=null and xmdl!='' ">
-        and xmdl like concat('%',#{xmdl},'%')
+
+      <if test="xmdl!=null and  xmdl.length>0 ">
+        and
+        <foreach item="item" index="index" collection="xmdl" open="(" separator="or" close=")">
+          xmdl like concat('%',#{item},'%')
+        </foreach>
       </if>
-      <if test="lxlb!=null and lxlb!='' ">
-        and lxlb like concat('%',#{lxlb},'%')
+
+      <if test="lxlb!=null and  lxlb.length>0 ">
+        and
+        <foreach item="item" index="index" collection="lxlb" open="(" separator="or" close=")">
+          lxlb like concat('%',#{item},'%')
+        </foreach>
       </if>
-      <if test="xmlb!=null and xmlb!='' ">
-        and xmlb like concat('%',#{xmlb},'%')
+
+      <if test="xmlb!=null and  xmlb.length>0 ">
+        and
+        <foreach item="item" index="index" collection="xmlb" open="(" separator="or" close=")">
+          xmlb like concat('%',#{item},'%')
+        </foreach>
       </if>
+
       <if test="jhje!=null and jhje!='' ">
         and jhje like concat('%',#{jhje},'%')
       </if>
@@ -90,12 +107,21 @@
       <if test="cbdw!=null and cbdw!='' ">
         and cbdw like concat('%',#{cbdw},'%')
       </if>
-      <if test="xmfqr!=null and xmfqr!='' ">
-        and xmfqr like concat('%',#{xmfqr},'%')
+
+      <if test="xmfqr!=null and  xmfqr.length>0 ">
+        and
+        <foreach item="item" index="index" collection="xmfqr" open="(" separator="or" close=")">
+          xmfqr like concat('%',#{item},'%')
+        </foreach>
       </if>
-      <if test="xmjbr!=null and xmjbr!='' ">
-        and xmjbr like concat('%',#{xmjbr},'%')
+
+      <if test="xmjbr!=null and  xmjbr.length>0 ">
+        and
+        <foreach item="item" index="index" collection="xmjbr" open="(" separator="or" close=")">
+          xmjbr like concat('%',#{item},'%')
+        </foreach>
       </if>
+
       <if test="lhzbwjsj!=null and lhzbwjsj!='' ">
         and lhzbwjsj like concat('%',#{lhzbwjsj},'%')
       </if>

@@ -1,6 +1,7 @@
 package com.sq.demo.controller;
 
 import com.sq.demo.Entity.Return_Comments;
+import com.sq.demo.Entity.Sgjdb2;
 import com.sq.demo.mapper.ProjectMapper;
 import com.sq.demo.mapper.SgjdbMapper;
 import com.sq.demo.pojo.Project;
@@ -50,14 +51,14 @@ public class SgjdbController {
 
     //实施进度报表搜索
     @RequestMapping("/select")
-    public List<Sgjdb> select(@RequestBody Sgjdb sgjdb){
-        List<Sgjdb> res= tcsj(sgjdbMapper.select(sgjdb));
-        if(sgjdb.getJsbjlsj()==null||sgjdb.getJsbjlsj().equals("")){
+    public List<Sgjdb> select(@RequestBody Sgjdb2 sgjdb2){
+        List<Sgjdb> res= tcsj(sgjdbMapper.search(sgjdb2));
+        if(sgjdb2.getJsbjlsj()==null||sgjdb2.getJsbjlsj().equals("")){
             return res;
         }else {
             List<Sgjdb> res2=new ArrayList<>();
             for(Sgjdb sgjdb1:res){
-                if(sgjdb1.getJsbjlsj().contains(sgjdb.getJsbjlsj())){
+                if(sgjdb1.getJsbjlsj().contains(sgjdb2.getJsbjlsj())){
                     res2.add(sgjdb1);
                 }
             }

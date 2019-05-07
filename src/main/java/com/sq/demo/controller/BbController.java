@@ -1,7 +1,11 @@
 package com.sq.demo.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sq.demo.Entity.Sgjdb2;
+import com.sq.demo.Entity.Xmcxb2;
 import com.sq.demo.mapper.ProjectMapper;
 import com.sq.demo.pojo.Sgjdb;
+import com.sq.demo.pojo.Xmcxb;
 import com.sq.demo.utils.ExcelUtil;
 import com.sq.demo.utils.ReflectUtil;
 
@@ -15,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -32,6 +37,9 @@ public class BbController {
 
     @Autowired
     private SgjdbController sgjdbController;
+
+    @Autowired
+    private XmcxbController xmcxbController;
 
     private static String OS = System.getProperty("os.name").toLowerCase();
 
@@ -147,7 +155,10 @@ public class BbController {
     }
 
     @GetMapping("/downloadXMSSJDB")
-    public ResponseEntity<byte[]> downloadXMSSJDB() throws IOException {
+    public ResponseEntity<byte[]> downloadXMSSJDB(@RequestParam("param") String param) throws IOException {
+        ObjectMapper objectMapper=new ObjectMapper();
+        Sgjdb2 sgjdb2=objectMapper.readValue(param,Sgjdb2.class);
+
         String filePath = getCurrentUploadDirectory() + File.separator + "新沙公司工程项目实施进度表.xls";
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet sheet = workbook.createSheet();
@@ -190,7 +201,7 @@ public class BbController {
         HSSFRow row3 = sheet.createRow(3);
         ExcelUtil.createRowHeader(row3, cloumnNames, style);
 
-        List<Sgjdb> sgjdbs = sgjdbController.getAllSgjdb();
+        List<Sgjdb> sgjdbs = sgjdbController.select(sgjdb2);
         List<List<String>> values = new ArrayList<>();
         for (Sgjdb sgjdb : sgjdbs) {
             List<String> list= ReflectUtil.getAllDeclareField(sgjdb);
@@ -219,6 +230,87 @@ public class BbController {
         //builder.header("Content-Disposition","attachment;filename*=UTF-8''"+file.getName());
         //中文文件名不行，需要转码
         String file_name = new String("新沙公司工程项目实施进度表.xls".getBytes(), "ISO-8859-1");
+        //res.setHeader("Content-Disposition", "attachment;filename=" + file_name);
+        builder.header("Content-Disposition", "attachment;filename=" + file_name);
+        return builder.body(FileUtils.readFileToByteArray(file));
+    }
+
+    @GetMapping("/downloadXMCXBB")
+    public ResponseEntity<byte[]> downloadXMCXBB(@RequestParam("param") String param) throws IOException {
+        ObjectMapper objectMapper=new ObjectMapper();
+        Xmcxb2 xmcxb2=objectMapper.readValue(param,Xmcxb2.class);
+
+        String filePath = getCurrentUploadDirectory() + File.separator + "项目查询报表.xls";
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet();
+
+        ExcelUtil.createInformation(workbook);
+
+        int[][] columnWidths = {
+                {
+                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25
+                },
+                {
+                        36 * 256, 18 * 256, 36 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256
+                }
+        };
+        ExcelUtil.setCloumnWitth(sheet, columnWidths);
+
+        HSSFCellStyle style = workbook.createCellStyle();
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+
+
+        HSSFRow row2 = sheet.createRow(2);
+        row2.setHeightInPoints(25);// 行高度
+        ExcelUtil.createTempCell(row2, 1, 25, style);
+        HSSFCell cell2_0 = ExcelUtil.createCell(row2, 0, "项目查询报表", style);
+        ExcelUtil.createRange(sheet, 2, 2, 0, 19);
+
+        String[] cloumnNames = {
+                "序号",
+                "项目编号", "项目名称", "立项时间", "立项部门", "项目大类",
+                "立项类别", "项目类别","计划金额（万元）", "合同金额（万元）","审批状态",
+                "合同状态", "施工状态", "结算状态","开工时间","完工时间",
+                "总结算进度", "今年结算进度", "项目过会时间", "两会招标文件时间","定标时间",
+                "合同签订时间", "结算时间", "承包单位", "项目发起人","经办项目人"
+        };
+        HSSFRow row3 = sheet.createRow(3);
+        ExcelUtil.createRowHeader(row3, cloumnNames, style);
+
+        List<Xmcxb> xmcxbs = xmcxbController.select(xmcxb2);
+        List<List<String>> values = new ArrayList<>();
+        for (Xmcxb xmcxb : xmcxbs) {
+            List<String> list= ReflectUtil.getAllDeclareField(xmcxb);
+            values.add(list);
+        }
+
+        ExcelUtil.insertRow(sheet,4, values, style);
+
+        try {
+            java.io.File file = new File(filePath);
+            if (file.exists()) {
+                file.delete();
+            }
+
+            FileOutputStream out = new FileOutputStream(file);
+            workbook.write(out);//保存Excel文件
+            out.close();//关闭文件流
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        File file = new File(filePath);
+        ResponseEntity.BodyBuilder builder = ResponseEntity.ok();
+        builder.contentLength(file.length());
+        builder.contentType(MediaType.APPLICATION_OCTET_STREAM);
+        //builder.header("Content-Disposition","attachment;filename*=UTF-8''"+file.getName());
+        //中文文件名不行，需要转码
+        String file_name = new String("项目查询报表.xls".getBytes(), "ISO-8859-1");
         //res.setHeader("Content-Disposition", "attachment;filename=" + file_name);
         builder.header("Content-Disposition", "attachment;filename=" + file_name);
         return builder.body(FileUtils.readFileToByteArray(file));

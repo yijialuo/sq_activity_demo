@@ -590,6 +590,8 @@ public class ProjectController {
     @Transactional
     @RequestMapping("/doNode")
     public boolean doNode(String pid, String userId, String comment, String varName, String value, @RequestParam(value = "peoples[]", required = false) String[] peoples) {
+        System.out.println("===========================================================");
+        System.out.println(pid);
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         try {
             TaskService taskService = processEngine.getTaskService();

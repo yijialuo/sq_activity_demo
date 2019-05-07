@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -71,6 +72,39 @@ public class UserController {
         }
     }
 
+
+    //拿发起人
+    @RequestMapping("/fqr")
+    public List<String> fqr(){
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
+        List<User> users = identityService.createUserQuery().list();
+        List<String> res=new ArrayList<>();
+        for (User user : users) {
+            String grouoId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
+            if (grouoId.equals("jsb_doman")||grouoId.equals("doman")) {
+                res.add(user.getFirstName());
+            }
+        }
+        return res;
+    }
+
+    //拿技术部经办人
+    @RequestMapping("/jsbjbr")
+    public List<String> jsbjbr(){
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
+        List<User> users = identityService.createUserQuery().list();
+        List<String> res=new ArrayList<>();
+        for (User user : users) {
+            String grouoId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
+            if (grouoId.equals("jsb_doman")) {
+                res.add(user.getFirstName());
+            }
+        }
+        return res;
+    }
+
     //拿技术部经办人
     @RequestMapping("/getAllJsbDoman")
     public List<UserOV> getAllJsbDoman(String manageType,String projectId){
@@ -112,6 +146,8 @@ public class UserController {
         User user = identityService.createUserQuery().userFirstName(userName).singleResult();
         return user.getId();
     }
+
+
 
     //拿到项目的经办人
     @RequestMapping("/getDepartmentjbr")

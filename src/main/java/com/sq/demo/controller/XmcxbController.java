@@ -1,13 +1,11 @@
 package com.sq.demo.controller;
 
 
+import com.sq.demo.Entity.Xmcxb2;
 import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.*;
 import com.sq.demo.utils.TaskName;
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.ProcessEngines;
-import org.activiti.engine.TaskService;
-import org.activiti.engine.task.Task;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -86,44 +85,47 @@ public class XmcxbController {
     }
 
     @RequestMapping("select")
-    public List<Xmcxb> select(@RequestBody Xmcxb xmcxb) {
-        List<Xmcxb> res=tcsj(xmcxbMapper.select(xmcxb));
+    public List<Xmcxb> select(@RequestBody Xmcxb2 xmcxb2) {
+        List<Xmcxb> res=tcsj(xmcxbMapper.search(xmcxb2));
         //过滤状态
         //过滤审批状态
-        if(xmcxb.getSpzt()!=null&&!xmcxb.getSpzt().equals("")){
+        if(xmcxb2.getSpzt()!=null&&!xmcxb2.getSpzt().equals("")){
             for(int i=0;i<res.size();i++){
-                if(!res.get(i).getSpzt().contains(xmcxb.getSpzt())){
+                if(!res.get(i).getSpzt().contains(xmcxb2.getSpzt())){
                     res.remove(i);
                     i--;
                 }
             }
         }
         //过滤合同状态
-        if(xmcxb.getHtzt()!=null&&!xmcxb.getHtzt().equals("")){
+        if(xmcxb2.getHtzt()!=null&&xmcxb2.getHtzt().length!=0){
             for(int i=0;i<res.size();i++){
-                if(!res.get(i).getHtzt().contains(xmcxb.getHtzt())){
+                if(!Arrays.asList(xmcxb2.getHtzt()).contains(res.get(i).getHtzt())){
                     res.remove(i);
                     i--;
                 }
             }
         }
         //过滤施工状态
-        if(xmcxb.getSgzt()!=null&&!xmcxb.getSgzt().equals("")){
-            for (int i=0;i<res.size();i++){
-                if(!res.get(i).getSgzt().contains(xmcxb.getSgzt())){
+        if(xmcxb2.getSgzt()!=null&&xmcxb2.getSgzt().length!=0){
+            for(int i=0;i<res.size();i++){
+                if(!Arrays.asList(xmcxb2.getSgzt()).contains(res.get(i).getSgzt())){
                     res.remove(i);
                     i--;
                 }
             }
         }
         //过滤结算状态
-        if(xmcxb.getJszt()!=null&&!xmcxb.getJszt().equals("")){
+        if(xmcxb2.getJszt()!=null&&xmcxb2.getJszt().length!=0){
             for(int i=0;i<res.size();i++){
-                if(!res.get(i).getJszt().contains(xmcxb.getJszt())){
+                if(!Arrays.asList(xmcxb2.getJszt()).contains(res.get(i).getJszt())){
                     res.remove(i);
                     i--;
                 }
             }
+        }
+        for (int i=0;i<res.size();i++){
+            res.get(i).setXmid(String.valueOf(i+1));
         }
         return res;
     }

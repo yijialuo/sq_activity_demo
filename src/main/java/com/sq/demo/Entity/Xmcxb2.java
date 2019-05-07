@@ -1,15 +1,9 @@
-package com.sq.demo.pojo;
+package com.sq.demo.Entity;
 
+import javax.persistence.Id;
 import java.math.BigDecimal;
-import javax.persistence.*;
 
-public class Xmcxb {
-    /**
-     * 主键
-     */
-    @Id
-    private String xmid;
-
+public class Xmcxb2 {
     /**
      * 编号
      */
@@ -28,22 +22,22 @@ public class Xmcxb {
     /**
      * 申报部门
      */
-    private String lxbm;
+    private String[] lxbm;
 
     /**
      * 修改人 项目分类
      */
-    private String xmdl;
+    private String[] xmdl;
 
     /**
      * 部门审核意见
      */
-    private String lxlb;
+    private String[] lxlb;
 
     /**
      * 项目类型
      */
-    private String xmlb;
+    private String[] xmlb;
 
     /**
      * 投资概算
@@ -55,13 +49,6 @@ public class Xmcxb {
      */
     private BigDecimal htje;
 
-    private String spzt;
-
-    private String htzt;
-
-    private String sgzt;
-
-    private String jszt;
     /**
      * 时间节点
      */
@@ -104,34 +91,22 @@ public class Xmcxb {
     /**
      * 申请人
      */
-    private String xmfqr;
+    private String[] xmfqr;
 
     /**
      * 中标单位
      */
-    private String xmjbr;
+    private String[] xmjbr;
 
+    private String spzt;
 
+    private String[] htzt;
+
+    private String[] sgzt;
+
+    private String[] jszt;
 
     private String lhzbwjsj;
-
-    /**
-     * 获取主键
-     *
-     * @return xmid - 主键
-     */
-    public String getXmid() {
-        return xmid;
-    }
-
-    /**
-     * 设置主键
-     *
-     * @param xmid 主键
-     */
-    public void setXmid(String xmid) {
-        this.xmid = xmid;
-    }
 
     /**
      * 获取编号
@@ -192,7 +167,7 @@ public class Xmcxb {
      *
      * @return lxbm - 申报部门
      */
-    public String getLxbm() {
+    public String[] getLxbm() {
         return lxbm;
     }
 
@@ -201,7 +176,7 @@ public class Xmcxb {
      *
      * @param lxbm 申报部门
      */
-    public void setLxbm(String lxbm) {
+    public void setLxbm(String[] lxbm) {
         this.lxbm = lxbm;
     }
 
@@ -210,7 +185,7 @@ public class Xmcxb {
      *
      * @return xmdl - 修改人 项目分类
      */
-    public String getXmdl() {
+    public String[] getXmdl() {
         return xmdl;
     }
 
@@ -219,7 +194,7 @@ public class Xmcxb {
      *
      * @param xmdl 修改人 项目分类
      */
-    public void setXmdl(String xmdl) {
+    public void setXmdl(String[] xmdl) {
         this.xmdl = xmdl;
     }
 
@@ -228,7 +203,7 @@ public class Xmcxb {
      *
      * @return lxlb - 部门审核意见
      */
-    public String getLxlb() {
+    public String[] getLxlb() {
         return lxlb;
     }
 
@@ -237,7 +212,7 @@ public class Xmcxb {
      *
      * @param lxlb 部门审核意见
      */
-    public void setLxlb(String lxlb) {
+    public void setLxlb(String[] lxlb) {
         this.lxlb = lxlb;
     }
 
@@ -246,7 +221,7 @@ public class Xmcxb {
      *
      * @return xmlb - 项目类型
      */
-    public String getXmlb() {
+    public String[] getXmlb() {
         return xmlb;
     }
 
@@ -255,7 +230,7 @@ public class Xmcxb {
      *
      * @param xmlb 项目类型
      */
-    public void setXmlb(String xmlb) {
+    public void setXmlb(String[] xmlb) {
         this.xmlb = xmlb;
     }
 
@@ -454,7 +429,7 @@ public class Xmcxb {
      *
      * @return xmfqr - 申请人
      */
-    public String getXmfqr() {
+    public String[] getXmfqr() {
         return xmfqr;
     }
 
@@ -463,7 +438,7 @@ public class Xmcxb {
      *
      * @param xmfqr 申请人
      */
-    public void setXmfqr(String xmfqr) {
+    public void setXmfqr(String[] xmfqr) {
         this.xmfqr = xmfqr;
     }
 
@@ -472,7 +447,7 @@ public class Xmcxb {
      *
      * @return xmjbr - 中标单位
      */
-    public String getXmjbr() {
+    public String[] getXmjbr() {
         return xmjbr;
     }
 
@@ -481,7 +456,7 @@ public class Xmcxb {
      *
      * @param xmjbr 中标单位
      */
-    public void setXmjbr(String xmjbr) {
+    public void setXmjbr(String[] xmjbr) {
         this.xmjbr = xmjbr;
     }
 
@@ -502,42 +477,42 @@ public class Xmcxb {
     /**
      * @return htzt
      */
-    public String getHtzt() {
+    public String[] getHtzt() {
         return htzt;
     }
 
     /**
      * @param htzt
      */
-    public void setHtzt(String htzt) {
+    public void setHtzt(String[] htzt) {
         this.htzt = htzt;
     }
 
     /**
      * @return sgzt
      */
-    public String getSgzt() {
+    public String[] getSgzt() {
         return sgzt;
     }
 
     /**
      * @param sgzt
      */
-    public void setSgzt(String sgzt) {
+    public void setSgzt(String[] sgzt) {
         this.sgzt = sgzt;
     }
 
     /**
      * @return jszt
      */
-    public String getJszt() {
+    public String[] getJszt() {
         return jszt;
     }
 
     /**
      * @param jszt
      */
-    public void setJszt(String jszt) {
+    public void setJszt(String[] jszt) {
         this.jszt = jszt;
     }
 
