@@ -7,6 +7,7 @@ public class Xmcxb2 {
     /**
      * 编号
      */
+
     private String xmbh;
 
     /**
@@ -17,7 +18,9 @@ public class Xmcxb2 {
     /**
      * 申请时间
      */
-    private String lxsj;
+    private String kslxsj;
+
+    private String jslxsj;
 
     /**
      * 申报部门
@@ -52,12 +55,16 @@ public class Xmcxb2 {
     /**
      * 时间节点
      */
-    private String kgsj;
+    private String kskgsj;
+
+    private String jskgsj;
 
     /**
      * 完成时间
      */
-    private String wgsj;
+    private String kswgsj;
+
+    private String jswgsj;
 
     private BigDecimal zjsjd;
 
@@ -66,22 +73,30 @@ public class Xmcxb2 {
     /**
      * 两会时间
      */
-    private String xmghsj;
+    private String ksxmghsj;
+
+    private String jsxmghsj;
 
     /**
      * 定标时间
      */
-    private String dbsj;
+    private String ksdbsj;
+
+    private String jsdbsj;
 
     /**
      * 日期
      */
-    private String htqdsj;
+    private String kshtqdsj;
+
+    private String jshtqdsj;
 
     /**
      * 日期
      */
-    private String jssj;
+    private String ksjssj;
+
+    private String jsjssj;
 
     /**
      * 中标单位
@@ -106,427 +121,273 @@ public class Xmcxb2 {
 
     private String[] jszt;
 
-    private String lhzbwjsj;
+    private String kslhzbwjsj;
 
-    /**
-     * 获取编号
-     *
-     * @return xmbh - 编号
-     */
+    private String jslhzbwjsj;
+
     public String getXmbh() {
         return xmbh;
     }
 
-    /**
-     * 设置编号
-     *
-     * @param xmbh 编号
-     */
     public void setXmbh(String xmbh) {
         this.xmbh = xmbh;
     }
 
-    /**
-     * 获取项目名称
-     *
-     * @return xmmc - 项目名称
-     */
     public String getXmmc() {
         return xmmc;
     }
 
-    /**
-     * 设置项目名称
-     *
-     * @param xmmc 项目名称
-     */
     public void setXmmc(String xmmc) {
         this.xmmc = xmmc;
     }
 
-    /**
-     * 获取申请时间
-     *
-     * @return lxsj - 申请时间
-     */
-    public String getLxsj() {
-        return lxsj;
+    public String getKslxsj() {
+        return kslxsj;
     }
 
-    /**
-     * 设置申请时间
-     *
-     * @param lxsj 申请时间
-     */
-    public void setLxsj(String lxsj) {
-        this.lxsj = lxsj;
+    public void setKslxsj(String kslxsj) {
+        this.kslxsj = kslxsj;
     }
 
-    /**
-     * 获取申报部门
-     *
-     * @return lxbm - 申报部门
-     */
+
+
     public String[] getLxbm() {
         return lxbm;
     }
 
-    /**
-     * 设置申报部门
-     *
-     * @param lxbm 申报部门
-     */
     public void setLxbm(String[] lxbm) {
         this.lxbm = lxbm;
     }
 
-    /**
-     * 获取修改人 项目分类
-     *
-     * @return xmdl - 修改人 项目分类
-     */
     public String[] getXmdl() {
         return xmdl;
     }
 
-    /**
-     * 设置修改人 项目分类
-     *
-     * @param xmdl 修改人 项目分类
-     */
     public void setXmdl(String[] xmdl) {
         this.xmdl = xmdl;
     }
 
-    /**
-     * 获取部门审核意见
-     *
-     * @return lxlb - 部门审核意见
-     */
     public String[] getLxlb() {
         return lxlb;
     }
 
-    /**
-     * 设置部门审核意见
-     *
-     * @param lxlb 部门审核意见
-     */
     public void setLxlb(String[] lxlb) {
         this.lxlb = lxlb;
     }
 
-    /**
-     * 获取项目类型
-     *
-     * @return xmlb - 项目类型
-     */
     public String[] getXmlb() {
         return xmlb;
     }
 
-    /**
-     * 设置项目类型
-     *
-     * @param xmlb 项目类型
-     */
     public void setXmlb(String[] xmlb) {
         this.xmlb = xmlb;
     }
 
-    /**
-     * 获取投资概算
-     *
-     * @return jhje - 投资概算
-     */
     public String getJhje() {
         return jhje;
     }
 
-    /**
-     * 设置投资概算
-     *
-     * @param jhje 投资概算
-     */
     public void setJhje(String jhje) {
         this.jhje = jhje;
     }
 
-    /**
-     * 获取合同价款
-     *
-     * @return htje - 合同价款
-     */
     public BigDecimal getHtje() {
         return htje;
     }
 
-    /**
-     * 设置合同价款
-     *
-     * @param htje 合同价款
-     */
     public void setHtje(BigDecimal htje) {
         this.htje = htje;
     }
 
-    /**
-     * 获取时间节点
-     *
-     * @return kgsj - 时间节点
-     */
-    public String getKgsj() {
-        return kgsj;
+    public String getKskgsj() {
+        return kskgsj;
     }
 
-    /**
-     * 设置时间节点
-     *
-     * @param kgsj 时间节点
-     */
-    public void setKgsj(String kgsj) {
-        this.kgsj = kgsj;
+    public void setKskgsj(String kskgsj) {
+        this.kskgsj = kskgsj;
     }
 
-    /**
-     * 获取完成时间
-     *
-     * @return wgsj - 完成时间
-     */
-    public String getWgsj() {
-        return wgsj;
+    public String getJskgsj() {
+        return jskgsj;
     }
 
-    /**
-     * 设置完成时间
-     *
-     * @param wgsj 完成时间
-     */
-    public void setWgsj(String wgsj) {
-        this.wgsj = wgsj;
+    public void setJskgsj(String jskgsj) {
+        this.jskgsj = jskgsj;
     }
 
-    /**
-     * @return zjsjd
-     */
+    public String getKswgsj() {
+        return kswgsj;
+    }
+
+    public void setKswgsj(String kswgsj) {
+        this.kswgsj = kswgsj;
+    }
+
+    public String getJswgsj() {
+        return jswgsj;
+    }
+
+    public void setJswgsj(String jswgsj) {
+        this.jswgsj = jswgsj;
+    }
+
     public BigDecimal getZjsjd() {
         return zjsjd;
     }
 
-    /**
-     * @param zjsjd
-     */
     public void setZjsjd(BigDecimal zjsjd) {
         this.zjsjd = zjsjd;
     }
 
-    /**
-     * @return jnjsjd
-     */
     public BigDecimal getJnjsjd() {
         return jnjsjd;
     }
 
-    /**
-     * @param jnjsjd
-     */
     public void setJnjsjd(BigDecimal jnjsjd) {
         this.jnjsjd = jnjsjd;
     }
 
-    /**
-     * 获取两会时间
-     *
-     * @return xmghsj - 两会时间
-     */
-    public String getXmghsj() {
-        return xmghsj;
+    public String getKsxmghsj() {
+        return ksxmghsj;
     }
 
-    /**
-     * 设置两会时间
-     *
-     * @param xmghsj 两会时间
-     */
-    public void setXmghsj(String xmghsj) {
-        this.xmghsj = xmghsj;
+    public void setKsxmghsj(String ksxmghsj) {
+        this.ksxmghsj = ksxmghsj;
     }
 
-    /**
-     * 获取定标时间
-     *
-     * @return dbsj - 定标时间
-     */
-    public String getDbsj() {
-        return dbsj;
+    public String getJsxmghsj() {
+        return jsxmghsj;
     }
 
-    /**
-     * 设置定标时间
-     *
-     * @param dbsj 定标时间
-     */
-    public void setDbsj(String dbsj) {
-        this.dbsj = dbsj;
+    public void setJsxmghsj(String jsxmghsj) {
+        this.jsxmghsj = jsxmghsj;
     }
 
-    /**
-     * 获取日期
-     *
-     * @return htqdsj - 日期
-     */
-    public String getHtqdsj() {
-        return htqdsj;
+    public String getKsdbsj() {
+        return ksdbsj;
     }
 
-    /**
-     * 设置日期
-     *
-     * @param htqdsj 日期
-     */
-    public void setHtqdsj(String htqdsj) {
-        this.htqdsj = htqdsj;
+    public void setKsdbsj(String ksdbsj) {
+        this.ksdbsj = ksdbsj;
     }
 
-    /**
-     * 获取日期
-     *
-     * @return jssj - 日期
-     */
-    public String getJssj() {
-        return jssj;
+    public String getJsdbsj() {
+        return jsdbsj;
     }
 
-    /**
-     * 设置日期
-     *
-     * @param jssj 日期
-     */
-    public void setJssj(String jssj) {
-        this.jssj = jssj;
+    public void setJsdbsj(String jsdbsj) {
+        this.jsdbsj = jsdbsj;
     }
 
-    /**
-     * 获取中标单位
-     *
-     * @return cbdw - 中标单位
-     */
+    public String getKshtqdsj() {
+        return kshtqdsj;
+    }
+
+    public void setKshtqdsj(String kshtqdsj) {
+        this.kshtqdsj = kshtqdsj;
+    }
+
+    public String getJshtqdsj() {
+        return jshtqdsj;
+    }
+
+    public void setJshtqdsj(String jshtqdsj) {
+        this.jshtqdsj = jshtqdsj;
+    }
+
+    public String getKsjssj() {
+        return ksjssj;
+    }
+
+    public void setKsjssj(String ksjssj) {
+        this.ksjssj = ksjssj;
+    }
+
+    public String getJsjssj() {
+        return jsjssj;
+    }
+
+    public void setJsjssj(String jsjssj) {
+        this.jsjssj = jsjssj;
+    }
+
     public String getCbdw() {
         return cbdw;
     }
 
-    /**
-     * 设置中标单位
-     *
-     * @param cbdw 中标单位
-     */
     public void setCbdw(String cbdw) {
         this.cbdw = cbdw;
     }
 
-    /**
-     * 获取申请人
-     *
-     * @return xmfqr - 申请人
-     */
     public String[] getXmfqr() {
         return xmfqr;
     }
 
-    /**
-     * 设置申请人
-     *
-     * @param xmfqr 申请人
-     */
     public void setXmfqr(String[] xmfqr) {
         this.xmfqr = xmfqr;
     }
 
-    /**
-     * 获取中标单位
-     *
-     * @return xmjbr - 中标单位
-     */
     public String[] getXmjbr() {
         return xmjbr;
     }
 
-    /**
-     * 设置中标单位
-     *
-     * @param xmjbr 中标单位
-     */
     public void setXmjbr(String[] xmjbr) {
         this.xmjbr = xmjbr;
     }
 
-    /**
-     * @return spzt
-     */
     public String getSpzt() {
         return spzt;
     }
 
-    /**
-     * @param spzt
-     */
     public void setSpzt(String spzt) {
         this.spzt = spzt;
     }
 
-    /**
-     * @return htzt
-     */
     public String[] getHtzt() {
         return htzt;
     }
 
-    /**
-     * @param htzt
-     */
     public void setHtzt(String[] htzt) {
         this.htzt = htzt;
     }
 
-    /**
-     * @return sgzt
-     */
     public String[] getSgzt() {
         return sgzt;
     }
 
-    /**
-     * @param sgzt
-     */
     public void setSgzt(String[] sgzt) {
         this.sgzt = sgzt;
     }
 
-    /**
-     * @return jszt
-     */
     public String[] getJszt() {
         return jszt;
     }
 
-    /**
-     * @param jszt
-     */
     public void setJszt(String[] jszt) {
         this.jszt = jszt;
     }
 
-    /**
-     * @return lhzbwjsj
-     */
-    public String getLhzbwjsj() {
-        return lhzbwjsj;
+    public String getKslhzbwjsj() {
+        return kslhzbwjsj;
     }
 
-    /**
-     * @param lhzbwjsj
-     */
-    public void setLhzbwjsj(String lhzbwjsj) {
-        this.lhzbwjsj = lhzbwjsj;
+    public void setKslhzbwjsj(String kslhzbwjsj) {
+        this.kslhzbwjsj = kslhzbwjsj;
+    }
+
+    public String getJslhzbwjsj() {
+        return jslhzbwjsj;
+    }
+
+    public void setJslhzbwjsj(String jslhzbwjsj) {
+        this.jslhzbwjsj = jslhzbwjsj;
+    }
+
+    public String getJslxsj() {
+        return jslxsj;
+    }
+
+    public void setJslxsj(String jslxsj) {
+        this.jslxsj = jslxsj;
     }
 }

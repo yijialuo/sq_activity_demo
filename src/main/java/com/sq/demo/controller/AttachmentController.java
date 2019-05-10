@@ -123,6 +123,7 @@ public class AttachmentController {
     public void getattachment1(HttpServletResponse res, String attachment_id) throws UnsupportedEncodingException {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         TaskService taskService = processEngine.getTaskService();
+        System.out.println("attachment_id: "+attachment_id);
         String fileName = taskService.getAttachment(attachment_id).getName();
         res.setHeader("content-type", "application/octet-stream");
         res.setContentType("application/octet-stream");

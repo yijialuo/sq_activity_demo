@@ -1,6 +1,7 @@
 package com.sq.demo.pojo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.sq.demo.Entity.Sgjdb2;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -72,8 +73,7 @@ public class Sgjdb {
     /**
      * 创建时间
      */
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    private Date httjpssj;
+    private String httjpssj;
 
     /**
      * 日期
@@ -265,7 +265,7 @@ public class Sgjdb {
      *
      * @return httjpssj - 创建时间
      */
-    public Date getHttjpssj() {
+    public String getHttjpssj() {
         return httjpssj;
     }
 
@@ -274,7 +274,7 @@ public class Sgjdb {
      *
      * @param httjpssj 创建时间
      */
-    public void setHttjpssj(Date httjpssj) {
+    public void setHttjpssj(String httjpssj) {
         this.httjpssj = httjpssj;
     }
 

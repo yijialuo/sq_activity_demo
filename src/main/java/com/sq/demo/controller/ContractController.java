@@ -11,6 +11,7 @@ import com.sq.demo.pojo.Contract;
 import com.sq.demo.pojo.Contractfile;
 import com.sq.demo.pojo.Project;
 import com.sq.demo.utils.IdCreate;
+import com.sq.demo.utils.Time;
 import org.activiti.engine.*;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
@@ -283,6 +284,7 @@ public class ContractController {
     @Transactional
     public String addContract(@RequestBody Contract con){
         con.setId(IdCreate.id());
+        con.setCjsj(Time.getNow());
         contractMapper.insert(con);
         return con.getId();
     }

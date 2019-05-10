@@ -98,6 +98,9 @@ public class Contract {
     @Column(name="GD")
     private String gd;
 
+    @Column(name="CJSJ")
+    private String cjsj;
+
 
     /**
      * 获取主键
@@ -366,5 +369,13 @@ public class Contract {
 
     public void setGd(String gd) {
         this.gd = gd;
+    }
+
+    public String getCjsj() {
+        return cjsj;
+    }
+
+    public void setCjsj(String cjsj) {
+        this.cjsj = cjsj;
     }
 }

@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -155,7 +157,7 @@ public class BbController {
     }
 
     @GetMapping("/downloadXMSSJDB")
-    public ResponseEntity<byte[]> downloadXMSSJDB(@RequestParam("param") String param) throws IOException {
+    public ResponseEntity<byte[]> downloadXMSSJDB(HttpServletRequest request, HttpServletResponse response,@RequestParam("param") String param) throws IOException {
         ObjectMapper objectMapper=new ObjectMapper();
         Sgjdb2 sgjdb2=objectMapper.readValue(param,Sgjdb2.class);
 

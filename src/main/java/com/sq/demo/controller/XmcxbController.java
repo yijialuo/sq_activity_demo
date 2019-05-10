@@ -1,6 +1,7 @@
 package com.sq.demo.controller;
 
 
+import com.github.pagehelper.PageHelper;
 import com.sq.demo.Entity.Xmcxb2;
 import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.*;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -83,14 +86,42 @@ public class XmcxbController {
         return tcsj(xmcxbMapper.selectAll());
     }
 
+    public void Tcjsjs(Xmcxb2 xmcxb2){
+        if(!xmcxb2.getKslxsj().equals("")&&xmcxb2.getJslxsj().equals("")){
+            xmcxb2.setJslxsj("9999-99-99");
+        }
+        if(!xmcxb2.getKskgsj().equals("")&&xmcxb2.getJskgsj().equals("")){
+            xmcxb2.setJskgsj("9999-99-99");
+        }
+        if(!xmcxb2.getKswgsj().equals("")&&xmcxb2.getJswgsj().equals("")){
+            xmcxb2.setJswgsj("9999-99-99");
+        }
+        if(!xmcxb2.getKsxmghsj().equals("")&&xmcxb2.getJsxmghsj().equals("")){
+            xmcxb2.setJsxmghsj("9999-99-99");
+        }
+        if(!xmcxb2.getKsdbsj().equals("")&&xmcxb2.getJsdbsj().equals("")){
+            xmcxb2.setJsdbsj("9999-99-99");
+        }
+        if(!xmcxb2.getKshtqdsj().equals("")&&xmcxb2.getJshtqdsj().equals("")){
+            xmcxb2.setJshtqdsj("9999-99-99");
+        }
+        if(!xmcxb2.getKsjssj().equals("")&&xmcxb2.getJsjssj().equals("")){
+            xmcxb2.setJsjssj("9999-99-99");
+        }
+        if(!xmcxb2.getKslhzbwjsj().equals("")&&xmcxb2.getJslhzbwjsj().equals("")){
+            xmcxb2.setJslhzbwjsj("9999-99-99");
+        }
+    }
+
     @RequestMapping("select")
     public List<Xmcxb> select(@RequestBody Xmcxb2 xmcxb2) {
+        Tcjsjs(xmcxb2);
         List<Xmcxb> res=tcsj(xmcxbMapper.search(xmcxb2));
         //过滤状态
         //过滤审批状态
         if(xmcxb2.getSpzt()!=null&&!xmcxb2.getSpzt().equals("")){
             for(int i=0;i<res.size();i++){
-                if(!res.get(i).getSpzt().contains(xmcxb2.getSpzt())){
+                if(!res.get(i).getSpzt().equals(xmcxb2.getSpzt())){
                     res.remove(i);
                     i--;
                 }
@@ -128,4 +159,5 @@ public class XmcxbController {
         }
         return res;
     }
+
 }

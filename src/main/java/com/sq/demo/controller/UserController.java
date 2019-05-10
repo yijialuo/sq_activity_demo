@@ -38,35 +38,43 @@ public class UserController {
     FsMapper fsMapper;
 
 
+    //判断是不是技术部的人
+    @RequestMapping("/isJsb")
+    public boolean isJsb(String userId) {
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
+        return identityService.getUserInfo(userId, "departmentId").equals("20190123022801622");
+    }
+
     //拿主管经理
     @RequestMapping("/getAllJsbZgjl")
-    public List<UserOV> getAllJsbZgjl(String manageType,String projectId){
-        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
-        IdentityService identityService=engine.getIdentityService();
-        List<UserOV> userOVS=new ArrayList<>();
-        if(projectId==null||projectId.equals("")){
-            List<User> users=identityService.createUserQuery().list();
-            for(User user:users){
-                Group group=identityService.createGroupQuery().groupMember(user.getId()).singleResult();
-                if(group.getId().equals("jsb_zgjl")&&identityService.getUserInfo(user.getId(),"manageType").contains(manageType)){
-                    UserOV userOV=new UserOV();
-                    userOV.userId=user.getId();
-                    userOV.userName=user.getFirstName();
+    public List<UserOV> getAllJsbZgjl(String manageType, String projectId) {
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
+        List<UserOV> userOVS = new ArrayList<>();
+        if (projectId == null || projectId.equals("")) {
+            List<User> users = identityService.createUserQuery().list();
+            for (User user : users) {
+                Group group = identityService.createGroupQuery().groupMember(user.getId()).singleResult();
+                if (group.getId().equals("jsb_zgjl") && identityService.getUserInfo(user.getId(), "manageType").contains(manageType)) {
+                    UserOV userOV = new UserOV();
+                    userOV.userId = user.getId();
+                    userOV.userName = user.getFirstName();
                     userOVS.add(userOV);
                 }
             }
             return userOVS;
-        }else {//拿到处理的技术部主管经理
-            Fs fs=new Fs();
+        } else {//拿到处理的技术部主管经理
+            Fs fs = new Fs();
             fs.setProjectid(projectId);
-            fs=fsMapper.selectOne(fs);
-            if(fs==null||fs.getDojsbzgjl()==null||fs.getDojsbzgjl().equals("")){
-                Project project=projectMapper.selectByPrimaryKey(projectId);
-                return getAllJsbZgjl(project.getReviser(),null);
+            fs = fsMapper.selectOne(fs);
+            if (fs == null || fs.getDojsbzgjl() == null || fs.getDojsbzgjl().equals("")) {
+                Project project = projectMapper.selectByPrimaryKey(projectId);
+                return getAllJsbZgjl(project.getReviser(), null);
             }
-            UserOV userOV=new UserOV();
-            userOV.userId=fs.getDojsbzgjl();
-            userOV.userName=identityService.createUserQuery().userId(fs.getDojsbzgjl()).singleResult().getFirstName();
+            UserOV userOV = new UserOV();
+            userOV.userId = fs.getDojsbzgjl();
+            userOV.userName = identityService.createUserQuery().userId(fs.getDojsbzgjl()).singleResult().getFirstName();
             userOVS.add(userOV);
             return userOVS;
         }
@@ -75,14 +83,14 @@ public class UserController {
 
     //拿发起人
     @RequestMapping("/fqr")
-    public List<String> fqr(){
+    public List<String> fqr() {
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = engine.getIdentityService();
         List<User> users = identityService.createUserQuery().list();
-        List<String> res=new ArrayList<>();
+        List<String> res = new ArrayList<>();
         for (User user : users) {
             String grouoId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
-            if (grouoId.equals("jsb_doman")||grouoId.equals("doman")) {
+            if (grouoId.equals("jsb_doman") || grouoId.equals("doman")) {
                 res.add(user.getFirstName());
             }
         }
@@ -91,11 +99,11 @@ public class UserController {
 
     //拿技术部经办人
     @RequestMapping("/jsbjbr")
-    public List<String> jsbjbr(){
+    public List<String> jsbjbr() {
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = engine.getIdentityService();
         List<User> users = identityService.createUserQuery().list();
-        List<String> res=new ArrayList<>();
+        List<String> res = new ArrayList<>();
         for (User user : users) {
             String grouoId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
             if (grouoId.equals("jsb_doman")) {
@@ -107,33 +115,33 @@ public class UserController {
 
     //拿技术部经办人
     @RequestMapping("/getAllJsbDoman")
-    public List<UserOV> getAllJsbDoman(String manageType,String projectId){
-        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
-        IdentityService identityService=engine.getIdentityService();
-        List<UserOV> userOVS=new ArrayList<>();
-        if(projectId==null||projectId.equals("")){//拿所有
-            List<User> users=identityService.createUserQuery().list();
-            for(User user:users){
-                Group group=identityService.createGroupQuery().groupMember(user.getId()).singleResult();
-                if(group.getId().equals("jsb_doman")&&identityService.getUserInfo(user.getId(),"manageType").contains(manageType)){
-                    UserOV userOV=new UserOV();
-                    userOV.userId=user.getId();
-                    userOV.userName=user.getFirstName();
+    public List<UserOV> getAllJsbDoman(String manageType, String projectId) {
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
+        List<UserOV> userOVS = new ArrayList<>();
+        if (projectId == null || projectId.equals("")) {//拿所有
+            List<User> users = identityService.createUserQuery().list();
+            for (User user : users) {
+                Group group = identityService.createGroupQuery().groupMember(user.getId()).singleResult();
+                if (group.getId().equals("jsb_doman") && identityService.getUserInfo(user.getId(), "manageType").contains(manageType)) {
+                    UserOV userOV = new UserOV();
+                    userOV.userId = user.getId();
+                    userOV.userName = user.getFirstName();
                     userOVS.add(userOV);
                 }
             }
             return userOVS;
-        }else {//拿处理的经办人
-            Fs fs=new Fs();
+        } else {//拿处理的经办人
+            Fs fs = new Fs();
             fs.setProjectid(projectId);
-            fs=fsMapper.selectOne(fs);
-            if(fs==null){
-                Project project=projectMapper.selectByPrimaryKey(projectId);
-                return getAllJsbDoman(project.getReviser(),null);
+            fs = fsMapper.selectOne(fs);
+            if (fs == null) {
+                Project project = projectMapper.selectByPrimaryKey(projectId);
+                return getAllJsbDoman(project.getReviser(), null);
             }
-            UserOV userOV=new UserOV();
-            userOV.userId=fs.getDojsbjbr();
-            userOV.userName=identityService.createUserQuery().userId(fs.getDojsbjbr()).singleResult().getFirstName();
+            UserOV userOV = new UserOV();
+            userOV.userId = fs.getDojsbjbr();
+            userOV.userName = identityService.createUserQuery().userId(fs.getDojsbjbr()).singleResult().getFirstName();
             userOVS.add(userOV);
             return userOVS;
         }
@@ -146,7 +154,6 @@ public class UserController {
         User user = identityService.createUserQuery().userFirstName(userName).singleResult();
         return user.getId();
     }
-
 
 
     //拿到项目的经办人
@@ -184,7 +191,7 @@ public class UserController {
                 }
                 return userOVS;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
@@ -223,7 +230,7 @@ public class UserController {
                 }
             }
             return res;
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
@@ -277,8 +284,8 @@ public class UserController {
         //保存用户部门
         identityService.setUserInfo(user.getId(), "departmentId", userOV.departmentId);
         //选择了manageType
-        if(userOV.manageType!=null&&userOV.manageType.length!=0){
-            identityService.setUserInfo(user.getId(),"manageType", ArrayToString.array(userOV.manageType));
+        if (userOV.manageType != null && userOV.manageType.length != 0) {
+            identityService.setUserInfo(user.getId(), "manageType", ArrayToString.array(userOV.manageType));
         }
 
         identityService.saveUser(user);
@@ -328,8 +335,8 @@ public class UserController {
         //修改部门ID
         identityService.setUserInfo(user.getId(), "departmentId", userOV.departmentId);
         //修改处理类型
-        if(userOV.manageType!=null&&userOV.manageType.length!=0){
-            identityService.setUserInfo(user.getId(),"manageType",ArrayToString.array(userOV.manageType));
+        if (userOV.manageType != null && userOV.manageType.length != 0) {
+            identityService.setUserInfo(user.getId(), "manageType", ArrayToString.array(userOV.manageType));
 
         }
         identityService.saveUser(user);
@@ -353,8 +360,8 @@ public class UserController {
                         userOV.userName = user.getFirstName();
                         userOV.passWord = user.getPassword();
                         userOV.departmentId = identityService.getUserInfo(user.getId(), "departmentId");
-                        if(identityService.getUserInfo(user.getId(),"manageType")!=null){
-                            userOV.manageType=identityService.getUserInfo(user.getId(),"manageType").split(",");
+                        if (identityService.getUserInfo(user.getId(), "manageType") != null) {
+                            userOV.manageType = identityService.getUserInfo(user.getId(), "manageType").split(",");
                         }
                         //查询用户所在的组
                         String groupId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();

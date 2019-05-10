@@ -20,7 +20,7 @@
         <result column="LHSJ" property="lhsj" jdbcType="VARCHAR"/>
         <result column="ZJHSJ" property="zjhsj" jdbcType="VARCHAR"/>
         <result column="dbsj" property="dbsj" jdbcType="VARCHAR"/>
-        <result column="httjpssj" property="httjpssj" jdbcType="TIMESTAMP"/>
+        <result column="httjpssj" property="httjpssj" jdbcType="VARCHAR"/>
         <result column="htqdsj" property="htqdsj" jdbcType="VARCHAR"/>
         <result column="htje" property="htje" jdbcType="DECIMAL"/>
         <result column="kgsj" property="kgsj" jdbcType="VARCHAR"/>
@@ -73,38 +73,47 @@
                 </foreach>
             </if>
 
-            <if test="lhsj!=null and lhsj!='' ">
-                and lhsj like concat('%',#{lhsj},'%')
+            <if test="kslhsj!='' or jslhsj!='' ">
+                and lhsj  BETWEEN #{kslhsj} and #{jslhsj}
             </if>
-            <if test="zjhsj!=null and zjhsj!='' ">
-                and zjhsj like concat('%',#{zjhsj},'%')
+
+            <if test="kszjhsj!='' or jszjhsj!='' ">
+                and zjhsj  BETWEEN #{kszjhsj} and #{jszjhsj}
             </if>
-            <if test="dbsj!=null and dbsj!='' ">
-                and dbsj like concat('%',#{dbsj},'%')
+
+            <if test="ksdbsj!='' or jsdbsj!='' ">
+                and dbsj BETWEEN #{ksdbsj} and #{jsdbsj}
             </if>
-            <if test="httjpssj!=null and httjpssj!='' ">
-                and httjpssj like concat('%',#{httjpssj},'%')
+
+
+            <if test="kshttjpssj!='' or jshttjpssj!=''">
+                and httjpssj BETWEEN #{kshttjpssj} and #{jshttjpssj}
             </if>
-            <if test="htqdsj!=null and htqdsj!='' ">
-                and htqdsj like concat('%',#{htqdsj},'%')
+
+            <if test="kshtqdsj!='' or jshtqdsj!=''">
+                and htqdsj BETWEEN #{kshtqdsj} and #{jshtqdsj}
             </if>
+
             <if test="htje!=null and htje!='' ">
                 and htje like concat('%',#{htje},'%')
             </if>
-            <if test="kgsj!=null and kgsj!='' ">
-                and kgsj like concat('%',#{kgsj},'%')
+
+            <if test="kskgsj!='' or jskgsj!='' ">
+                and kgsj BETWEEN #{kskgsj} and #{jskgsj}
             </if>
-            <if test="ysrq!=null and ysrq!='' ">
-                and kgsj like concat('%',#{ysrq},'%')
+
+            <if test="ksysrq!='' or jsysrq!='' ">
+                and ysrq BETWEEN #{ksysrq} and #{jsysrq}
             </if>
+
             <if test="bndjsjd!=null and bndjsjd!='' ">
                 and bndjsjd like concat('%',#{bndjsjd},'%')
             </if>
             <if test="zjsjd!=null and zjsjd!='' ">
                 and zjsjd like concat('%',#{zjsjd},'%')
             </if>
-            <if test="wcjsjs!=null and wcjsjs!='' ">
-                and wcjsjs like concat('%',#{wcjsjs},'%')
+            <if test="kswcjsjs!='' or jswcjsjs!='' ">
+                and wcjsjs BETWEEN #{kswcjsjs} and #{jswcjsjs}
             </if>
             <if test="jsbzgjl!=null and jsbzgjl!='' ">
                 and jsbzgjl like concat('%',#{jsbzgjl},'%')

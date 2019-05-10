@@ -66,6 +66,7 @@ public class DepartmentController {
         }
     }
 
+
     //查询所有部门
     @RequestMapping("/getAllDepartment")
     List<Department> getDepartment() {

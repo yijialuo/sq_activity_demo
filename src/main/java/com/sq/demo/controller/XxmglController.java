@@ -35,6 +35,7 @@ public class XxmglController {
     public List<Xxmgl> getProjects(String userName) {
         Project project = new Project();
         project.setBider(userName);
+        project.setDepAuditOpinion("股份项目");
         List<Project> projects = projectMapper.select(project);
         List<Xxmgl> res = new ArrayList<>();
         for (Project project1 : projects) {

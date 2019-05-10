@@ -42,8 +42,8 @@
       <if test="xmmc!=null and xmmc!='' ">
         and xmmc like concat('%',#{xmmc},'%')
       </if>
-      <if test="lxsj!=null and lxsj!='' ">
-        and lxsj like concat('%',#{lxsj},'%')
+      <if test=" kslxsj!='' or jslxsj!='' ">
+        and lxsj   BETWEEN #{kslxsj} and #{jslxsj}
       </if>
 
       <if test="lxbm!=null and  lxbm.length>0 ">
@@ -80,30 +80,38 @@
       <if test="htje!=null and htje!='' ">
         and htje like concat('%',#{htje},'%')
       </if>
-      <if test="kgsj!=null and kgsj!='' ">
-        and kgsj like concat('%',#{kgsj},'%')
+
+      <if test=" kskgsj!='' or jskgsj!='' ">
+        and kgsj   BETWEEN #{kskgsj} and #{jskgsj}
       </if>
-      <if test="wgsj!=null and wgsj!='' ">
-        and wgsj like concat('%',#{wgsj},'%')
+
+      <if test=" kswgsj!='' or jswgsj!='' ">
+        and wgsj   BETWEEN #{kswgsj} and #{jswgsj}
       </if>
+
       <if test="zjsjd!=null and zjsjd!='' ">
         and zjsjd like concat('%',#{zjsjd},'%')
       </if>
       <if test="jnjsjd!=null and jnjsjd!='' ">
         and jnjsjd like concat('%',#{jnjsjd},'%')
       </if>
-      <if test="xmghsj!=null and xmghsj!='' ">
-        and xmghsj like concat('%',#{xmghsj},'%')
+
+      <if test=" ksxmghsj!='' or jsxmghsj!='' ">
+        and xmghsj   BETWEEN #{ksxmghsj} and #{jsxmghsj}
       </if>
-      <if test="dbsj!=null and dbsj!='' ">
-        and dbsj like concat('%',#{dbsj},'%')
+
+      <if test=" ksdbsj!='' or jsdbsj!='' ">
+        and dbsj   BETWEEN #{ksdbsj} and #{jsdbsj}
       </if>
-      <if test="htqdsj!=null and htqdsj!='' ">
-        and htqdsj like concat('%',#{htqdsj},'%')
+
+      <if test=" kshtqdsj!='' or jshtqdsj!='' ">
+        and htqdsj   BETWEEN #{kshtqdsj} and #{jshtqdsj}
       </if>
-      <if test="jssj!=null and jssj!='' ">
-        and jssj like concat('%',#{jssj},'%')
+
+      <if test=" ksjssj!='' or jsjssj!='' ">
+        and jssj   BETWEEN #{ksjssj} and #{jsjssj}
       </if>
+
       <if test="cbdw!=null and cbdw!='' ">
         and cbdw like concat('%',#{cbdw},'%')
       </if>
@@ -122,9 +130,11 @@
         </foreach>
       </if>
 
-      <if test="lhzbwjsj!=null and lhzbwjsj!='' ">
-        and lhzbwjsj like concat('%',#{lhzbwjsj},'%')
+      <if test=" kslhzbwjsj!='' or jslhzbwjsj!='' ">
+        and lhzbwjsj   BETWEEN #{kslhzbwjsj} and #{jslhzbwjsj}
       </if>
+
+
     </trim>
   </select>
 </mapper>

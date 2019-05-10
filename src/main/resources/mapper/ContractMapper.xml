@@ -21,6 +21,7 @@
     <result column="ZJLYJ" property="zjlyj" jdbcType="VARCHAR" />
     <result column="RQ" property="rq" jdbcType="VARCHAR" />
     <result column="GD" property="gd" jdbcType="VARCHAR" />
+    <result column="CJSJ" property="cjsj" jdbcType="VARCHAR" />
   </resultMap>
 
   <select id="search" resultType="com.sq.demo.pojo.Contract">

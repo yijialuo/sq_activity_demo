@@ -58,6 +58,8 @@ public class ProjectController {
     ContractfileMapper contractfileMapper;
     @Autowired
     JinduMapper jinduMapper;
+    @Autowired
+    XxmglMapper xxmglMapper;
 
     String getSgzt(String projectId) {
         Project project = projectMapper.selectByPrimaryKey(projectId);
@@ -1242,15 +1244,7 @@ public class ProjectController {
     @Transactional
     @RequestMapping("/updataXm")
     public boolean xgxmbd(@RequestBody Project po) {
-        try {
-            if (po.getPid() == null || po.getPid().equals("") || getPidNode(po.getPid()).equals("填写申请表")) {//没有pid，还没开始审批，可以修改
-                projectMapper.updateByPrimaryKeySelective(po);
-                return true;
-            }
-            return false;
-        } catch (Exception e) {
-            return false;
-        }
+        return projectMapper.updateByPrimaryKeySelective(po)==1;
     }
 
     //拿到本部门未开始招标的项目id和项目name
@@ -1309,6 +1303,24 @@ public class ProjectController {
                 }
             }
         }
+        //在小项目管理中找
+        List<String> xmids=new ArrayList<>();
+        List<Xxmgl> xxmgls=xxmglMapper.selectAll();
+        for(Xxmgl xxmgl:xxmgls){
+            xmids.add(xxmgl.getY1());
+        }
+        List<String> xmids2=new ArrayList<>();
+        for(Xm xm:xms){
+            xmids2.add(xm.value);
+        }
+        for(int i=0;i<xmids.size();i++){
+            if(!xmids2.contains(xmids.get(i))){
+                Xm xm=new Xm();
+                xm.value=xmids.get(i);
+                xm.label=projectMapper.selectByPrimaryKey(xmids.get(i)).getProjectNam();
+                xms.add(xm);
+            }
+        }
         return xms;
     }
 
@@ -1352,5 +1364,10 @@ public class ProjectController {
         return projectMapper.selectByPrimaryKey(xmId).getProjectNam();
     }
 
+    //项目id拿项目详情
+    @RequestMapping("/getXmById")
+    public Project getXmById(String xmid){
+        return projectMapper.selectByPrimaryKey(xmid);
+    }
 
 }
