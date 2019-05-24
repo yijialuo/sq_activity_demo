@@ -18,4 +18,7 @@ public interface ContractMapper extends MyMapper<Contract> {
     List<Contract> selectYlc();
 
     List<Contract> search(String contractNo,String ContractDate,String dfdsr,String tzwh);
+
+    @Select("select project_id from contract ")
+    List<String> selectAllXmids();
 }

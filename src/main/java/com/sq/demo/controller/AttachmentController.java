@@ -2,12 +2,11 @@ package com.sq.demo.controller;
 
 import com.sq.demo.Entity.AttachmentReturn;
 
-import com.sq.demo.mapper.AttachmentlinkMapper;
-import com.sq.demo.mapper.DepRankMapper;
-import com.sq.demo.mapper.DepartmentMapper;
-import com.sq.demo.mapper.ProjectMapper;
+import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.Attachmentlink;
 
+import com.sq.demo.pojo.Yscjdwj;
+import com.sq.demo.utils.Time;
 import org.activiti.engine.*;
 
 import org.activiti.engine.task.Attachment;
@@ -44,6 +43,10 @@ public class AttachmentController {
     AttachmentlinkMapper attachmentlinkMapper;
     @Autowired
     DepRankMapper depRankMapper;
+    @Autowired
+    YscjdwjMapper yscjdwjMapper;
+    @Autowired
+    ProjectController projectController;
 
     //删除附件
     @RequestMapping("/deletAttachment")
@@ -58,6 +61,10 @@ public class AttachmentController {
                 ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
                 TaskService taskService = processEngine.getTaskService();
                 taskService.deleteAttachment(attachment_id);
+                //删除已上传节点文件表
+                Yscjdwj yscjdwj=new Yscjdwj();
+                yscjdwj.setFid(attachment_id);
+                yscjdwjMapper.delete(yscjdwj);
                 return true;
             }else {
                 return false;
@@ -80,6 +87,7 @@ public class AttachmentController {
 //        }
     }
 
+
     //返回附件信息
     @RequestMapping("/getattachment")
     public List<AttachmentReturn> getattachment(String pid) {
@@ -91,6 +99,24 @@ public class AttachmentController {
             AttachmentReturn attachmentReturn = new AttachmentReturn();
             attachmentReturn.setAttachment_id(at.getId());
             attachmentReturn.setAttachment_nam(at.getName());
+            attachmentReturns.add(attachmentReturn);
+        }
+        return attachmentReturns;
+    }
+
+
+    //返回附件信息
+    @RequestMapping("/getattachment2")
+    public List<AttachmentReturn> getattachment2(String id,String bcwjid) {
+        List<AttachmentReturn> attachmentReturns = new ArrayList<>();
+        Yscjdwj yscjdwj=new Yscjdwj();
+        yscjdwj.setBcwjid(bcwjid);
+        yscjdwj.setJlid(id);
+        List<Yscjdwj> yscjdwjs=yscjdwjMapper.select(yscjdwj);
+        for (Yscjdwj yscjdwj1 : yscjdwjs) {
+            AttachmentReturn attachmentReturn = new AttachmentReturn();
+            attachmentReturn.setAttachment_id(yscjdwj1.getFid());
+            attachmentReturn.setAttachment_nam(yscjdwj1.getFname());
             attachmentReturns.add(attachmentReturn);
         }
         return attachmentReturns;
@@ -123,7 +149,7 @@ public class AttachmentController {
     public void getattachment1(HttpServletResponse res, String attachment_id) throws UnsupportedEncodingException {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         TaskService taskService = processEngine.getTaskService();
-        System.out.println("attachment_id: "+attachment_id);
+        System.out.println(Time.getNow()+"  attachment_id: "+attachment_id);
         String fileName = taskService.getAttachment(attachment_id).getName();
         res.setHeader("content-type", "application/octet-stream");
         res.setContentType("application/octet-stream");

@@ -6,13 +6,13 @@ import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.*;
 import com.sq.demo.utils.IdCreate;
 import com.sq.demo.utils.Time;
-import org.activiti.bpmn.model.BpmnModel;
+
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
 import org.activiti.engine.impl.identity.Authentication;
-import org.activiti.engine.repository.ProcessDefinition;
+
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Comment;
@@ -24,11 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import sun.misc.BASE64Encoder;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -60,6 +56,10 @@ public class ProjectController {
     JinduMapper jinduMapper;
     @Autowired
     XxmglMapper xxmglMapper;
+    @Autowired
+    YscjdwjMapper yscjdwjMapper;
+    @Autowired
+    ContractMapper contractMapper;
 
     String getSgzt(String projectId) {
         Project project = projectMapper.selectByPrimaryKey(projectId);
@@ -231,7 +231,7 @@ public class ProjectController {
     @RequestMapping("xmzf")
     public boolean xmzf(String id, String pid) {
         try {
-            if(canDelet(id)){
+            if (canDelet(id)) {
                 ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
                 RuntimeService runtimeService = engine.getRuntimeService();
                 //删流程
@@ -242,7 +242,7 @@ public class ProjectController {
                 //删表
                 projectMapper.deleteByPrimaryKey(id);
                 return true;
-            }else {
+            } else {
                 return false;
             }
         } catch (Exception e) {
@@ -291,7 +291,8 @@ public class ProjectController {
         return s1 + "-" + s2 + "-" + s3 + "-" + s4 + "-" + s5 + "-" + s6 + "-" + s7 + "-" + s8;
     }
 
-    //判断当前项目是否可以申请
+
+    //判断当前项目是否可以申请(申请按钮)
     @RequestMapping("/isSq")
     public boolean isSq(String projectId) {
         Project project = projectMapper.selectByPrimaryKey(projectId);
@@ -373,29 +374,37 @@ public class ProjectController {
                 Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
                 project.setPid(pi.getId());
                 projectMapper.updateByPrimaryKeySelective(project);
-                //设置项目参数
-                //taskService.setVariable(task.getId(), "project", project);
                 //设置任务受理人
                 taskService.setAssignee(task.getId(), user.getId());
-                if (!groupName.equals("技术部办事员")) {
-                    //处理前期还是申请时候的附件
-                    Contractfile contractfile = new Contractfile();
-                    contractfile.setCid(project.getId());
-                    List<Contractfile> contractfiles = contractfileMapper.select(contractfile);
-                    RepositoryService repositoryService = engine.getRepositoryService();
-                    for (Contractfile contractfile1 : contractfiles) {
-                        //上传附件  参数：附件类型、任务id，流程id，附件名称，附件描述，文件流
-                        Attachment attachment = taskService.createAttachment("", task.getId(), pi.getId(), contractfile1.getFname(), "", repositoryService.getResourceAsStream(contractfile1.getFid(), contractfile1.getFname()));
-                        Attachmentlink attachmentlink = new Attachmentlink();
-                        attachmentlink.setUserid(project.getProposer());
-                        attachmentlink.setAttachment(attachment.getId());
-                        attachmentlinkMapper.insert(attachmentlink);
-                    }
+
+                //处理前期还未申请时候的附件
+                Contractfile contractfile = new Contractfile();
+                contractfile.setCid(project.getId());
+                List<Contractfile> contractfiles = contractfileMapper.select(contractfile);
+                RepositoryService repositoryService = engine.getRepositoryService();
+                for (Contractfile contractfile1 : contractfiles) {
+                    //上传附件  参数：附件类型、任务id，流程id，附件名称，附件描述，文件流
+                    Attachment attachment = taskService.createAttachment("", task.getId(), pi.getId(), contractfile1.getFname(), "", repositoryService.getResourceAsStream(contractfile1.getFid(), contractfile1.getFname()));
+                    Attachmentlink attachmentlink = new Attachmentlink();
+                    attachmentlink.setUserid(user.getId());
+                    attachmentlink.setAttachment(attachment.getId());
+                    attachmentlinkMapper.insert(attachmentlink);
+                    //更新已上传节点文件的fid
+                    Yscjdwj yscjdwj = new Yscjdwj();
+                    //以前是部署id，为申请的时候用部署id下载
+                    yscjdwj.setFid(contractfile1.getFid());
+                    yscjdwj.setFname(contractfile1.getFname());
+                    yscjdwj.setJlid(project.getId());
+                    yscjdwj = yscjdwjMapper.selectOne(yscjdwj);
+                    //申请了用附件id下载
+                    yscjdwj.setFid(attachment.getId());
+                    yscjdwjMapper.updateByPrimaryKeySelective(yscjdwj);
                 }
+
                 //完成填写申请项目
                 taskService.complete(task.getId());
 
-                //如果申请人是技术部办事员,前面不用走,直接通过
+                //如果申请人是技术部办事员,前面两步不用走,直接到达技术部经办人
                 if (groupName.equals("技术部办事员")) {
                     task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
                     taskService.setVariable(task.getId(), "zgjl", true);
@@ -405,23 +414,10 @@ public class ProjectController {
                     taskService.setVariable(task.getId(), "jl", true);
                     taskService.complete(task.getId());
 
-                    task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-                    taskService.setVariable(task.getId(), "jbr", true);
-                    taskService.setAssignee(task.getId(), user.getId());
+//                    task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+//                    taskService.setVariable(task.getId(), "jbr", true);
+//                    taskService.setAssignee(task.getId(), user.getId());
 
-                    //处理前期还是申请时候的附件
-                    Contractfile contractfile = new Contractfile();
-                    contractfile.setCid(project.getId());
-                    List<Contractfile> contractfiles = contractfileMapper.select(contractfile);
-                    RepositoryService repositoryService = engine.getRepositoryService();
-                    for (Contractfile contractfile1 : contractfiles) {
-                        //上传附件  参数：附件类型、任务id，流程id，附件名称，附件描述，文件流
-                        Attachment attachment = taskService.createAttachment("", task.getId(), pi.getId(), contractfile1.getFname(), "", repositoryService.getResourceAsStream(contractfile1.getFid(), contractfile1.getFname()));
-                        Attachmentlink attachmentlink = new Attachmentlink();
-                        attachmentlink.setUserid(project.getProposer());
-                        attachmentlink.setAttachment(attachment.getId());
-                        attachmentlinkMapper.insert(attachmentlink);
-                    }
 
                     //插入发送表
                     Fs fs = new Fs();
@@ -433,17 +429,18 @@ public class ProjectController {
                     for (int i = 1; i < jbrs.size(); i++) {
                         jbrss = jbrss + "," + jbrs.get(i).userId;
                     }
+                    //发往该类型的各个技术部经办人
                     fs.setJsbjbr(jbrss);
 
-                    List<UserOV> jbzgjls = userController.getAllJsbZgjl(project.getReviser(), null);
-                    String jbzgjlss = jbzgjls.get(0).userId;
-                    for (int i = 1; i < jbzgjls.size(); i++) {
-                        jbzgjlss = jbzgjlss + "," + jbzgjls.get(i).userId;
-                    }
-                    fs.setJsbzgjl(jbzgjlss);
-                    fs.setDojsbjbr(user.getId());
+//                    List<UserOV> jbzgjls = userController.getAllJsbZgjl(project.getReviser(), null);
+//                    String jbzgjlss = jbzgjls.get(0).userId;
+//                    for (int i = 1; i < jbzgjls.size(); i++) {
+//                        jbzgjlss = jbzgjlss + "," + jbzgjls.get(i).userId;
+//                    }
+//                    fs.setJsbzgjl(jbzgjlss);
+//                    fs.setDojsbjbr(user.getId());
                     fsMapper.insert(fs);
-                    taskService.complete(task.getId());
+                    //taskService.complete(task.getId());
                 }
                 return true;
             } else {//有流程id
@@ -526,19 +523,73 @@ public class ProjectController {
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         TaskService taskService = engine.getTaskService();
         Task task = taskService.createTaskQuery().processInstanceId(project.getPid()).singleResult();
-        //重新设置项目参数
-        //taskService.setVariable(task.getId(), "project", project);
         //修改项目表
         projectMapper.updateByPrimaryKeySelective(project);
-        taskService.complete(task.getId());
+        if (!project.getDeclarationDep().equals("工程技术部"))
+            taskService.complete(task.getId());
+        else {//工程技术部重新申请，立项部门主管经理、经理直接同意
+            taskService.complete(task.getId());
+            task = taskService.createTaskQuery().processInstanceId(project.getPid()).singleResult();
+            taskService.setVariable(task.getId(), "zgjl", true);
+            taskService.complete(task.getId());
+
+            task = taskService.createTaskQuery().processInstanceId(project.getPid()).singleResult();
+            taskService.setVariable(task.getId(), "jl", true);
+            taskService.complete(task.getId());
+        }
+    }
+
+    //技术部主管经理驳回处理
+    @RequestMapping("/jszgjlBh")
+    public boolean jszgjlBh(String pid, String userId, String comment, String bhd) {
+        try {
+            ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = engine.getTaskService();
+            Task task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
+            if (comment == null)
+                comment = "";
+            //添加评论
+            Authentication.setAuthenticatedUserId(userId);
+            taskService.addComment(task.getId(), pid, comment);
+            //设置任务代理人
+            taskService.setAssignee(task.getId(), userId);
+            //设置参数
+            taskService.setVariable(task.getId(), "jszgjl", false);
+            //完成任务
+            taskService.complete(task.getId());
+            if (bhd.equals("技术部经办人")) {
+                return true;
+            } else {
+                //技术部经办人不同意
+                task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                //设置技术部主管经理驳回参数
+                taskService.setVariable(task.getId(), "jbr", false);
+                taskService.complete(task.getId());
+
+                //立项部们经理不同意
+                task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                //设置技术部主管经理驳回参数
+                taskService.setVariable(task.getId(), "jl", false);
+                taskService.complete(task.getId());
+
+                //立项部门主管经理不同意
+                task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                //设置立项部门主管经理不同意参数
+                taskService.setVariable(task.getId(), "zgjl", false);
+                taskService.complete(task.getId());
+                return true;
+            }
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     //技术部经理的驳回处理
     @RequestMapping("/jsjlBh")
-    public boolean jsjlBh(String pid,String userId,String comment,String bhd){
+    public boolean jsjlBh(String pid, String userId, String comment, String bhd) {
         try {
-            ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
-            TaskService taskService=engine.getTaskService();
+            ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = engine.getTaskService();
             Task task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
             if (comment == null)
                 comment = "";
@@ -551,39 +602,42 @@ public class ProjectController {
             taskService.setVariable(task.getId(), "jsjl", false);
             //完成任务
             taskService.complete(task.getId());
-            if(bhd.equals("技术部主管")){
+            if (bhd.equals("技术部主管")) {
                 return true;
-            }else if(bhd.equals("技术部经办人")){
+            } else if (bhd.equals("技术部经办人")) {
                 //技术主管经理的不同意
-                task=taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
                 //设置技术部主管经理驳回参数
-                taskService.setVariable(task.getId(),"jszgjl",false);
+                taskService.setVariable(task.getId(), "jszgjl", false);
                 taskService.complete(task.getId());
                 return true;
-            }else {//驳回到立项部门经办人
+            } else {//驳回到立项部门经办人
                 //技术主管经理的不同意
-                task=taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
                 //设置技术部主管经理驳回参数
-                taskService.setVariable(task.getId(),"jszgjl",false);
+                taskService.setVariable(task.getId(), "jszgjl", false);
                 taskService.complete(task.getId());
 
                 //技术部经办人不同意
-                task=taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
                 //设置技术部主管经理驳回参数
-                taskService.setVariable(task.getId(),"jsb",false);
+                taskService.setVariable(task.getId(), "jbr", false);
                 taskService.complete(task.getId());
 
                 //立项部们经理不同意
-                task=taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
                 //设置技术部主管经理驳回参数
-                taskService.setVariable(task.getId(),"jl",false);
+                taskService.setVariable(task.getId(), "jl", false);
                 taskService.complete(task.getId());
 
                 //立项部门主管经理不同意
-
+                task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                //设置立项部门主管经理不同意参数
+                taskService.setVariable(task.getId(), "zgjl", false);
+                taskService.complete(task.getId());
                 return true;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
@@ -592,8 +646,7 @@ public class ProjectController {
     @Transactional
     @RequestMapping("/doNode")
     public boolean doNode(String pid, String userId, String comment, String varName, String value, @RequestParam(value = "peoples[]", required = false) String[] peoples) {
-        System.out.println("=======================================================");
-        System.out.println(pid);
+        System.out.println(Time.getNow() + "  pid:" + pid);
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         try {
             TaskService taskService = processEngine.getTaskService();
@@ -651,7 +704,7 @@ public class ProjectController {
                 return true;
             }
 
-            //立项部门经理处理顺利项目(peoples是技术部经办人)
+            //立项部门经理处理同意项目(peoples是技术部经办人)
             if (group.getId().equals("jl") && value.equals("true")) {
                 UserController userController = new UserController();
                 //拿到该项目类型的所有技术部经办人
@@ -674,7 +727,6 @@ public class ProjectController {
                     fs.setJsbjbr(jbrs);
                     fsMapper.updateByPrimaryKeySelective(fs);
                 }
-
             }
 
             if (group.getId().equals("jsb_doman")) {//处理人为技术部办事人,设置经办人
@@ -703,7 +755,34 @@ public class ProjectController {
                     fs.setJsbzgjl(jsbzgjls);
                 }
                 fsMapper.updateByPrimaryKeySelective(fs);
+                if (comment == null)
+                    comment = "";
+                //添加评论
+                Authentication.setAuthenticatedUserId(userId);
+                taskService.addComment(task.getId(), pid, comment);
 
+                //设置任务代理人
+                taskService.setAssignee(task.getId(), userId);
+                //设置参数
+                taskService.setVariable(task.getId(), varName, value);
+                //完成任务
+                taskService.complete(task.getId());
+
+                //如果是驳回的技术部的项目，驳回到填写申请表
+                if (value.equals("false") && project.getDeclarationDep().equals("工程技术部")) {
+                    //经理不同意经理不同意
+                    task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                    //设置立项部门经理驳回参数
+                    taskService.setVariable(task.getId(), "jl", false);
+                    taskService.complete(task.getId());
+
+                    //立项部门主管经理不同意
+                    task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
+                    //设置立项部门主管经理不同意参数
+                    taskService.setVariable(task.getId(), "zgjl", false);
+                    taskService.complete(task.getId());
+                }
+                return true;
             }
 
             //如果技术部主管经理处理，更新发送表，设置项目主管经理处理人
@@ -845,9 +924,13 @@ public class ProjectController {
             return res;
         } else {
             List<Project> bas = new ArrayList<>();
-            List<Project> projects = lqxm(userId);
+            List<Project> projects = projectMapper.getPidProject();
             for (Project project : projects) {
-                if (isBa(project.getPid()) && isJbs(project.getPid(), userId)) {//如果该项目到达备案，且经办人为自己
+                ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+                IdentityService identityService = engine.getIdentityService();
+                User user = identityService.createUserQuery().userId(userId).singleResult();
+                //如果该项目到达备案，且经办人为自己,且不是股份项目
+                if (isBa(project.getPid()) && project.getBider().equals(user.getFirstName()) && !project.getDepAuditOpinion().equals("股份项目")) {
                     bas.add(project);
                 }
             }
@@ -855,7 +938,7 @@ public class ProjectController {
         }
     }
 
-    //pidToProject
+    //流程id拿项目
     Project pidToProject(String pid) {
         Project project = new Project();
         project.setPid(pid);
@@ -932,18 +1015,48 @@ public class ProjectController {
                     res.add(project);
                     continue;
                 }
+                if (fs.getJsbjbr() == null) {
+                    res.add(project);
+                    continue;
+                }
                 if (isReject(project.getId())) {//如果是驳回项目，判断发送表中的dojsbjbr是不是自己
                     if (fs.getDojsbjbr() == null || fs.getDojsbjbr().equals("") || fs.getDojsbjbr().equals(userId)) {
                         res.add(project);
                     }
                 } else {//如果是顺流项目，判断发送表中的jsbjbr有没有自己
-                    String[] jbrs = fs.getJsbjbr().split(",");
-                    for (int i = 0; i < jbrs.length; i++) {
-                        if (jbrs[i].equals(userId)) {
-                            res.add(project);
-                            break;
+                    //不是工程技术部的顺流项目
+                    if(!project.getDeclarationDep().equals("工程技术部")){
+                        String[] jbrs = fs.getJsbjbr().split(",");
+                        for (int i = 0; i < jbrs.length; i++) {
+                            if (jbrs[i].equals(userId)) {
+                                res.add(project);
+                                break;
+                            }
+                        }
+                    }else {//工程技术部的顺流项目
+                        //还没有工程技术部处理人
+                        if(fs.getDojsbjbr()==null||fs.getDojsbjbr().equals("")){
+                            String[] jbrs = fs.getJsbjbr().split(",");
+                            for (int i = 0; i < jbrs.length; i++) {
+                                if (jbrs[i].equals(userId)) {
+                                    res.add(project);
+                                    break;
+                                }
+                            }
+                        }else {//有工程技术部处理人
+                            if(fs.getDojsbjbr().equals(userId)){
+                                res.add(project);
+                                continue;
+                            }
                         }
                     }
+                }
+            }
+            //过滤掉备案项目
+            for (int i = 0; i < res.size(); i++) {
+                if (isBa(res.get(i).getPid())) {
+                    res.remove(i);
+                    i--;
                 }
             }
             return res;
@@ -985,43 +1098,43 @@ public class ProjectController {
     }
 
     //查看申请状态
-    @RequestMapping("/zt")
-    public String zt(String pi) throws IOException {
-        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-        RuntimeService runtimeService = processEngine.getRuntimeService();
-        RepositoryService repositoryService = processEngine.getRepositoryService();
-        //根据pid找流程名字
-        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(pi).singleResult();
-        String pidName = processInstance.getProcessDefinitionKey();
-        //查询流程定义
-        ProcessDefinition pd = repositoryService.createProcessDefinitionQuery().processDefinitionKey(pidName).list().get(0);
-        //获取bpmn模型对象
-        BpmnModel model = repositoryService.getBpmnModel(pd.getId());
-        //定义使用宋体
-        String fontName = "AR PL UMing HK";
-        //获取流程实例当前的节点,需要高亮显示
-        List<String> currentActs = runtimeService.getActiveActivityIds(pi);
-        //BPMN模型对象,图片类型,显示的节点
-        InputStream is = processEngine.getProcessEngineConfiguration()
-                .getProcessDiagramGenerator()
-                .generateDiagram(model, "png", currentActs, new ArrayList<String>(), fontName, fontName, fontName, null, 1.0);
-
-        //将输入流转换为byte数组
-        ByteArrayOutputStream bytestream = new ByteArrayOutputStream();
-        int b;
-        while ((b = is.read()) != -1) {
-            bytestream.write(b);
-        }
-        byte[] bs = bytestream.toByteArray();
-        BASE64Encoder encoder = new BASE64Encoder();
-        String data = encoder.encode(bs);
-        return data;
-    }
+//    @RequestMapping("/zt")
+//    public String zt(String pi) throws IOException {
+//        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+//        RuntimeService runtimeService = processEngine.getRuntimeService();
+//        RepositoryService repositoryService = processEngine.getRepositoryService();
+//        //根据pid找流程名字
+//        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(pi).singleResult();
+//        String pidName = processInstance.getProcessDefinitionKey();
+//        //查询流程定义
+//        ProcessDefinition pd = repositoryService.createProcessDefinitionQuery().processDefinitionKey(pidName).list().get(0);
+//        //获取bpmn模型对象
+//        BpmnModel model = repositoryService.getBpmnModel(pd.getId());
+//        //定义使用宋体
+//        String fontName = "AR PL UMing HK";
+//        //获取流程实例当前的节点,需要高亮显示
+//        List<String> currentActs = runtimeService.getActiveActivityIds(pi);
+//        //BPMN模型对象,图片类型,显示的节点
+//        InputStream is = processEngine.getProcessEngineConfiguration()
+//                .getProcessDiagramGenerator()
+//                .generateDiagram(model, "png", currentActs, new ArrayList<String>(), fontName, fontName, fontName, null, 1.0);
+//
+//        //将输入流转换为byte数组
+//        ByteArrayOutputStream bytestream = new ByteArrayOutputStream();
+//        int b;
+//        while ((b = is.read()) != -1) {
+//            bytestream.write(b);
+//        }
+//        byte[] bs = bytestream.toByteArray();
+//        BASE64Encoder encoder = new BASE64Encoder();
+//        String data = encoder.encode(bs);
+//        return data;
+//    }
 
     //上传附件
     @Transactional
     @RequestMapping(value = "/uploadFile")
-    public boolean uploadFile(MultipartFile file, String pId, String userId) {
+    public boolean uploadFile(MultipartFile file, String pId, String userId, String bcwjid) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         try {
             TaskService taskService = processEngine.getTaskService();
@@ -1033,6 +1146,14 @@ public class ProjectController {
             attachmentlink.setUserid(userId);
             attachmentlink.setAttachment(attachment.getId());
             attachmentlinkMapper.insert(attachmentlink);
+            Yscjdwj yscjdwj = new Yscjdwj();
+            yscjdwj.setId(IdCreate.id());
+            yscjdwj.setJlid(pidToProject(pId).getId());
+            yscjdwj.setBcwjid(bcwjid);
+            yscjdwj.setFid(attachment.getId());
+            yscjdwj.setFname(file.getOriginalFilename());
+            yscjdwj.setScr(userId);
+            yscjdwjMapper.insert(yscjdwj);
             return true;
         } catch (Exception e) {
             return false;
@@ -1106,10 +1227,12 @@ public class ProjectController {
         for (Comment comment : comments) {
             String uid = comment.getUserId();
             User user = identityService.createUserQuery().userId(uid).singleResult();
+            Group group = identityService.createGroupQuery().groupMember(uid).singleResult();
             String unam = user.getFirstName();
             Return_Comments return_comments1 = new Return_Comments();
             return_comments1.setComment(comment.getFullMessage());
             return_comments1.setUsernam(unam);
+            return_comments1.setGroupName(group.getName());
             String dd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(comment.getTime());
             return_comments1.setTime(dd);
             return_comments.add(return_comments1);
@@ -1149,8 +1272,15 @@ public class ProjectController {
                 return false;
         }
         Project project = projectMapper.selectByPrimaryKey(projectId);
-        if (project.getPid() != null && !project.getPid().equals("") && !getPidNode(project.getPid()).equals("填写申请表"))//有pid
-            return false;
+        //判断项目是否工程技术部
+        if (!project.getDeclarationDep().equals("工程技术部")) {
+            if (project.getPid() != null && !project.getPid().equals("") && !getPidNode(project.getPid()).equals("填写申请表"))
+                return false;
+        } else {
+            //如果是工程技术部项目，在经办人就可以删除
+            if (project.getPid() != null && !project.getPid().equals("") && !getPidNode(project.getPid()).equals("经办人"))
+                return false;
+        }
         return true;
     }
 
@@ -1244,13 +1374,21 @@ public class ProjectController {
     @Transactional
     @RequestMapping("/updataXm")
     public boolean xgxmbd(@RequestBody Project po) {
-        return projectMapper.updateByPrimaryKeySelective(po)==1;
+        return projectMapper.updateByPrimaryKeySelective(po) == 1;
     }
 
     //拿到本部门未开始招标的项目id和项目name
+    //拿到是自己经办人的能招标的项目
     @RequestMapping("/getSelfWzzXmidAndXmname")
-    public List<Xm> getSelfWzzXmidAndXmname(String dpt) {
-        List<Xm> xms = getSelfXmidAndXmname(dpt);
+    public List<Xm> getSelfWzzXmidAndXmname(String userName) {
+        List<Map> maps = projectMapper.selectJsbjbrXmidAndXmname(userName);
+        List<Xm> xms = new ArrayList<>();
+        for (int i = 0; i < maps.size(); i++) {
+            Xm xm = new Xm();
+            xm.label = maps.get(i).get("PROJECT_NAM").toString();
+            xm.value = maps.get(i).get("ID").toString();
+            xms.add(xm);
+        }
         //所有招标了的项目
         List<String> projectIds = new ArrayList<>();
         for (Zhaobiao zhaobiao : zhaobiaoMapper.selectAll()) {
@@ -1258,12 +1396,14 @@ public class ProjectController {
         }
         List<Xm> res = new ArrayList<>();
         for (Xm xm : xms) {
-            if (!projectIds.contains(xm.value)) {
+            Project project=projectMapper.selectByPrimaryKey(xm.value);
+            if (!projectIds.contains(xm.value)&&!project.getDepAuditOpinion().equals("股份项目")) {
                 res.add(xm);
             }
         }
         return res;
     }
+
 
     //拿到本部门项目id和项目name
     @RequestMapping("/getSelfXmidAndXmname")
@@ -1304,21 +1444,28 @@ public class ProjectController {
             }
         }
         //在小项目管理中找
-        List<String> xmids=new ArrayList<>();
-        List<Xxmgl> xxmgls=xxmglMapper.selectAll();
-        for(Xxmgl xxmgl:xxmgls){
+        List<String> xmids = new ArrayList<>();
+        List<Xxmgl> xxmgls = xxmglMapper.selectAll();
+        for (Xxmgl xxmgl : xxmgls) {
             xmids.add(xxmgl.getY1());
         }
-        List<String> xmids2=new ArrayList<>();
-        for(Xm xm:xms){
+        List<String> xmids2 = new ArrayList<>();
+        for (Xm xm : xms) {
             xmids2.add(xm.value);
         }
-        for(int i=0;i<xmids.size();i++){
-            if(!xmids2.contains(xmids.get(i))){
-                Xm xm=new Xm();
-                xm.value=xmids.get(i);
-                xm.label=projectMapper.selectByPrimaryKey(xmids.get(i)).getProjectNam();
+        for (int i = 0; i < xmids.size(); i++) {
+            if (!xmids2.contains(xmids.get(i))) {
+                Xm xm = new Xm();
+                xm.value = xmids.get(i);
+                xm.label = projectMapper.selectByPrimaryKey(xmids.get(i)).getProjectNam();
                 xms.add(xm);
+            }
+        }
+        List<String> contracts=contractMapper.selectAllXmids();
+        for(int i=0;i<xms.size();i++){
+            if(contracts.contains(xms.get(i).value)){
+                xms.remove(i);
+                i--;
             }
         }
         return xms;
@@ -1366,8 +1513,9 @@ public class ProjectController {
 
     //项目id拿项目详情
     @RequestMapping("/getXmById")
-    public Project getXmById(String xmid){
+    public Project getXmById(String xmid) {
         return projectMapper.selectByPrimaryKey(xmid);
     }
+
 
 }

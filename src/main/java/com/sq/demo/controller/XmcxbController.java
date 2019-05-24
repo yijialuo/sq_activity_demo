@@ -1,7 +1,5 @@
 package com.sq.demo.controller;
 
-
-import com.github.pagehelper.PageHelper;
 import com.sq.demo.Entity.Xmcxb2;
 import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.*;
@@ -12,8 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;

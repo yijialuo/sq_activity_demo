@@ -70,6 +70,10 @@ public interface ProjectMapper extends MyMapper<Project> {
     @Select("SELECT ID,PROJECT_NAM FROM project WHERE ID not in (SELECT PROJECTID FROM yanshou )")
     List<Map> selectYsXm();
 
+    //拿到技术部经办人的项目id和name
+    @Select("select ID,PROJECT_NAM FROM project WHERE BIDER = #{Name}")
+    List<Map> selectJsbjbrXmidAndXmname(String Name);
+
     //根据部门名称那项目
     @Select("select * from project where DECLARATION_DEP=#{departmentName} order by ENG_TECH_AUDIT_OPINION desc")
     List<Project> selectByDepartmentName(String departmentName);
@@ -129,4 +133,21 @@ public interface ProjectMapper extends MyMapper<Project> {
             "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER})")
     void nfbb(Map<String,String> params);
 
+    @Options(statementType = StatementType.CALLABLE)
+    @Select("call bmyfbb(#{ _year,mode=IN,jdbcType=VARCHAR},#{_month,mode=IN,jdbcType=VARCHAR},#{ _bm,mode=IN,jdbcType=VARCHAR}," +
+            "#{sb_fbsl,mode=OUT,jdbcType=INTEGER},#{sb_jssl,mode=OUT,jdbcType=INTEGER},#{sb_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{jj_fbsl,mode=OUT,jdbcType=INTEGER},#{jj_jssl,mode=OUT,jdbcType=INTEGER},#{jj_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{xx_fbsl,mode=OUT,jdbcType=INTEGER},#{xx_jssl,mode=OUT,jdbcType=INTEGER},#{xx_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER})")
+    void bmyfbb(Map<String,String> params);
+
+    @Options(statementType = StatementType.CALLABLE)
+    @Select("call bmnfbb(#{ _year,mode=IN,jdbcType=VARCHAR},#{_month,mode=IN,jdbcType=VARCHAR},#{ _bm,mode=IN,jdbcType=VARCHAR}," +
+            "#{sb_fbsl,mode=OUT,jdbcType=INTEGER},#{sb_jssl,mode=OUT,jdbcType=INTEGER},#{sb_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{jj_fbsl,mode=OUT,jdbcType=INTEGER},#{jj_jssl,mode=OUT,jdbcType=INTEGER},#{jj_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{xx_fbsl,mode=OUT,jdbcType=INTEGER},#{xx_jssl,mode=OUT,jdbcType=INTEGER},#{xx_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER}," +
+            "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER})")
+    void bmnfbb(Map<String,String> params);
 }

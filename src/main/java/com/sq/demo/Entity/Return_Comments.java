@@ -9,6 +9,7 @@ public class Return_Comments implements Serializable {
     private String usernam;
     private String comment;
     private String time;
+    private String groupName;
 
     public String getUsernam() {
         return usernam;
@@ -32,5 +33,13 @@ public class Return_Comments implements Serializable {
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 }
