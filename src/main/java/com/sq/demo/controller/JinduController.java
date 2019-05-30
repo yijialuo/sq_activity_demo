@@ -1,10 +1,13 @@
 package com.sq.demo.controller;
 
+import com.sq.demo.Entity.Xm;
 import com.sq.demo.mapper.JinduMapper;
 import com.sq.demo.mapper.ProjectMapper;
+import com.sq.demo.mapper.YanshouMapper;
 import com.sq.demo.mapper.ZhaobiaoMapper;
 import com.sq.demo.pojo.Jindu;
 import com.sq.demo.pojo.Project;
+import com.sq.demo.pojo.Yanshou;
 import com.sq.demo.pojo.Zhaobiao;
 import com.sq.demo.utils.IdCreate;
 import org.activiti.engine.ProcessEngine;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -29,10 +33,41 @@ public class JinduController {
     JinduMapper jinduMapper;
     @Autowired
     ZhaobiaoMapper zhaobiaoMapper;
+    @Autowired
+    YanshouMapper yanshouMapper;
+
+    //拿所有可以验收的项目
+    @RequestMapping("/getCanYanshouXmidAndXmname")
+    public List<Xm> getCanYanshouXmidAndXmname(String userName){
+        List<String> jds=jinduMapper.getXmids();
+        List<String> yss=yanshouMapper.getXmids();
+        List<Xm> res=new ArrayList<>();
+        for(String jd:jds){
+            //过滤已经验收的记录
+            if(!yss.contains(jd)){
+                Xm xm=new Xm();
+                xm.value=jd;
+                xm.label=projectMapper.selectByPrimaryKey(jd).getProjectNam();
+                res.add(xm);
+            }
+        }
+        //过滤不是自己的
+        for(int i=0;i<res.size();i++){
+            String sqr=projectMapper.selectByPrimaryKey(res.get(i).value).getBider();
+            if(!sqr.equals(userName)){
+                res.remove(i);
+                i--;
+            }
+        }
+        return res;
+    }
 
     //判断该项目是否可以
     @RequestMapping("/canAddjd")
     public boolean canAddjd(String projectId){
+        Project project=projectMapper.selectByPrimaryKey(projectId);
+        if(project.getDepAuditOpinion().equals("股份项目"))
+            return true;
         Zhaobiao zhaobiao=new Zhaobiao();
         zhaobiao.setXmid(projectId);
         zhaobiao=zhaobiaoMapper.selectOne(zhaobiao);

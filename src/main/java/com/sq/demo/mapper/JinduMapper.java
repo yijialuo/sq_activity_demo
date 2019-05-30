@@ -14,4 +14,8 @@ public interface JinduMapper extends MyMapper<Jindu> {
 
     @Select("select * from jindu where project_id = #{project} order by finish_date desc")
     List<Jindu> pidcx(@Param("project") String pid);
+
+    //拿已经新建进度了的项目id\
+    @Select("SELECT DISTINCT PROJECT_ID FROM jindu")
+    List<String> getXmids();
 }

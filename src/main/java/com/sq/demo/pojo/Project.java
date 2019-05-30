@@ -130,6 +130,9 @@ public class Project implements Serializable {
     @Column(name = "ZJHSJ")
     private String  zjhsj;
 
+    @Column(name = "TJDW")
+    private String tjdw;
+
     @Column(name = "PID")
     private String pid;
 
@@ -503,5 +506,13 @@ public class Project implements Serializable {
 
     public void setLhsj(String lhsj) {
         this.lhsj = lhsj;
+    }
+
+    public String getTjdw() {
+        return tjdw;
+    }
+
+    public void setTjdw(String tjdw) {
+        this.tjdw = tjdw;
     }
 }

@@ -1424,7 +1424,7 @@ public class ProjectController {
 
     //拿所有可以新建合同得项目id和项目name
     @RequestMapping("/getCanHtXmIdAndXmname")
-    public List<Xm> getCanHtXmIdAndXmname() {
+    public List<Xm> getCanHtXmIdAndXmname(String userName) {
         List<Project> projects = projectMapper.selectAll();
         List<Xm> xms = new ArrayList<>();
         for (Project project : projects) {
@@ -1468,8 +1468,18 @@ public class ProjectController {
                 i--;
             }
         }
+        //拿自己的项目的合同
+        for(int i=0;i<xms.size();i++){
+            String jbr=projectMapper.selectByPrimaryKey(xms.get(i).value).getBider();
+            if(!jbr.equals(userName)){
+                xms.remove(i);
+                i--;
+            }
+        }
         return xms;
     }
+
+
 
 
     //拿所有项目id和项目name
@@ -1517,5 +1527,11 @@ public class ProjectController {
         return projectMapper.selectByPrimaryKey(xmid);
     }
 
-
+    //修改推荐单位
+    @RequestMapping("/updataTjdw")
+    public void updataTjdw(String xmid,String tjdw){
+        Project project=projectMapper.selectByPrimaryKey(xmid);
+        project.setTjdw(tjdw);
+        projectMapper.updateByPrimaryKeySelective(project);
+    }
 }

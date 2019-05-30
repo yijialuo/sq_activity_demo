@@ -26,6 +26,7 @@
         <result column="ILLUSTRATION" property="illustration" jdbcType="VARCHAR"/>
         <result column="ZJHSJ" property="zjhsj" jdbcType="VARCHAR"/>
         <result column="LHSJ" property="lhsj" jdbcType="VARCHAR"/>
+        <result column="TJDW" property="tjdw" jdbcType="VARCHAR"/>
         <result column="PID" property="pid" jdbcType="VARCHAR"/>
     </resultMap>
 

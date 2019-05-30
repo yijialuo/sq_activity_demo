@@ -19,4 +19,7 @@ public interface YanshouMapper extends MyMapper<Yanshou> {
     int AllCounts();
 
     List<Yanshou> search(String ysNo,String kgrq,String sjjgrq,String ysrq);
+
+    @Select("select DISTINCT PROJECTID from yanshou ")
+    List<String> getXmids();
 }

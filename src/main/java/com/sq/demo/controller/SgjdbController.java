@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -30,18 +31,25 @@ public class SgjdbController {
             Project project = projectMapper.selectByPrimaryKey(res.get(i).getId());
             List<Return_Comments> return_comments = projectController.projecttocomment(project.getPid());
             for (Return_Comments return_comment : return_comments) {
-                if (return_comment.getUsernam().equals("元少麟")) {
+                if (return_comment.getUsernam().equals("元少麟") && !return_comment.getComment().contains("驳回：")) {
                     res.get(i).setJsbjlsj(return_comment.getTime());
-                    continue;
+                    break;
                 }
             }
             if (res.get(i).getJsbjbr() == null || res.get(i).getJsbjlsj().equals(res.get(i).getJsbjbr())) {//没找到时间，设为空
                 res.get(i).setJsbjlsj("");
             }
         }
-        int i=1;
-        for(Sgjdb sgjdb:res){
-            sgjdb.setId(i+++"");
+        int i = 1;
+        //填序号、合同金额、结算进度、总结算进度除以10000
+        for (Sgjdb sgjdb : res) {
+            sgjdb.setId(i++ + "");
+            if (sgjdb.getHtje() != null && !sgjdb.getHtje().equals(""))
+                sgjdb.setHtje(sgjdb.getHtje().divide(new BigDecimal(10000)));
+            if (sgjdb.getBndjsjd() != null && !sgjdb.getBndjsjd().equals(""))
+                sgjdb.setBndjsjd(sgjdb.getBndjsjd().divide(new BigDecimal(10000)));
+            if (sgjdb.getZjsjd() != null && !sgjdb.getZjsjd().equals(""))
+                sgjdb.setZjsjd(sgjdb.getZjsjd().divide(new BigDecimal(10000)));
         }
         return res;
     }
@@ -61,10 +69,10 @@ public class SgjdbController {
             sgjdb2.setJszjhsj("9999-99-99");
         }
         if (!sgjdb2.getKsdbsj().equals("") && sgjdb2.getJsdbsj().equals("")) {
-             sgjdb2.setJsdbsj("9999-99-99");
+            sgjdb2.setJsdbsj("9999-99-99");
         }
         if (!sgjdb2.getKshttjpssj().equals("") && sgjdb2.getJshttjpssj().equals("")) {
-             sgjdb2.setJshttjpssj("9999-99-99");
+            sgjdb2.setJshttjpssj("9999-99-99");
         }
         if (!sgjdb2.getKshtqdsj().equals("") && sgjdb2.getJshtqdsj().equals("")) {
             sgjdb2.setJshtqdsj("9999-99-99");

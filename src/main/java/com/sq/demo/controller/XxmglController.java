@@ -62,7 +62,7 @@ public class XxmglController {
 
     @Transactional
     @RequestMapping("/insert")
-    public boolean insert(String xmbh, String xmmc, String lxbm, String sqr, String y1) {
+    public boolean insert(String xmbh, String xmmc, String lxbm, String sqr, String y1,String y2) {
         try {
             Xxmgl xxmgl = new Xxmgl();
             xxmgl.setId(IdCreate.id());
@@ -72,6 +72,7 @@ public class XxmglController {
             xxmgl.setLxbm(lxbm);
             xxmgl.setSqr(sqr);
             xxmgl.setY1(y1);
+            xxmgl.setY2(y2);
             xxmglMapper.insert(xxmgl);
             return true;
         } catch (Exception e) {

@@ -13,4 +13,12 @@ public interface PayableMapper extends MyMapper<Payable> {
     Payable selectlatest( String pId);
 
     List<Payable> search(String projectNo,String projectName,String contractNo,String rq,String jbbm, String jbr,String yszmr,String skdw);
+
+    //拿到所有还没付款完的合同id
+    @Select("SELECT DISTINCT CONTRACT_ID FROM payable WHERE CONTRACT_ID  not in (  SELECT CONTRACT_ID FROM payable WHERE WZF=0 )")
+    List<String> getCanpayHtid();
+
+    //拿到所有付款完了的
+    @Select("select distinct CONTRACT_ID from payable where wzf=0")
+    List<String> getFwHtid();
 }

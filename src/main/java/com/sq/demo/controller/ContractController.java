@@ -47,6 +47,10 @@ public class ContractController {
     YscjdwjMapper yscjdwjMapper;
     @Autowired
     AttachmentlinkMapper attachmentlinkMapper;
+    @Autowired
+    YanshouMapper yanshouMapper;
+    @Autowired
+    PayableMapper payableMapper;
 
     //综合搜索
     @RequestMapping("search")
@@ -198,25 +202,31 @@ public class ContractController {
     @RequestMapping(value = "/getBgsHts")
     public List<Contract_return> getBgsHts(String userId) {
         List<Contract_return> res = new ArrayList<>();
-        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-        IdentityService identityService = processEngine.getIdentityService();
+//        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+////        IdentityService identityService = processEngine.getIdentityService();
         for (Contract contract : contractMapper.selectYlc()) {
-            //判断该项目是不是自己前期处理的项目
-            Project project = projectMapper.selectByPrimaryKey(contract.getProjectId());
-            //那评论
-            ProjectController controller = new ProjectController();
-            List<Return_Comments> return_comments = controller.projecttocomment(project.getPid());
-            for (int i = 0; i < return_comments.size(); i++) {
-                //评论人
-                User user = identityService.createUserQuery().userFirstName(return_comments.get(i).getUsernam()).singleResult();
-                //评论人的group
-                Group group1 = identityService.createGroupQuery().groupMember(user.getId()).singleResult();
-                //如果评论人的职位是办公室，同时评论人是自己
-                if (group1.getId().equals("bgs") && user.getId().equals(userId) && getPidNode(contract.getDwyj()).equals("办公室确认")) {
-                    res.add(contractTocontractreturn(contract));
-                    break;
-                }
+
+            if ( getPidNode(contract.getDwyj()).equals("办公室确认")&&(userId.equals("ldy")||userId.equals("zlf"))) {
+                res.add(contractTocontractreturn(contract));
+                break;
             }
+
+//            //判断该项目是不是自己前期处理的项目
+//            Project project = projectMapper.selectByPrimaryKey(contract.getProjectId());
+//            //那评论
+//            ProjectController controller = new ProjectController();
+//            List<Return_Comments> return_comments = controller.projecttocomment(project.getPid());
+//            for (int i = 0; i < return_comments.size(); i++) {
+//                //评论人
+//                User user = identityService.createUserQuery().userFirstName(return_comments.get(i).getUsernam()).singleResult();
+//                //评论人的group
+//                Group group1 = identityService.createGroupQuery().groupMember(user.getId()).singleResult();
+//                //如果评论人的职位是办公室，同时评论人是自己
+//                if ((group1.getId().equals("bgs") && getPidNode(contract.getDwyj()).equals("办公室确认"))&&(userId.equals("ldy")||userId.equals("zlf"))) {
+//                    res.add(contractTocontractreturn(contract));
+//                    break;
+//                }
+//            }
         }
         return res;
     }
@@ -532,6 +542,66 @@ public class ContractController {
         return false;
     }
 
+    //拿所有可以新建结算的合同id和合同号
+    @RequestMapping("/canHtidAndHtno")
+    public List<Hetong> canHtidAndHtno(String userName){
+        //拿到所有付完了的合同id
+        List<String> htids=payableMapper.getFwHtid();
+        List<Hetong> hetongs=getallhtid();
+        for(String htid:htids){
+            for(int i=0;i<hetongs.size();i++){
+                if(hetongs.get(i).value.equals(htid)){
+                    hetongs.remove(i);
+                    break;
+                }
+            }
+        }
+        //同时还要验收
+        for(int i=0;i<hetongs.size();i++){
+            //合同对应的项目id
+            String xmid=contractMapper.selectByPrimaryKey(hetongs.get(i).value).getProjectId();
+            //检查改项目id有没有验收
+            Yanshou yanshou=new Yanshou();
+            yanshou.setProjectid(xmid);
+            if(yanshouMapper.selectOne(yanshou)==null){
+                hetongs.remove(i);
+                i--;
+            }
+        }
+        //过滤，不是自己的项目
+        for(int i=0;i<hetongs.size();i++){
+            String xmid=contractMapper.selectByPrimaryKey(hetongs.get(i).value).getProjectId();
+            String jbr=projectMapper.selectByPrimaryKey(xmid).getBider();
+            if(!jbr.equals(userName)){
+                hetongs.remove(i);
+                i--;
+            }
+        }
+        return hetongs;
+//        //所有验收了的项目id;
+//        List<String> ysxmids=yanshouMapper.getXmids();
+//        //所有验收了的合同id
+//        List<String> htids=new ArrayList<>();
+//        for(String ysxmid:ysxmids){
+//            Contract contract=new Contract();
+//            contract.setProjectId(ysxmid);
+//            contract=contractMapper.selectOne(contract);
+//            htids.add(contract.getId());
+//        }
+//        //过滤、付完了的合同id
+//        for(String xxx:htid){
+//            htids.remove(xxx);
+//        }
+//        List<Hetong> res=new ArrayList<>();
+//        for(String yyy:htids){
+//            Hetong hetong=new Hetong();
+//            hetong.value=yyy;
+//            hetong.label=contractMapper.selectByPrimaryKey(yyy).getContractNo();
+//            res.add(hetong);
+//        }
+//        return res;
+    }
+
     //拿到所有合同id和合同编号
     @RequestMapping("/getAllHtidAndHtno")
     public List<Hetong> getallhtid() {
@@ -545,6 +615,8 @@ public class ContractController {
                 hetongs.add(hetong);
             }
         }
+
+
         return hetongs;
     }
 

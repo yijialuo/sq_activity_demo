@@ -147,38 +147,39 @@ public class AttachmentController {
     //下载附件
     @RequestMapping("/getattachment1")
     public void getattachment1(HttpServletResponse res, String attachment_id) throws UnsupportedEncodingException {
-        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-        TaskService taskService = processEngine.getTaskService();
-        System.out.println(Time.getNow()+"  attachment_id: "+attachment_id);
-        String fileName = taskService.getAttachment(attachment_id).getName();
-        res.setHeader("content-type", "application/octet-stream");
-        res.setContentType("application/octet-stream");
-        //中文文件名不行，需要转码
-        String file_name = new String(fileName.getBytes(), "ISO-8859-1");
-        res.setHeader("Content-Disposition", "attachment;filename=" + file_name);
-        byte[] buff = new byte[1024];
-        BufferedInputStream bis = null;
-        OutputStream os = null;
-        try {
-            os = res.getOutputStream();
-            bis = new BufferedInputStream(processEngine.getTaskService().getAttachmentContent(attachment_id));
-            int i = bis.read(buff);
-            while (i != -1) {
-                os.write(buff, 0, buff.length);
-                os.flush();
-                i = bis.read(buff);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+        if(attachment_id!=null&&!attachment_id.equals("")){
+            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = processEngine.getTaskService();
+            System.out.println(Time.getNow()+"  attachment_id: "+attachment_id);
+            String fileName = taskService.getAttachment(attachment_id).getName();
+            res.setHeader("content-type", "application/octet-stream");
+            res.setContentType("application/octet-stream");
+            //中文文件名不行，需要转码
+            String file_name = new String(fileName.getBytes(), "ISO-8859-1");
+            res.setHeader("Content-Disposition", "attachment;filename=" + file_name);
+            byte[] buff = new byte[1024];
+            BufferedInputStream bis = null;
+            OutputStream os = null;
+            try {
+                os = res.getOutputStream();
+                bis = new BufferedInputStream(processEngine.getTaskService().getAttachmentContent(attachment_id));
+                int i = bis.read(buff);
+                while (i != -1) {
+                    os.write(buff, 0, buff.length);
+                    os.flush();
+                    i = bis.read(buff);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (bis != null) {
+                    try {
+                        bis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
     }
-
 }
