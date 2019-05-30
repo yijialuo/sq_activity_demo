@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sq.demo.mapper.YscjdwjMapper" >
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Yscjdwj" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="VARCHAR" />
+    <result column="jlid" property="jlid" jdbcType="VARCHAR" />
+    <result column="bcwjid" property="bcwjid" jdbcType="VARCHAR" />
+    <result column="fid" property="fid" jdbcType="VARCHAR" />
+    <result column="fname" property="fname" jdbcType="VARCHAR" />
+    <result column="scr" property="scr" jdbcType="VARCHAR" />
+    <result column="y1" property="y1" jdbcType="VARCHAR" />
+    <result column="y2" property="y2" jdbcType="VARCHAR" />
+    <result column="y3" property="y3" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>
