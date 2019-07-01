@@ -418,7 +418,7 @@ public class ContractController {
         return contractfileMapper.select(contractfile);
     }
 
-    //上传附件
+    //上传附件，已经申请
     @Transactional
     @RequestMapping(value = "/uploadFile")
     public boolean uploadFile(MultipartFile file, String dwyj, String userId, String bcwjid) {
@@ -440,6 +440,7 @@ public class ContractController {
             yscjdwj.setFid(attachment.getId());
             yscjdwj.setFname(file.getOriginalFilename());
             yscjdwj.setScr(userId);
+            yscjdwj.setY1(Time.getNow());
             yscjdwjMapper.insert(yscjdwj);
             return true;
         } catch (Exception e) {
@@ -453,7 +454,7 @@ public class ContractController {
         return contractMapper.selectOne(contract);
     }
 
-    //上传合同附件
+    //上传附件,未申请
     @RequestMapping("/uploadHtfj")
     @Transactional
     public boolean uploadHtfj(MultipartFile file, String id, String bcwjid, String userId) {
@@ -469,6 +470,8 @@ public class ContractController {
             contractfile.setFname(file.getOriginalFilename());
             String fid = builder.deploy().getId();
             contractfile.setFid(fid);
+            contractfile.setScr(userId);
+            contractfile.setScsj(Time.getNow());
             contractfileMapper.insert(contractfile);
             if (bcwjid != null && !bcwjid.equals("")) {
                 Yscjdwj yscjdwj = new Yscjdwj();
@@ -479,6 +482,7 @@ public class ContractController {
                 yscjdwj.setFid(fid);
                 yscjdwj.setFname(file.getOriginalFilename());
                 yscjdwj.setScr(userId);
+                yscjdwj.setY1(Time.getNow());
                 yscjdwjMapper.insert(yscjdwj);
             }
             return true;
@@ -487,40 +491,7 @@ public class ContractController {
         }
     }
 
-    //点击文件下载/contract/getFj
-    @RequestMapping("/getFj")
-    public void getFj(HttpServletResponse res, String fid, String fname) throws UnsupportedEncodingException {
-        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-        RepositoryService repositoryService = processEngine.getRepositoryService();
-        res.setHeader("content-type", "application/octet-stream");
-        res.setContentType("application/octet-stream");
-        //中文文件名不行，需要转码
-        String file_name = new String(fname.getBytes(), "ISO-8859-1");
-        res.setHeader("Content-Disposition", "attachment;filename=" + file_name);
-        byte[] buff = new byte[1024];
-        BufferedInputStream bis = null;
-        OutputStream os = null;
-        try {
-            os = res.getOutputStream();
-            bis = new BufferedInputStream(repositoryService.getResourceAsStream(fid, fname));
-            int i = bis.read(buff);
-            while (i != -1) {
-                os.write(buff, 0, buff.length);
-                os.flush();
-                i = bis.read(buff);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
+
 
     //删除附件
     @RequestMapping("/deletFj")
@@ -544,7 +515,7 @@ public class ContractController {
 
     //拿所有可以新建结算的合同id和合同号
     @RequestMapping("/canHtidAndHtno")
-    public List<Hetong> canHtidAndHtno(String userName){
+    public List<Hetong> canHtidAndHtno(String userId){
         //拿到所有付完了的合同id
         List<String> htids=payableMapper.getFwHtid();
         List<Hetong> hetongs=getallhtid();
@@ -568,10 +539,13 @@ public class ContractController {
                 i--;
             }
         }
+        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService=engine.getIdentityService();
         //过滤，不是自己的项目
         for(int i=0;i<hetongs.size();i++){
             String xmid=contractMapper.selectByPrimaryKey(hetongs.get(i).value).getProjectId();
             String jbr=projectMapper.selectByPrimaryKey(xmid).getBider();
+            String userName=identityService.createUserQuery().userId(userId).singleResult().getFirstName();
             if(!jbr.equals(userName)){
                 hetongs.remove(i);
                 i--;

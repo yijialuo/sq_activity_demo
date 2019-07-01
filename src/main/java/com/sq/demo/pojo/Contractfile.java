@@ -28,6 +28,12 @@ public class Contractfile {
     @Column(name = "FNAME")
     private String fname;
 
+    @Column(name = "SCR")
+    private String scr;
+
+    @Column(name = "SCSJ")
+    private String scsj;
+
     /**
      * 获取主键
      *
@@ -98,5 +104,21 @@ public class Contractfile {
      */
     public void setFname(String fname) {
         this.fname = fname;
+    }
+
+    public String getScr() {
+        return scr;
+    }
+
+    public void setScr(String scr) {
+        this.scr = scr;
+    }
+
+    public String getScsj() {
+        return scsj;
+    }
+
+    public void setScsj(String scsj) {
+        this.scsj = scsj;
     }
 }

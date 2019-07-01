@@ -1,5 +1,6 @@
 package com.sq.demo.controller;
 
+import com.sq.demo.Entity.Return_Comments;
 import com.sq.demo.Entity.UserOV;
 import com.sq.demo.mapper.DepartmentMapper;
 import com.sq.demo.mapper.FsMapper;
@@ -11,14 +12,17 @@ import com.sq.demo.utils.ArrayToString;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
+import org.activiti.engine.TaskService;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
+import org.activiti.engine.task.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -414,5 +418,55 @@ public class UserController {
         IdentityService identityService = engine.getIdentityService();
         String departmentId = identityService.getUserInfo(userId, "departmentId");
         return departmentMapper.selectByPrimaryKey(departmentId).getdNam();
+    }
+
+    public List<Return_Comments> projecttocomment(String pid) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
+        TaskService taskService = processEngine.getTaskService();
+        List<Comment> comments = taskService.getProcessInstanceComments(pid);
+        List<Return_Comments> return_comments = new ArrayList<>();
+        for (int i = 0; i < comments.size(); i++) {
+            if (comments.get(i).getType().equals("event")) {
+                comments.remove(i);
+                i--;
+            }
+        }
+        for (Comment comment : comments) {
+            String uid = comment.getUserId();
+            User user = identityService.createUserQuery().userId(uid).singleResult();
+            Group group = identityService.createGroupQuery().groupMember(uid).singleResult();
+            String unam = user.getFirstName();
+            Return_Comments return_comments1 = new Return_Comments();
+            return_comments1.setComment(comment.getFullMessage());
+            return_comments1.setUsernam(unam);
+            return_comments1.setGroupName(group.getName());
+            String dd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(comment.getTime());
+            return_comments1.setTime(dd);
+            return_comments.add(return_comments1);
+        }
+        return return_comments;
+    }
+
+    //判断用户是否为该项目前期的处理人之一
+    @RequestMapping("/isClr")
+    public boolean isClr(String xmid,String userId){
+        Project project=projectMapper.selectByPrimaryKey(xmid);
+        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService=engine.getIdentityService();
+        User user=identityService.createUserQuery().userId(userId).singleResult();
+        if(project.getProposer().equals(user.getFirstName())){
+            return true;
+        }
+        if(project.getPid()!=null&&!project.getPid().equals("")){
+            for(Return_Comments return_comments:projecttocomment(project.getPid())){
+                if(return_comments.getUsernam().equals(user.getFirstName())){
+                    return true;
+                }
+            }
+            return false;
+        }else {
+            return false;
+        }
     }
 }

@@ -211,14 +211,14 @@ public class ZhaobiaoController {
     //办事员填写招标表,插入招标标
     @Transactional
     @RequestMapping("/insertZhaobiao")
-    public boolean insertZhaobiao(@RequestBody Zhaobiao zhaobiao) {
+    public String insertZhaobiao(@RequestBody Zhaobiao zhaobiao) {
         try {
             zhaobiao.setId(IdCreate.id());
             zhaobiao.setCjsj(Time.getNow());
             zhaobiaoMapper.insert(zhaobiao);
-            return true;
+            return zhaobiao.getId()+":"+zhaobiao.getCjsj();
         } catch (Exception e) {
-            return false;
+            return "";
         }
 
     }
@@ -226,7 +226,7 @@ public class ZhaobiaoController {
     //启动招标申请流程,
     @Transactional
     @RequestMapping("/startZhaobiao")
-    public boolean startZhaobiao(String id) {
+    public String startZhaobiao(String id) {
         try {
             Zhaobiao zhaobiao = zhaobiaoMapper.selectByPrimaryKey(id);
             ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
@@ -269,9 +269,9 @@ public class ZhaobiaoController {
             taskService.setVariable(task.getId(), "jbr", true);
             taskService.setAssignee(task.getId(), zhaobiao.getSqr());
             taskService.complete(task.getId());
-            return true;
+            return pi.getId();
         } catch (Exception e) {
-            return false;
+            return "";
         }
     }
 
@@ -464,6 +464,7 @@ public class ZhaobiaoController {
             yscjdwj.setFid(attachment.getId());
             yscjdwj.setFname(file.getOriginalFilename());
             yscjdwj.setScr(userId);
+            yscjdwj.setY1(Time.getNow());
             yscjdwjMapper.insert(yscjdwj);
             return true;
         } catch (Exception e) {

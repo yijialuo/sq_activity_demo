@@ -2,13 +2,12 @@ package com.sq.demo.utils;
 
 import cn.afterturn.easypoi.word.WordExportUtil;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.util.Map;
 
@@ -26,6 +25,9 @@ public class FileUtil {
      * @param request HttpServletRequest
      * @param response HttpServletResponse
      */
+
+
+    //下载word
     public static void exportWord(String templatePath, String fileName, Map<String, Object> params, HttpServletRequest request, HttpServletResponse response) {
         Assert.notNull(templatePath,"模板路径不能为空");
         //Assert.notNull(temDir,"临时文件路径不能为空");
@@ -51,6 +53,7 @@ public class FileUtil {
         } finally {
             //delAllFile(temDir);//这一步看具体需求，要不要删
         }
+        //        Assert.notNull(templatePath,"模板路径不能为空");
 
     }
 }

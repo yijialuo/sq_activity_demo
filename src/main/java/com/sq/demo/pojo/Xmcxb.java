@@ -86,6 +86,8 @@ public class Xmcxb {
      */
     private String dbsj;
 
+    private String lhzbwjsj;
+
     /**
      * 日期
      */
@@ -110,10 +112,6 @@ public class Xmcxb {
      * 中标单位
      */
     private String xmjbr;
-
-
-
-    private String lhzbwjsj;
 
     /**
      * 获取主键

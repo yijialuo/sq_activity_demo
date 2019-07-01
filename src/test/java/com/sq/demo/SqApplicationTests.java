@@ -1,14 +1,21 @@
 package com.sq.demo;
 
+import com.sq.demo.Entity.Return_Comments;
+import com.sq.demo.Entity.Sgjdb2;
+import com.sq.demo.Entity.Xmcxb2;
+import com.sq.demo.controller.ProjectController;
+import com.sq.demo.controller.XmcxbController;
 import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.*;
 import com.sq.demo.utils.IdCreate;
+import com.sq.demo.utils.Time;
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Task;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +27,7 @@ import sun.misc.BASE64Encoder;
 
 import javax.persistence.Id;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -59,30 +67,42 @@ public class SqApplicationTests {
     PayableMapper payableMapper;
     @Autowired
     SgjdbMapper sgjdbMapper;
+    @Autowired
+    XxmglMapper xxmglMapper;
+    @Autowired
+    XxmcbMapper xxmcbMapper;
+    @Autowired
+    XmcxbMapper xmcxbMapper;
+    @Autowired
+    XmcxbController xmcxbController;
+    @Autowired
+    ZjhfzMapper zjhfzMapper;
+    @Autowired
+    YscjdwjMapper yscjdwjMapper;
 
     //    @Autowired
 //    SupplierMapper supplierMapper;
 //    ProcessEngine processEngine=ProcessEngines.getDefaultProcessEngine();
     //  RepositoryService repositoryService=processEngine.getRepositoryService();
     @Test
-    public void htsp(){
+    public void htsp() {
         //开始一条合同审批流程
-        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
-        RuntimeService runtimeService=engine.getRuntimeService();
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        RuntimeService runtimeService = engine.getRuntimeService();
         ProcessInstance pi = runtimeService.startProcessInstanceByKey("htsp");
-        TaskService taskService=engine.getTaskService();
-        Task task=taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+        TaskService taskService = engine.getTaskService();
+        Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
 
         taskService.complete(task.getId());
 
-        task=taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-        taskService.setVariable(task.getId(),"jsb_jl",false);
+        task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+        taskService.setVariable(task.getId(), "jsb_jl", false);
         taskService.complete(task.getId());
 
-        task=taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+        task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
         taskService.complete(task.getId());
 
-        task=taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+        task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
         System.out.println(task.getName());
 
     }
@@ -107,10 +127,10 @@ public class SqApplicationTests {
     }
 
     @Test
-    public void adsfdsaf(){
-        Department department=new Department();
+    public void adsfdsaf() {
+        Department department = new Department();
         department.setdNam("粮油操作部");
-        department=departmentMapper.selectOne(department);
+        department = departmentMapper.selectOne(department);
         System.out.println(department.getId());
     }
 
@@ -124,12 +144,12 @@ public class SqApplicationTests {
     }
 
     @Test
-    public void testasdfasgasd(){
+    public void testasdfasgasd() {
         System.out.println(contractMapper.selectYlc().size());
     }
 
     @Test
-    public void adfasdfgdaf(){
+    public void adfasdfgdaf() {
         System.out.println(projectMapper.ssywgxm().size());
     }
 
@@ -575,19 +595,19 @@ public class SqApplicationTests {
         System.out.println(projectMapper.selectByDepartmentName("粮油操作部").size());
     }
 
-//35120
+    //35120
 //        35137
 //        35152
 //        35075
 //        35090
 //        35105
     @Test
-    public void asdfas() {//30336
-        String pid = "30336";//7726
+    public void asdfas() {//30336   80638  72986
+        String pid = "107532";//7726
         Project project = new Project();
         project.setPid(pid);
         //删除表
-       // projectMapper.delete(project);
+        projectMapper.delete(project);
 
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         RuntimeService runtimeService = engine.getRuntimeService();
@@ -665,16 +685,15 @@ public class SqApplicationTests {
     }
 
     @Test
-    public void asd4f(){
-        Payable payable=payableMapper.selectByPrimaryKey("eabc2bb5-14c5-4099-96fc-fc46bc8e6d78");
+    public void asd4f() {
+        Payable payable = payableMapper.selectByPrimaryKey("eabc2bb5-14c5-4099-96fc-fc46bc8e6d78");
         System.out.println(payable.getRq());
     }
 
 
-
     @Test
-    public void testadsfasdf(){
-        Project project=new Project();
+    public void testadsfasdf() {
+        Project project = new Project();
         project.setId("8888888");
         project.setIllustration("啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的" +
                 "啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的啊打发手动阀的说法的" +
@@ -690,32 +709,32 @@ public class SqApplicationTests {
     }
 
     @Test
-    public void asdfasdgdfgw(){
+    public void asdfasdgdfgw() {
         System.out.println(projectMapper.ttt("select count(*) from project"));
     }
 
 
     @Test
-    public void ertergdfa(){
-        String[] xms=new String[13];
-        xms[0]="asd";
-        xms[1]="gad";
-        xms[2]="rt";
-        xms[3]="asdf";
-        xms[4]="atwesd";
-        xms[5]="jjfg";
-        xms[6]="er";
-        xms[7]="asjrtgd";
-        xms[8]="qwe";
-        xms[9]="sdffd";
-        xms[10]="askluyd";
-        xms[11]="rty";
-        xms[12]="sd";
-        String jbrs=xms[0];
-        for(int i=1;i<xms.length;i++){
-            jbrs=jbrs+","+xms[i];
+    public void ertergdfa() {
+        String[] xms = new String[13];
+        xms[0] = "asd";
+        xms[1] = "gad";
+        xms[2] = "rt";
+        xms[3] = "asdf";
+        xms[4] = "atwesd";
+        xms[5] = "jjfg";
+        xms[6] = "er";
+        xms[7] = "asjrtgd";
+        xms[8] = "qwe";
+        xms[9] = "sdffd";
+        xms[10] = "askluyd";
+        xms[11] = "rty";
+        xms[12] = "sd";
+        String jbrs = xms[0];
+        for (int i = 1; i < xms.length; i++) {
+            jbrs = jbrs + "," + xms[i];
         }
-        Fs fs=new Fs();
+        Fs fs = new Fs();
         fs.setId(IdCreate.id());
         fs.setProjectid("465465");
         fs.setJsbjbr(jbrs);
@@ -723,44 +742,281 @@ public class SqApplicationTests {
     }
 
     @Test
-    public void asdgasd(){
-        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
-        IdentityService identityService=engine.getIdentityService();
-        String[] userIds=new String[5];
-        userIds[0]="wwj";
-        userIds[1]="zaq";
-        userIds[2]="dyt";
-        userIds[3]="fb";
-        userIds[4]="zqh";
-        for(int i=0;i<5;i++){
-           // identityService.setUserInfo(userIds[0],"");
+    public void asdgasd() {
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
+        String[] userIds = new String[5];
+        userIds[0] = "wwj";
+        userIds[1] = "zaq";
+        userIds[2] = "dyt";
+        userIds[3] = "fb";
+        userIds[4] = "zqh";
+        for (int i = 0; i < 5; i++) {
+            // identityService.setUserInfo(userIds[0],"");
         }
     }
 
     @Test
-    public void asdfasdf(){
+    public void asdfasdf() {
         System.out.println(projectMapper.getPidProject().size());
     }
 
     @Test
-    public void ljl(){
+    public void ljl() {
         System.out.println(sgjdbMapper.selectByPrimaryKey("069617ed-ed28-467a-b87b-b9c6edfee87d").getProjectNam());
     }
 
     @Test
-    public void asdgsdfgklsdf(){
+    public void asdgsdfgklsdf() {
         System.out.println(sgjdbMapper.selectAll().size());
     }
 
 
     @Test
-    public void eraeq(){
-        Map<String,String> map=new HashMap<>();
-        map.put("_year","2019");
-        map.put("_month","4");
-        projectMapper.yfbb2(map);
-        System.out.println( String.valueOf(map.get("sb_fbsl")));
+    public void eraeq() {
+        Map<String, String> map = new HashMap<>();
+        map.put("_year", "2019");
+        map.put("_month", "4");
+        projectMapper.nfbb(map);
+        System.out.println(String.valueOf(map.get("sb_fbsl")));
+    }
+
+    @Test
+    public void asdfag() {
+//        Xxmgl xxmgl=new Xxmgl();
+//       // xxmgl.setId(IdCreate.id());
+//        xxmgl.setXmbh("xmbh");
+//        xxmgl.setXmmc("xmmc");
+//        xxmgl.setLxbm("lxbm");
+//        xxmgl.setSqr("sqr");
+//        xxmgl.setCjsj(Time.getNow());
+//        xxmgl.setY1("y1");
+//        xxmgl.setY2("y2");
+//        xxmgl.setY3("y3");
+//        xxmglMapper.insert(xxmgl);
+
+        Xxmgl xxmgl = xxmglMapper.selectByPrimaryKey("1");
+        System.out.println(xxmgl.getCjsj());
+        xxmgl.setY3("yijialuo");
+        xxmglMapper.updateByPrimaryKeySelective(xxmgl);
+
+    }
+
+    //小项目从表插入
+    @Test
+    public void asd4fasdf() {
+        Xxmcb xxmcb = new Xxmcb();
+        //xxmcb.setId(1);
+        xxmcb.setXxmid(IdCreate.id());
+        xxmcb.setXh("xh");
+        xxmcb.setGzbzmc("gzbzmc");
+        xxmcb.setSgdw("sgdw");
+        xxmcb.setHtje(new BigDecimal("22342.09"));
+        xxmcb.setHtqdsj("htqdsj");
+        xxmcb.setBz("bz");
+        xxmcb.setCjsj(Time.getNow());
+        xxmcb.setY1("y1");
+        xxmcb.setY2("y2");
+        xxmcb.setY3("y33333333333");
+        xxmcbMapper.insert(xxmcb);
+    }
+
+    //删除xxmcb
+    @Test
+    public void deletxxmcb() {
+        xxmcbMapper.deleteByPrimaryKey(2);
+    }
+
+    @Test
+    public void asdfgdsafa() {
+        System.out.println(xxmcbMapper.getMaxXh("1"));
+    }
+
+    @Test
+    public void adsfadfga() {
+
+        System.out.println(xxmglMapper.getAllXmid().get(0));
+    }
+
+    @Test
+    public void asdfgkjlk() {
+        System.out.println(xxmglMapper.getSelfXxmgl("煤矿操作部").size());
+    }
+
+    @Test
+    public void ergwk() {
+        Xmcxb xmcxb = xmcxbMapper.selectByPrimaryKey("dc26e288-1701-4dab-9aa2-8be53d9a8659");
+        System.out.println(xmcxb.getXmbh());
+    }
+
+
+    @Test
+    public void jfgs(){
+        Xmcxb2 xmcxb2=new Xmcxb2();
+        String[] sgzts=new String[1];
+        sgzts[0]="施工进行中";
+        xmcxb2.setSgzt(sgzts);
+        System.out.println(xmcxbController.select(xmcxb2).size());
+    }
+
+    @Test
+    public void dfadfg(){
+        Zjhfz zjhfz=new Zjhfz();
+        zjhfz.setId("1");
+        zjhfz.setFz("20");
+        zjhfzMapper.updateByPrimaryKeySelective(zjhfz);
+    }
+
+    //招标所有文件放到其他里面、
+    @Test
+    public void zbb(){
+        List<Zhaobiao> zhaobiaos=zhaobiaoMapper.selectAll();
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService=processEngine.getIdentityService();
+        TaskService taskService = processEngine.getTaskService();
+        for(Zhaobiao zhaobiao:zhaobiaos){
+            if(zhaobiao.getZbpid()!=null&&!zhaobiao.getZbpid().equals("")){
+                //该项目的所有文件
+                List<Attachment> atta = taskService.getProcessInstanceAttachments(zhaobiao.getZbpid());
+                for(Attachment attachment:atta){
+                    Yscjdwj yscjdwj=new Yscjdwj();
+                    yscjdwj.setId(IdCreate.id());
+                    yscjdwj.setFid(attachment.getId());
+                    yscjdwj.setBcwjid("1");
+                    yscjdwj.setJlid(zhaobiao.getId());
+                    yscjdwj.setFname(attachment.getName());
+                    Attachmentlink attachmentlink=new Attachmentlink();
+                    attachmentlink.setAttachment(attachment.getId());
+                    attachmentlink=attachmentlinkMapper.select(attachmentlink).get(0);
+                    //如果是名字(汉字)
+                    if(isChinese(attachmentlink.getUserid().charAt(0))){
+                        User user=identityService.createUserQuery().userFirstName(attachmentlink.getUserid()).singleResult();
+                        yscjdwj.setScr(user.getId());
+                    }else {
+                        yscjdwj.setScr(attachmentlink.getUserid());
+                    }
+                    yscjdwjMapper.insert(yscjdwj);
+                }
+            }else {//没申请
+                Contractfile contractfile=new Contractfile();
+                contractfile.setCid(zhaobiao.getId());
+                List<Contractfile> contractfiles=contractfileMapper.select(contractfile);
+                for(int i=0;i<contractfiles.size();i++){
+                    Yscjdwj yscjdwj=new Yscjdwj();
+                    yscjdwj.setId(IdCreate.id());
+                    yscjdwj.setFid(contractfiles.get(i).getFid());
+                    yscjdwj.setBcwjid("1");
+                    yscjdwj.setJlid(zhaobiao.getId());
+                    yscjdwj.setFname(contractfiles.get(i).getFname());
+                    yscjdwjMapper.insert(yscjdwj);
+                }
+            }
+        }
+    }
+
+    //前期所有文件放到其他里面
+    @Test
+    public void piou(){
+        List<Project> projects=projectMapper.selectAll();
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService=processEngine.getIdentityService();
+        TaskService taskService = processEngine.getTaskService();
+        for(Project project:projects){
+            if(project.getPid()!=null&&!project.getPid().equals("")){
+                //该项目的所有文件
+                List<Attachment> atta = taskService.getProcessInstanceAttachments(project.getPid());
+                for(Attachment attachment:atta){
+                    Yscjdwj yscjdwj=new Yscjdwj();
+                    yscjdwj.setId(IdCreate.id());
+                    yscjdwj.setFid(attachment.getId());
+                    yscjdwj.setBcwjid("0");
+                    yscjdwj.setJlid(project.getId());
+                    yscjdwj.setFname(attachment.getName());
+                    Attachmentlink attachmentlink=new Attachmentlink();
+                    attachmentlink.setAttachment(attachment.getId());
+                    attachmentlink=attachmentlinkMapper.select(attachmentlink).get(0);
+                    //如果是名字(汉字)
+                    if(isChinese(attachmentlink.getUserid().charAt(0))){
+                        User user=identityService.createUserQuery().userFirstName(attachmentlink.getUserid()).singleResult();
+                        yscjdwj.setScr(user.getId());
+                    }else {
+                        yscjdwj.setScr(attachmentlink.getUserid());
+                    }
+                    yscjdwjMapper.insert(yscjdwj);
+                }
+            }else {//没申请
+                Contractfile contractfile=new Contractfile();
+                contractfile.setCid(project.getId());
+                List<Contractfile> contractfiles=contractfileMapper.select(contractfile);
+                for(int i=0;i<contractfiles.size();i++){
+                    Yscjdwj yscjdwj=new Yscjdwj();
+                    yscjdwj.setId(IdCreate.id());
+                    yscjdwj.setFid(contractfiles.get(i).getFid());
+                    yscjdwj.setBcwjid("0");
+                    yscjdwj.setJlid(project.getId());
+                    yscjdwj.setFname(contractfiles.get(i).getFname());
+                    yscjdwjMapper.insert(yscjdwj);
+                }
+            }
+        }
+    }
+
+    public static boolean isChinese(char c) {
+
+        Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
+
+        if (ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+
+                || ub == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+
+                || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+
+                || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION
+
+                || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+
+                || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS) {
+
+            return true;
+
+        }
+
+        return false;
+
+    }
+
+    @Test
+    public void ADSFASDF(){
+        ProjectController projectController=new ProjectController();
+        Project project = projectMapper.selectByPrimaryKey("560b56ff-5109-46bc-8a95-342d8b1f2603");
+        List<Return_Comments> return_comments = projectController.projecttocomment(project.getPid());
+        for(Return_Comments return_comments1:return_comments){
+            //System.out.println(return_comments1.getTime());
+            if (return_comments1.getUsernam().equals("元少麟")) {
+                System.out.println(return_comments1.getTime());
+                break;
+            }
+        }
+    }
+
+
+    @Test
+    public void xxx(){
+        Project project=new Project();
+        project.setPid("39009");
+        project=projectMapper.selectOne(project);
+        project.setBider("牛立刚");
+        projectMapper.updateByPrimaryKeySelective(project);
+    }
+
+
+    @Test
+    public void erwer(){
+        //刪除文件
+        java.io.File file=new File("D:\\upload\\2222222222222立项申请表.docx");
+        System.out.println(file.exists());
+        System.out.println(file.isFile());
+        if(file.exists()&&file.isFile())
+            file.delete();
     }
 }
-
-

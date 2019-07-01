@@ -4,6 +4,7 @@ import com.sq.demo.mapper.YscjdwjMapper;
 import com.sq.demo.pojo.Contractfile;
 import com.sq.demo.pojo.Yscjdwj;
 import com.sq.demo.utils.IdCreate;
+import com.sq.demo.utils.Time;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.RepositoryService;
@@ -39,6 +40,7 @@ public class fileController {
             yscjdwj.setFid(builder.deploy().getId());
             yscjdwj.setFname(file.getOriginalFilename());
             yscjdwj.setScr(userId);
+            yscjdwj.setY1(Time.getNow());
             yscjdwjMapper.insert(yscjdwj);
             return true;
         } catch (Exception e) {

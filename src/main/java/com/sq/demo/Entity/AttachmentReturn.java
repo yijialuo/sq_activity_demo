@@ -8,6 +8,8 @@ import java.io.Serializable;
 public class AttachmentReturn implements Serializable {
     private String attachment_nam;
     private String attachment_id;
+    private String scr;
+    private String scsj;
 
     public String getAttachment_nam() {
         return attachment_nam;
@@ -23,5 +25,21 @@ public class AttachmentReturn implements Serializable {
 
     public void setAttachment_id(String attachment_id) {
         this.attachment_id = attachment_id;
+    }
+
+    public String getScr() {
+        return scr;
+    }
+
+    public void setScr(String scr) {
+        this.scr = scr;
+    }
+
+    public String getScsj() {
+        return scsj;
+    }
+
+    public void setScsj(String scsj) {
+        this.scsj = scsj;
     }
 }

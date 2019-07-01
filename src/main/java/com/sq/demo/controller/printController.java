@@ -1,24 +1,33 @@
 package com.sq.demo.controller;
 
+import cn.afterturn.easypoi.word.WordExportUtil;
 import com.sq.demo.Entity.Return_Comments;
 import com.sq.demo.mapper.*;
 
 import com.sq.demo.pojo.*;
 
 
+import com.sq.demo.utils.Doc2Pdf;
 import com.sq.demo.utils.FileUtil;
 import com.sq.demo.utils.NumberToCn;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.identity.User;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +46,10 @@ public class printController {
     PayableMapper payableMapper;
     @Autowired
     ContractfileMapper contractfileMapper;
+
+
+    @Value("classpath:license.xml")
+    private org.springframework.core.io.Resource licensepath;
 
     //部门名字找经理
     public String dptnTojl(String dptn) {
@@ -100,7 +113,7 @@ public class printController {
 
     //下载支付审批表
     @RequestMapping("/zfspd")
-    public void zfspd(String id, HttpServletRequest request, HttpServletResponse response) {
+    public void zfspd(String id, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Payable payable = payableMapper.selectByPrimaryKey(id);
         Map<String, Object> map = new HashMap<>();
         map.put("jbbm", payable.getJbbm());
@@ -122,12 +135,42 @@ public class printController {
         map.put("yzfje", cidToYf(contract.getId()).subtract(payable.getBqyf()));
         map.put("wzf", cidToWf(contract.getId()).add(payable.getBqyf()));
         map.put("bqyf", payable.getBqyf().toString());
-        FileUtil.exportWord("word/zfspd.docx", zfxm + "支付审批单.docx", map, request, response);
+        //FileUtil.exportWord("word/zfspd.docx", zfxm + "支付审批单.docx", map, request, response);
+        //FileUtil.exportWord("word/htpsb.docx", project.getProjectNam() + "合同评审表.docx", map, request, response);
+        String OS = System.getProperty("os.name").toLowerCase();
+        //生成word的路径
+        String lj = "";
+        if (OS.indexOf("linux") >= 0)
+            lj = "/upload/";
+        else if (OS.indexOf("windows") >= 0)
+            lj = "D:\\upload\\";
+        XWPFDocument doc = WordExportUtil.exportWord07("word/zfspd.docx", map);
+        String fileName = zfxm + "支付审批单.docx";
+        FileOutputStream fos = new FileOutputStream(lj + fileName);
+        doc.write(fos);
+        FileInputStream fileInputStream = new FileInputStream(lj + fileName);
+        com.aspose.words.Document doc1 = new com.aspose.words.Document(fileInputStream);
+        fileInputStream.close();
+        fos.close();
+        doc.close();
+        //刪除文件
+        File file = new File(lj + fileName);
+        if (file.exists() && file.isFile())
+            file.delete();
+        fileName = fileName.split(".docx")[0] + ".pdf";
+        String userAgent = request.getHeader("user-agent").toLowerCase();
+        if (userAgent.contains("msie") || userAgent.contains("like gecko")) {
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+        } else {
+            fileName = new String(fileName.getBytes("utf-8"), "ISO-8859-1");
+        }
+        // word转pdf的工具类
+        Doc2Pdf.doc2pdf(response, fileName, doc1);
     }
 
     //下载合同审批表
     @RequestMapping("/ht")
-    public void ht(String id, HttpServletRequest request, HttpServletResponse response) {
+    public void ht(String id, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Contract contract = contractMapper.selectByPrimaryKey(id);
         Map<String, Object> map = new HashMap<>();
         Project project = projectMapper.selectByPrimaryKey(contract.getProjectId());
@@ -142,31 +185,61 @@ public class printController {
         ProjectController projectController = new ProjectController();
         List<Return_Comments> return_comments = projectController.projecttocomment(contract.getDwyj());
         for (Return_Comments return_comment : return_comments) {
-            if (return_comment.getUsernam().equals("元少麟")&&map.get("zbdwyj")==null) {
+            if (return_comment.getUsernam().equals("元少麟") && map.get("zbdwyj") == null) {
                 map.put("zbdwyj", return_comment.getComment());
                 String sj = return_comment.getTime().substring(0, 4) + "年" + return_comment.getTime().substring(5, 7) + "月" + return_comment.getTime().substring(8, 10) + "日";
                 map.put("sj", sj);
+                map.put("jsbjl","元少麟");
                 break;
             }
         }
-        if (map.get("zbdwyj") == null||map.get("zbdwyj").equals("")) {
+        if (map.get("zbdwyj") == null || map.get("zbdwyj").equals("")) {
             map.put("zbdwyj", " ");
             map.put("sj", "年    月    日");
         }
 
-        FileUtil.exportWord("word/htpsb.docx", project.getProjectNam() + "合同评审表.docx", map, request, response);
+        //FileUtil.exportWord("word/htpsb.docx", project.getProjectNam() + "合同评审表.docx", map, request, response);
+        String OS = System.getProperty("os.name").toLowerCase();
+        //生成word的路径
+        String lj = "";
+        if (OS.indexOf("linux") >= 0)
+            lj = "/upload/";
+        else if (OS.indexOf("windows") >= 0)
+            lj = "D:\\upload\\";
+        XWPFDocument doc = WordExportUtil.exportWord07("word/htpsb.docx", map);
+        String fileName = project.getProjectNam() + "合同评审表.docx";
+        FileOutputStream fos = new FileOutputStream(lj + fileName);
+        doc.write(fos);
+        FileInputStream fileInputStream = new FileInputStream(lj + fileName);
+        com.aspose.words.Document doc1 = new com.aspose.words.Document(fileInputStream);
+        fileInputStream.close();
+        fos.close();
+        doc.close();
+        //刪除文件
+        File file = new File(lj + fileName);
+        if (file.exists() && file.isFile())
+            file.delete();
+        fileName = fileName.split(".docx")[0] + ".pdf";
+        String userAgent = request.getHeader("user-agent").toLowerCase();
+        if (userAgent.contains("msie") || userAgent.contains("like gecko")) {
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+        } else {
+            fileName = new String(fileName.getBytes("utf-8"), "ISO-8859-1");
+        }
+        // word转pdf的工具类
+        Doc2Pdf.doc2pdf(response, fileName, doc1);
     }
 
     //下载申请表
     @RequestMapping("/sqb")
-    public void export(String id, HttpServletRequest request, HttpServletResponse response) {
+    public void export(String id, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Project project = projectMapper.selectByPrimaryKey(id);
         Map<String, Object> mmap = new HashMap<String, Object>();
         mmap.put("declarationDep", project.getDeclarationDep());
-        mmap.put("projectNo", project.getProjectNo() == null||project.getProjectNo().equals("")? " " : project.getProjectNo());
+        mmap.put("projectNo", project.getProjectNo() == null || project.getProjectNo().equals("") ? " " : project.getProjectNo());
         mmap.put("projectNam", project.getProjectNam());
         mmap.put("projectType", project.getProjectType());
-        mmap.put("investmentEstimate", project.getInvestmentEstimate() == null? "  " : project.getInvestmentEstimate());
+        mmap.put("investmentEstimate", project.getInvestmentEstimate() == null ? "  " : project.getInvestmentEstimate());
         mmap.put("personInCharge", project.getPersonInCharge() == null ? " " : project.getPersonInCharge());
         mmap.put("establishReason", project.getEstablishReason() == null ? " " : project.getEstablishReason());
         mmap.put("scale", project.getScale() == null ? " " : project.getScale());
@@ -177,13 +250,13 @@ public class printController {
         //列出所有审核意见
         List<Return_Comments> return_comments = projectController.projecttocomment(project.getPid());
         for (Return_Comments return_comment : return_comments) {
-            if (return_comment.getUsernam().equals(jl)&&mmap.get("jl")==null) {
+            if (return_comment.getUsernam().equals(jl) && mmap.get("jl") == null) {
                 mmap.put("bmshyj", return_comment.getComment());
                 mmap.put("jl", jl);
                 mmap.put("bmspsj", return_comment.getTime().substring(0, 10));
                 continue;
             }
-            if (return_comment.getUsernam().equals("元少麟")&&mmap.get("jsbjl")==null) {
+            if (return_comment.getUsernam().equals("元少麟") && mmap.get("jsbjl") == null) {
                 mmap.put("sjbjlyj", return_comment.getComment());
                 mmap.put("jsbjl", "元少麟");
                 mmap.put("jsbspsj", return_comment.getTime().substring(0, 10));
@@ -200,6 +273,36 @@ public class printController {
             mmap.put("jsbjl", " ");
             mmap.put("jsbspsj", " ");
         }
-        FileUtil.exportWord("word/xmlxb.docx", project.getProjectNam() + "立项申请表.docx", mmap, request, response);
+
+        String OS = System.getProperty("os.name").toLowerCase();
+        //生成word的路径
+        String lj = "";
+        if (OS.indexOf("linux") >= 0)
+            lj = "/upload/";
+        else if (OS.indexOf("windows") >= 0)
+            lj = "D:\\upload\\";
+        XWPFDocument doc = WordExportUtil.exportWord07("word/xmlxb.docx", mmap);
+        String fileName = project.getProjectNam() + "立项申请表.docx";
+        FileOutputStream fos = new FileOutputStream(lj + fileName);
+        doc.write(fos);
+        FileInputStream fileInputStream = new FileInputStream(lj + fileName);
+        com.aspose.words.Document doc1 = new com.aspose.words.Document(fileInputStream);
+        fileInputStream.close();
+        fos.close();
+        doc.close();
+        //刪除文件
+        File file = new File(lj + fileName);
+        if (file.exists() && file.isFile())
+            file.delete();
+        fileName = fileName.split(".docx")[0] + ".pdf";
+        String userAgent = request.getHeader("user-agent").toLowerCase();
+        if (userAgent.contains("msie") || userAgent.contains("like gecko")) {
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+        } else {
+            fileName = new String(fileName.getBytes("utf-8"), "ISO-8859-1");
+        }
+        // word转pdf的工具类
+        Doc2Pdf.doc2pdf(response, fileName, doc1);
     }
+
 }

@@ -45,7 +45,7 @@ public class XmcxbController {
             if (contract == null || contract.getDwyj() == null || contract.getDwyj().equals("")) {
                 xmcxb.setHtzt("未申请");
             } else {
-                xmcxb.setHtzt(TaskName.pidToTaskName(project.getPid()));
+                xmcxb.setHtzt(TaskName.pidToTaskName(contract.getDwyj()));
             }
             //填充施工状态
             if (project.getFinishDte() != null && !project.getFinishDte().equals("")) {
@@ -157,9 +157,9 @@ public class XmcxbController {
                 }
             }
         }
-        for (int i = 0; i < res.size(); i++) {
-            res.get(i).setXmid(String.valueOf(i + 1));
-        }
+//        for (int i = 0; i < res.size(); i++) {
+//            res.get(i).setXmid(String.valueOf(i + 1));
+//        }
         return res;
     }
 

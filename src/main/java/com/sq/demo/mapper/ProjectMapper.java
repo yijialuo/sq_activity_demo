@@ -70,6 +70,10 @@ public interface ProjectMapper extends MyMapper<Project> {
     @Select("SELECT ID,PROJECT_NAM FROM project WHERE ID not in (SELECT PROJECTID FROM yanshou )")
     List<Map> selectYsXm();
 
+    //id拿名字和编号
+    @Select("select project_nam,project_no from project where id = #{xmid}")
+    Map selectNameAndNo(String xmid);
+
     //拿到技术部经办人的项目id和name
     @Select("select ID,PROJECT_NAM FROM project WHERE BIDER = #{Name}")
     List<Map> selectJsbjbrXmidAndXmname(String Name);

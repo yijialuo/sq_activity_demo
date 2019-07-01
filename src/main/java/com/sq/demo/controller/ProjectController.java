@@ -735,6 +735,9 @@ public class ProjectController {
                 project.setBider(identityService.createUserQuery().userId(userId).singleResult().getFirstName());
                 //修改项目表
                 projectMapper.updateByPrimaryKeySelective(project);
+                project=projectMapper.selectByPrimaryKey(project.getId());
+                System.out.println("修改后："+project.getBider());
+               // System.out.println(project.getId());
                 Fs fs = new Fs();
                 fs.setProjectid(project.getId());
                 fs = fsMapper.selectOne(fs);
@@ -1153,6 +1156,7 @@ public class ProjectController {
             yscjdwj.setFid(attachment.getId());
             yscjdwj.setFname(file.getOriginalFilename());
             yscjdwj.setScr(userId);
+            yscjdwj.setY1(Time.getNow());
             yscjdwjMapper.insert(yscjdwj);
             return true;
         } catch (Exception e) {
@@ -1287,9 +1291,10 @@ public class ProjectController {
     //删除
     @Transactional
     @RequestMapping("/deletXm")
-    public boolean deletXm(@RequestBody Project po) {
-        if (canDelet(po.getId())) {
-            projectMapper.delete(po);
+    public boolean deletXm(String xmid) {
+        if (canDelet(xmid)) {
+            Project po=projectMapper.selectByPrimaryKey(xmid);
+            projectMapper.deleteByPrimaryKey(xmid);
             if (po.getPid() != null && !po.getPid().equals("")) {
                 ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
                 RuntimeService runtimeService = engine.getRuntimeService();
@@ -1310,16 +1315,14 @@ public class ProjectController {
         return projectMapper.selectByPrimaryKey(xmid).getDeclarationDep();
     }
 
-    //确定申请人(确定修改按钮的显示)
+    //确定修改按钮的显示
     @RequestMapping("/qdsqr")
     public boolean qdsqr(String projectId, String userId) {
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = engine.getIdentityService();
         User user = identityService.createUserQuery().userId(userId).singleResult();
         String username = user.getFirstName();
-        Project project = new Project();
-        project.setId(projectId);
-        Project po = projectMapper.selectOne(project);
+        Project po = projectMapper.selectByPrimaryKey(projectId);
         String peic = po.getProposer();
         if (po.getPid() == null || po.getPid().equals("")) {
             if (username.equals(peic)) {
@@ -1533,5 +1536,10 @@ public class ProjectController {
         Project project=projectMapper.selectByPrimaryKey(xmid);
         project.setTjdw(tjdw);
         projectMapper.updateByPrimaryKeySelective(project);
+    }
+
+    @RequestMapping("/selectNameAndNo")
+    public Map selectNameAndNo(String xmid){
+        return projectMapper.selectNameAndNo(xmid);
     }
 }

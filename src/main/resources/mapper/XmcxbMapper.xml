@@ -129,12 +129,9 @@
           xmjbr like concat('%',#{item},'%')
         </foreach>
       </if>
-
       <if test=" kslhzbwjsj!='' or jslhzbwjsj!='' ">
         and lhzbwjsj   BETWEEN #{kslhzbwjsj} and #{jslhzbwjsj}
       </if>
-
-
     </trim>
   </select>
 </mapper>

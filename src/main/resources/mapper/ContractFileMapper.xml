@@ -9,5 +9,7 @@
     <result column="CID" jdbcType="VARCHAR" property="cid" />
     <result column="FID" jdbcType="VARCHAR" property="fid" />
     <result column="FNAME" jdbcType="VARCHAR" property="fname" />
+    <result column="SCR" jdbcType="VARCHAR" property="scr" />
+    <result column="SCSJ" jdbcType="VARCHAR" property="scsj" />
   </resultMap>
 </mapper>

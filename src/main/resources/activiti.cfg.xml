@@ -8,7 +8,8 @@
         <!--<property name="jdbcPassword" value="xsgcgl"/>-->
         <!--<property name="jdbcUrl" value="jdbc:mysql://10.197.33.115:3306/xsgcgl?useSSL=FALSE&amp;characterEncoding=utf8&amp;autoReconnct=true&amp;autoReconnectForPools=true"/>-->
 
-        <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/activity_test4?useSSL=FALSE&amp;characterEncoding=utf8&amp;autoReconnct=true&amp;autoReconnectForPools=true"/>
+
+        <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/activity_test2?useSSL=FALSE&amp;characterEncoding=utf8&amp;autoReconnct=true&amp;autoReconnectForPools=true"/>
         <property name="jdbcPassword" value="yijialuo666"/>
 
 
