@@ -1,5 +1,6 @@
 package com.sq.demo.Entity;
 
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -27,6 +28,13 @@ public class Contract_return implements Serializable {
     private String fjid;
     private String rq;
     private String gd;
+    private String ksyxq;
+    private String jsyxq;
+    private String gq;
+    private String lxqk;
+    private String declarationDep;
+    private String dqjd;
+    private String cjsj;
 
     public String getId() {
         return id;
@@ -178,5 +186,61 @@ public class Contract_return implements Serializable {
 
     public void setXmNo(String xmNo) {
         this.xmNo = xmNo;
+    }
+
+    public String getDeclarationDep() {
+        return declarationDep;
+    }
+
+    public void setDeclarationDep(String declarationDep) {
+        this.declarationDep = declarationDep;
+    }
+
+    public String getKsyxq() {
+        return ksyxq;
+    }
+
+    public void setKsyxq(String ksyxq) {
+        this.ksyxq = ksyxq;
+    }
+
+    public String getJsyxq() {
+        return jsyxq;
+    }
+
+    public void setJsyxq(String jsyxq) {
+        this.jsyxq = jsyxq;
+    }
+
+    public String getGq() {
+        return gq;
+    }
+
+    public void setGq(String gq) {
+        this.gq = gq;
+    }
+
+    public String getLxqk() {
+        return lxqk;
+    }
+
+    public void setLxqk(String lxqk) {
+        this.lxqk = lxqk;
+    }
+
+    public String getDqjd() {
+        return dqjd;
+    }
+
+    public void setDqjd(String dqjd) {
+        this.dqjd = dqjd;
+    }
+
+    public String getCjsj() {
+        return cjsj;
+    }
+
+    public void setCjsj(String cjsj) {
+        this.cjsj = cjsj;
     }
 }

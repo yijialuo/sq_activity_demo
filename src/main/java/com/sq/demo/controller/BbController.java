@@ -59,7 +59,7 @@ public class BbController {
         Map nfmap = new HashMap();
         yfmap.put("_year", year);
         yfmap.put("_month", month);
-        if (bm == null || bm.equals(""))
+        if (bm == null || bm.equals("")||bm.equals("null"))
             projectMapper.yfbb(yfmap);
         else {
             yfmap.put("_bm",bm);
@@ -120,7 +120,7 @@ public class BbController {
         List<String> nfbb = new ArrayList<>();
         nfmap.put("_year", year);
         nfmap.put("_month", month);
-        if (bm == null || bm.equals("")){
+        if (bm == null || bm.equals("")||bm.equals("null")){
             projectMapper.nfbb(nfmap);
         }else {
             nfmap.put("_bm",bm);
@@ -180,10 +180,10 @@ public class BbController {
 
         int[][] columnWidths = {
                 {
-                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
+                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,23
                 },
                 {
-                        18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256
+                        18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256
                 }
         };
         ExcelUtil.setCloumnWitth(sheet, columnWidths);
@@ -199,13 +199,13 @@ public class BbController {
 
         HSSFRow row2 = sheet.createRow(2);
         row2.setHeightInPoints(25);// 行高度
-        ExcelUtil.createTempCell(row2, 1, 22, style);
+        ExcelUtil.createTempCell(row2, 1, 23, style);
         HSSFCell cell2_0 = ExcelUtil.createCell(row2, 0, "新沙公司工程项目实施进度表", style);
-        ExcelUtil.createRange(sheet, 2, 2, 0, 19);
+        ExcelUtil.createRange(sheet, 2, 2, 0, 23);
 
         String[] cloumnNames = {
                 "序号", "项目计划号", "项目名称", "计划金额(万元)", "立项部门",
-                "立项类别", "项目类别", "项目大类", "技术部经理审批时间",
+                "立项类别", "项目类别", "项目大类","机种", "技术部经理审批时间",
                 "过会时间", "过总经办时间", "定标时间",
                 "合同提交评审时间", "合同签订时间", "合同金额（万元）", "开工时间",
                 "验收时间", "本年度结算进度（万元）", "总结算进度（万元）", "完成结算时间",
@@ -261,10 +261,10 @@ public class BbController {
 
         int[][] columnWidths = {
                 {
-                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
+                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,25
                 },
                 {
-                        18 * 256, 18 * 256, 36 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256
+                        18 * 256, 18 * 256, 36 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256
                 }
         };
         ExcelUtil.setCloumnWitth(sheet, columnWidths);
@@ -280,13 +280,13 @@ public class BbController {
 
         HSSFRow row2 = sheet.createRow(2);
         row2.setHeightInPoints(25);// 行高度
-        ExcelUtil.createTempCell(row2, 1, 24, style);
+        ExcelUtil.createTempCell(row2, 1, 26, style);
         HSSFCell cell2_0 = ExcelUtil.createCell(row2, 0, "项目查询报表", style);
-        ExcelUtil.createRange(sheet, 2, 2, 0, 19);
+        ExcelUtil.createRange(sheet, 2, 2, 0, 26);
 
         String[] cloumnNames = {
-                "项目编号", "项目名称", "立项时间", "立项部门", "项目大类",
-                "立项类别", "项目类别", "计划金额（万元）", "合同金额（万元）", "审批状态",
+                "项目id","项目编号", "项目名称", "立项时间", "立项部门", "项目大类",
+                "立项类别", "机种", "项目类别","计划金额（万元）", "合同金额（万元）", "审批状态",
                 "合同状态", "施工状态", "结算状态", "开工时间", "完工时间",
                 "总结算进度（万元）", "今年结算进度（万元）", "定标时间", "项目过会时间", "两会招标文件时间",
                 "合同签订时间", "结算时间", "承包单位", "项目发起人", "经办项目人"

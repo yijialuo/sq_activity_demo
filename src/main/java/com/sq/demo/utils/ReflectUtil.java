@@ -10,7 +10,7 @@ public class ReflectUtil {
 
         Class clz=object.getClass();
         Field[] fields = clz.getDeclaredFields();
-        for (int i=1;i<fields.length;i++){//遍历
+        for (int i=0;i<fields.length;i++){//遍历
             try {
                 //得到属性
                 Field field = fields[i];

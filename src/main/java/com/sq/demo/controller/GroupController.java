@@ -22,11 +22,11 @@ public class GroupController {
 
     @Transactional
     @RequestMapping("/addgroup")
-    public Group addgroup(String groupName,String groupCode){
+    public Group addgroup(String groupId, String groupName,String groupCode){
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = processEngine.getIdentityService();
         try {
-            Group group=identityService.newGroup(IdCreate.id());
+            Group group=identityService.newGroup(groupId);
             group.setName(groupName);
             group.setType(groupCode);
             identityService.saveGroup(group);

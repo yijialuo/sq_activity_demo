@@ -2,6 +2,7 @@ package com.sq.demo.pojo;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class Zhaobiao implements Serializable {
     /**
@@ -41,6 +42,27 @@ public class Zhaobiao implements Serializable {
     //定标时间
     private String dbsj;
 
+    //立项部门
+    @Transient
+    private String declarationDep;
+
+    @Transient
+    private String dqjd;
+
+    @Transient
+    private String zbr;
+
+    @Transient
+    private BigDecimal zbje;
+
+    @Transient
+    private String xmNo;
+
+    @Transient
+    private String xmName;
+
+    @Transient
+    private String userName;
     /**
      * 获取主键
      *
@@ -169,5 +191,61 @@ public class Zhaobiao implements Serializable {
 
     public void setDbsj(String dbsj) {
         this.dbsj = dbsj;
+    }
+
+    public String getDeclarationDep() {
+        return declarationDep;
+    }
+
+    public void setDeclarationDep(String declarationDep) {
+        this.declarationDep = declarationDep;
+    }
+
+    public String getDqjd() {
+        return dqjd;
+    }
+
+    public void setDqjd(String dqjd) {
+        this.dqjd = dqjd;
+    }
+
+    public String getZbr() {
+        return zbr;
+    }
+
+    public void setZbr(String zbr) {
+        this.zbr = zbr;
+    }
+
+    public BigDecimal getZbje() {
+        return zbje;
+    }
+
+    public void setZbje(BigDecimal zbje) {
+        this.zbje = zbje;
+    }
+
+    public String getXmNo() {
+        return xmNo;
+    }
+
+    public void setXmNo(String xmNo) {
+        this.xmNo = xmNo;
+    }
+
+    public String getXmName() {
+        return xmName;
+    }
+
+    public void setXmName(String xmName) {
+        this.xmName = xmName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

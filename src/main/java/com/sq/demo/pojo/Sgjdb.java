@@ -51,6 +51,9 @@ public class Sgjdb {
     @Column(name = "xmdl")
     private String xmdl;
 
+    @Column(name = "jz")
+    private String jz;
+
     private String jsbjlsj;
 
     /**
@@ -466,5 +469,13 @@ public class Sgjdb {
 
     public void setJsbjlsj(String jsbjlsj) {
         this.jsbjlsj = jsbjlsj;
+    }
+
+    public String getJz() {
+        return jz;
+    }
+
+    public void setJz(String jz) {
+        this.jz = jz;
     }
 }

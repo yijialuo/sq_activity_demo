@@ -46,6 +46,8 @@ public class Sgjdb2 {
     @Column(name = "xmdl")
     private String[] xmdl;
 
+    @Column(name="jz")
+    private String[] jz;
 
     private String ksjsbjlsj;
     private String jsjsbjlsj;
@@ -368,5 +370,13 @@ public class Sgjdb2 {
 
     public void setSgdw(String sgdw) {
         this.sgdw = sgdw;
+    }
+
+    public String[] getJz() {
+        return jz;
+    }
+
+    public void setJz(String[] jz) {
+        this.jz = jz;
     }
 }

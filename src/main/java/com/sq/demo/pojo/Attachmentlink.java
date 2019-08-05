@@ -2,7 +2,7 @@ package com.sq.demo.pojo;
 
 import javax.persistence.*;
 
-public class Attachmentlink {
+public class Attachmentlink{
     /**
      * 附件id
      */

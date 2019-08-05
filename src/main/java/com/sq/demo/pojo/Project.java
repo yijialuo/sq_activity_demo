@@ -130,11 +130,20 @@ public class Project implements Serializable {
     @Column(name = "ZJHSJ")
     private String  zjhsj;
 
+    //推荐单位
     @Column(name = "TJDW")
     private String tjdw;
 
+    //机种
+    @Column(name = "JZ")
+    private String jz;
+
     @Column(name = "PID")
     private String pid;
+
+    //当前节点
+    @Transient
+    private String dqjd;
 
     /**
      * 获取主键
@@ -514,5 +523,21 @@ public class Project implements Serializable {
 
     public void setTjdw(String tjdw) {
         this.tjdw = tjdw;
+    }
+
+    public String getDqjd() {
+        return dqjd;
+    }
+
+    public void setDqjd(String dqjd) {
+        this.dqjd = dqjd;
+    }
+
+    public String getJz() {
+        return jz;
+    }
+
+    public void setJz(String jz) {
+        this.jz = jz;
     }
 }

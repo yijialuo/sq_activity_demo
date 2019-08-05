@@ -21,7 +21,11 @@
     <result column="ZJLYJ" property="zjlyj" jdbcType="VARCHAR" />
     <result column="RQ" property="rq" jdbcType="VARCHAR" />
     <result column="GD" property="gd" jdbcType="VARCHAR" />
+    <result column="KSYXQ" property="ksyxq" jdbcType="VARCHAR" />
+    <result column="JSYXQ" property="jsyxq" jdbcType="VARCHAR" />
+    <result column="GQ" property="gq" jdbcType="VARCHAR" />
     <result column="CJSJ" property="cjsj" jdbcType="VARCHAR" />
+    <result column="LXQK" property="lxqk" jdbcType="VARCHAR" />
   </resultMap>
 
   <select id="search" resultType="com.sq.demo.pojo.Contract">

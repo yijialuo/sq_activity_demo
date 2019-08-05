@@ -9,10 +9,12 @@ import com.sq.demo.pojo.*;
 
 import com.sq.demo.utils.Doc2Pdf;
 import com.sq.demo.utils.FileUtil;
+import com.sq.demo.utils.GroupUtils;
 import com.sq.demo.utils.NumberToCn;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
+import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +49,10 @@ public class printController {
     PayableMapper payableMapper;
     @Autowired
     ContractfileMapper contractfileMapper;
-
+    @Autowired
+    ContractController contractController;
+    @Autowired
+    ProjectController projectController;
 
     @Value("classpath:license.xml")
     private org.springframework.core.io.Resource licensepath;
@@ -62,8 +68,9 @@ public class printController {
         for (User user : users) {
             //用户是这个部门
             if (identityService.getUserInfo(user.getId(), "departmentId").equals(department.getId())) {
+                List<Group> groups=identityService.createGroupQuery().groupMember(user.getId()).list();
                 //用户是经理
-                if (identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId().equals("jl")) {
+                if (GroupUtils.equalsJs(groups,"jl")) {
                     return user.getFirstName();
                 }
             }
@@ -182,8 +189,7 @@ public class printController {
         map.put("price", contract.getPrice() == null ? " " : contract.getPrice());
         map.put("dx", NumberToCn.number2CNMontrayUnit(contract.getPrice()));
         map.put("jbr", contract.getJbr() == null ? " " : contract.getJbr());
-        ProjectController projectController = new ProjectController();
-        List<Return_Comments> return_comments = projectController.projecttocomment(contract.getDwyj());
+        List<Return_Comments> return_comments =contractController.getHtComment(contract.getDwyj());
         for (Return_Comments return_comment : return_comments) {
             if (return_comment.getUsernam().equals("元少麟") && map.get("zbdwyj") == null) {
                 map.put("zbdwyj", return_comment.getComment());
@@ -246,7 +252,6 @@ public class printController {
         mmap.put("illustration", project.getIllustration() == null ? " " : project.getIllustration());
         //拿到该部门的部门经理名字
         String jl = dptnTojl(project.getDeclarationDep());
-        ProjectController projectController = new ProjectController();
         //列出所有审核意见
         List<Return_Comments> return_comments = projectController.projecttocomment(project.getPid());
         for (Return_Comments return_comment : return_comments) {

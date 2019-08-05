@@ -9,6 +9,7 @@ import com.sq.demo.pojo.Department;
 import com.sq.demo.pojo.Fs;
 import com.sq.demo.pojo.Project;
 import com.sq.demo.utils.ArrayToString;
+import com.sq.demo.utils.GroupUtils;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
@@ -39,6 +40,8 @@ public class UserController {
     ProjectMapper projectMapper;
     @Autowired
     FsMapper fsMapper;
+    @Autowired
+    ProjectController projectController;
 
 
     //判断是不是技术部的人
@@ -56,10 +59,11 @@ public class UserController {
         IdentityService identityService = engine.getIdentityService();
         List<UserOV> userOVS = new ArrayList<>();
         if (projectId == null || projectId.equals("")) {
+            //拿所有的用户
             List<User> users = identityService.createUserQuery().list();
             for (User user : users) {
-                Group group = identityService.createGroupQuery().groupMember(user.getId()).singleResult();
-                if (group.getId().equals("jsb_zgjl") && identityService.getUserInfo(user.getId(), "manageType").contains(manageType)) {
+                List<Group> groups = identityService.createGroupQuery().groupMember(user.getId()).list();
+                if (GroupUtils.equalsJs(groups, "jsb_zgjl") && identityService.getUserInfo(user.getId(), "manageType").contains(manageType)) {
                     UserOV userOV = new UserOV();
                     userOV.userId = user.getId();
                     userOV.userName = user.getFirstName();
@@ -92,8 +96,8 @@ public class UserController {
         List<User> users = identityService.createUserQuery().list();
         List<String> res = new ArrayList<>();
         for (User user : users) {
-            String grouoId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
-            if (grouoId.equals("jsb_doman") || grouoId.equals("doman")) {
+            List<Group> groups = identityService.createGroupQuery().groupMember(user.getId()).list();
+            if (GroupUtils.equalsJs(groups, "jsb_doman") || GroupUtils.equalsJs(groups, "doman")) {
                 res.add(user.getFirstName());
             }
         }
@@ -108,8 +112,8 @@ public class UserController {
         List<User> users = identityService.createUserQuery().list();
         List<String> res = new ArrayList<>();
         for (User user : users) {
-            String grouoId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
-            if (grouoId.equals("jsb_doman")) {
+            List<Group> groups = identityService.createGroupQuery().groupMember(user.getId()).list();
+            if (GroupUtils.equalsJs(groups, "jsb_doman")) {
                 res.add(user.getFirstName());
             }
         }
@@ -125,8 +129,8 @@ public class UserController {
         if (projectId == null || projectId.equals("")) {//拿所有
             List<User> users = identityService.createUserQuery().list();
             for (User user : users) {
-                Group group = identityService.createGroupQuery().groupMember(user.getId()).singleResult();
-                if (group.getId().equals("jsb_doman") && identityService.getUserInfo(user.getId(), "manageType").contains(manageType)) {
+                List<Group> groups = identityService.createGroupQuery().groupMember(user.getId()).list();
+                if (GroupUtils.equalsJs(groups, "jsb_doman") && identityService.getUserInfo(user.getId(), "manageType").contains(manageType)) {
                     UserOV userOV = new UserOV();
                     userOV.userId = user.getId();
                     userOV.userName = user.getFirstName();
@@ -212,8 +216,9 @@ public class UserController {
                 for (User user : users) {
                     //找到部门的人
                     if (identityService.getUserInfo(user.getId(), "departmentId").equals(departmentId)) {
+                        List<Group> groups=identityService.createGroupQuery().groupMember(user.getId()).list();
                         //找到doman
-                        if (identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId().equals("doman")) {
+                        if (GroupUtils.equalsJs(groups,"doman")) {
                             UserOV userOV = new UserOV();
                             userOV.userId = user.getId();
                             userOV.userName = user.getFirstName();
@@ -223,8 +228,8 @@ public class UserController {
                 }
             } else {//如果是工程技术部拿所有的
                 for (User user : users) {
-                    String grouoId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
-                    if (grouoId.equals("doman") || grouoId.equals("jsb_doman")) {
+                    List<Group> groups = identityService.createGroupQuery().groupMember(user.getId()).list();
+                    if (GroupUtils.equalsJs(groups, "doman") || GroupUtils.equalsJs(groups, "jsb_doman")) {
                         UserOV userOV = new UserOV();
                         userOV.userId = user.getId();
                         userOV.userName = user.getFirstName();
@@ -258,14 +263,15 @@ public class UserController {
             userOV.passWord = user.getPassword();
             userOV.departmentId = identityService.getUserInfo(user.getId(), "departmentId");
             //查询用户所在的组
-            String groupId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
-            userOV.groupId = groupId;
-            Department department = new Department();
-            department.setId(userOV.departmentId);
-            String d_name = departmentMapper.selectOne(department).getdNam();
-            userOV.departmentName = d_name;
-            Group group = identityService.createGroupQuery().groupId(groupId).singleResult();
-            userOV.groupName = group.getName();
+            List<Group> groups = identityService.createGroupQuery().groupMember(user.getId()).list();
+            userOV.groupId = GroupUtils.getGroupIds(groups);
+            if (userOV.departmentId != null && !userOV.departmentId.equals("")) {
+                Department department = new Department();
+                department.setId(userOV.departmentId);
+                String d_name = departmentMapper.selectOne(department).getdNam();
+                userOV.departmentName = d_name;
+            }
+            userOV.groupName = GroupUtils.getGroupNames(groups);
             return userOV;
         } else {
             return null;
@@ -285,14 +291,17 @@ public class UserController {
         user.setFirstName(userOV.userName);
         user.setPassword(userOV.passWord);
         //保存用户部门
-        identityService.setUserInfo(user.getId(), "departmentId", userOV.departmentId);
+        if (userOV.departmentId != null && !userOV.departmentId.equals(""))
+            identityService.setUserInfo(user.getId(), "departmentId", userOV.departmentId);
         //选择了manageType
         if (userOV.manageType != null && userOV.manageType.length != 0) {
             identityService.setUserInfo(user.getId(), "manageType", ArrayToString.array(userOV.manageType));
         }
 
         identityService.saveUser(user);
-        identityService.createMembership(user.getId(), userOV.groupId);
+        for (String groupId : userOV.groupId) {
+            identityService.createMembership(user.getId(), groupId);
+        }
         return true;
     }
 
@@ -321,6 +330,10 @@ public class UserController {
         return false;
     }
 
+    public boolean equalList(List list1, List list2) {
+        return (list1.size() == list2.size()) && list1.containsAll(list2);
+    }
+
     @Transactional
     @RequestMapping("/edituser")
     public boolean edituser(@RequestBody UserOV userOV) {
@@ -329,11 +342,22 @@ public class UserController {
         User user = identityService.createUserQuery().userId(userOV.userId).singleResult();
         user.setFirstName(userOV.userName);
         user.setPassword(userOV.passWord);
-        String groupId = identityService.createGroupQuery().groupMember(userOV.userId).singleResult().getId();
+        //原来的组
+        List<Group> group = identityService.createGroupQuery().groupMember(userOV.userId).list();
+        List<String> groupId = new ArrayList<>();
+        for (Group group1 : group) {
+            groupId.add(group1.getId());
+        }
         //新的groupId不等于原来的就修改
-        if (!groupId.equals(userOV.groupId)) {
-            identityService.deleteMembership(userOV.userId, groupId);
-            identityService.createMembership(user.getId(), userOV.groupId);
+        if (!equalList(userOV.groupId, groupId)) {
+            //删除原来的组
+            for (String groupId2 : groupId) {
+                identityService.deleteMembership(userOV.userId, groupId2);
+            }
+            //增加现在的组
+            for (String groupId3 : userOV.groupId) {
+                identityService.createMembership(user.getId(), groupId3);
+            }
         }
         //修改部门ID
         identityService.setUserInfo(user.getId(), "departmentId", userOV.departmentId);
@@ -367,13 +391,12 @@ public class UserController {
                             userOV.manageType = identityService.getUserInfo(user.getId(), "manageType").split(",");
                         }
                         //查询用户所在的组
-                        String groupId = identityService.createGroupQuery().groupMember(user.getId()).singleResult().getId();
-                        userOV.groupId = groupId;
+                        List<Group> groups = identityService.createGroupQuery().groupMember(user.getId()).list();
+                        userOV.groupId = GroupUtils.getGroupIds(groups);
                         Department department = new Department();
                         department.setId(userOV.departmentId);
                         userOV.departmentName = departmentMapper.selectOne(department).getdNam();
-                        Group group1 = identityService.createGroupQuery().groupId(groupId).singleResult();
-                        userOV.groupName = group1.getName();
+                        userOV.groupName = GroupUtils.getGroupNames(groups);
                         userOVs.add(userOV);
                     }
                     return userOVs;
@@ -420,52 +443,24 @@ public class UserController {
         return departmentMapper.selectByPrimaryKey(departmentId).getdNam();
     }
 
-    public List<Return_Comments> projecttocomment(String pid) {
-        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-        IdentityService identityService = processEngine.getIdentityService();
-        TaskService taskService = processEngine.getTaskService();
-        List<Comment> comments = taskService.getProcessInstanceComments(pid);
-        List<Return_Comments> return_comments = new ArrayList<>();
-        for (int i = 0; i < comments.size(); i++) {
-            if (comments.get(i).getType().equals("event")) {
-                comments.remove(i);
-                i--;
-            }
-        }
-        for (Comment comment : comments) {
-            String uid = comment.getUserId();
-            User user = identityService.createUserQuery().userId(uid).singleResult();
-            Group group = identityService.createGroupQuery().groupMember(uid).singleResult();
-            String unam = user.getFirstName();
-            Return_Comments return_comments1 = new Return_Comments();
-            return_comments1.setComment(comment.getFullMessage());
-            return_comments1.setUsernam(unam);
-            return_comments1.setGroupName(group.getName());
-            String dd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(comment.getTime());
-            return_comments1.setTime(dd);
-            return_comments.add(return_comments1);
-        }
-        return return_comments;
-    }
-
     //判断用户是否为该项目前期的处理人之一
     @RequestMapping("/isClr")
-    public boolean isClr(String xmid,String userId){
-        Project project=projectMapper.selectByPrimaryKey(xmid);
-        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
-        IdentityService identityService=engine.getIdentityService();
-        User user=identityService.createUserQuery().userId(userId).singleResult();
-        if(project.getProposer().equals(user.getFirstName())){
+    public boolean isClr(String xmid, String userId) {
+        Project project = projectMapper.selectByPrimaryKey(xmid);
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
+        User user = identityService.createUserQuery().userId(userId).singleResult();
+        if (project.getProposer().equals(user.getFirstName())) {
             return true;
         }
-        if(project.getPid()!=null&&!project.getPid().equals("")){
-            for(Return_Comments return_comments:projecttocomment(project.getPid())){
-                if(return_comments.getUsernam().equals(user.getFirstName())){
+        if (project.getPid() != null && !project.getPid().equals("")) {
+            for (Return_Comments return_comments : projectController.projecttocomment(project.getPid())) {
+                if (return_comments.getUsernam().equals(user.getFirstName())) {
                     return true;
                 }
             }
             return false;
-        }else {
+        } else {
             return false;
         }
     }

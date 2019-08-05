@@ -101,6 +101,24 @@ public class Contract {
     @Column(name="CJSJ")
     private String cjsj;
 
+    //开始有效期
+    @Column(name="KSYXQ")
+    private String ksyxq;
+
+    //结束有效期
+    @Column(name="JSYXQ")
+    private String jsyxq;
+
+    //工期
+    @Column(name="GQ")
+    private String gq;
+
+    @Column(name = "LXQK")
+    private String lxqk;
+    //立项部门
+    @Transient
+    private String declarationDep;
+
 
     /**
      * 获取主键
@@ -377,5 +395,45 @@ public class Contract {
 
     public void setCjsj(String cjsj) {
         this.cjsj = cjsj;
+    }
+
+    public String getDeclarationDep() {
+        return declarationDep;
+    }
+
+    public void setDeclarationDep(String declarationDep) {
+        this.declarationDep = declarationDep;
+    }
+
+    public String getKsyxq() {
+        return ksyxq;
+    }
+
+    public void setKsyxq(String ksyxq) {
+        this.ksyxq = ksyxq;
+    }
+
+    public String getJsyxq() {
+        return jsyxq;
+    }
+
+    public void setJsyxq(String jsyxq) {
+        this.jsyxq = jsyxq;
+    }
+
+    public String getGq() {
+        return gq;
+    }
+
+    public void setGq(String gq) {
+        this.gq = gq;
+    }
+
+    public String getLxqk() {
+        return lxqk;
+    }
+
+    public void setLxqk(String lxqk) {
+        this.lxqk = lxqk;
     }
 }

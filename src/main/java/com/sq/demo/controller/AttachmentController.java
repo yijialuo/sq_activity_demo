@@ -241,7 +241,7 @@ public class AttachmentController {
     }
 
 
-    //返回附件信息
+    //返回附件信息 已上传节点文件去找（yscjdwj）
     @RequestMapping("/getattachment2")
     public List<AttachmentReturn> getattachment2(String id, String bcwjid) {
         List<AttachmentReturn> attachmentReturns = new ArrayList<>();
@@ -261,27 +261,6 @@ public class AttachmentController {
         return attachmentReturns;
     }
 
-    //判断用户对附件是否有操作权限
-    @RequestMapping("/getrank")
-    public Boolean getrank(String userId, String attachment_id) {
-        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-        IdentityService identityService = processEngine.getIdentityService();
-        TaskService taskService = processEngine.getTaskService();
-        String rank = identityService.createGroupQuery().groupMember(userId).singleResult().getType();
-        Attachment attachment = taskService.getAttachment(attachment_id);
-        String aid = attachment.getId();
-        Attachmentlink attachmentlink = new Attachmentlink();
-        attachmentlink.setAttachment(aid);
-        String upid = attachmentlinkMapper.selectOne(attachmentlink).getUserid();
-        String rank1 = identityService.createGroupQuery().groupMember(upid).singleResult().getType();
-        int a = Integer.valueOf(rank);
-        int b = Integer.valueOf(rank1);
-        if (a >= b) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     //报表附件的下载
     @RequestMapping("/Download")

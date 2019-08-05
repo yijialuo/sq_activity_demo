@@ -40,6 +40,9 @@ public class Xmcxb {
      */
     private String lxlb;
 
+    //机种
+    private String jz;
+
     /**
      * 项目类型
      */
@@ -551,5 +554,13 @@ public class Xmcxb {
      */
     public void setLhzbwjsj(String lhzbwjsj) {
         this.lhzbwjsj = lhzbwjsj;
+    }
+
+    public String getJz() {
+        return jz;
+    }
+
+    public void setJz(String jz) {
+        this.jz = jz;
     }
 }

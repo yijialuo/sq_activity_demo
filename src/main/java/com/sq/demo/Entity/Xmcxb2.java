@@ -42,6 +42,8 @@ public class Xmcxb2 {
      */
     private String[] xmlb;
 
+    private String[] jz;
+
     /**
      * 投资概算
      */
@@ -389,5 +391,13 @@ public class Xmcxb2 {
 
     public void setJslxsj(String jslxsj) {
         this.jslxsj = jslxsj;
+    }
+
+    public String[] getJz() {
+        return jz;
+    }
+
+    public void setJz(String[] jz) {
+        this.jz = jz;
     }
 }

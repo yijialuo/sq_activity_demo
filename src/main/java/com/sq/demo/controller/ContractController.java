@@ -6,6 +6,7 @@ import com.sq.demo.Entity.Hetong;
 import com.sq.demo.Entity.Return_Comments;
 import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.*;
+import com.sq.demo.utils.GroupUtils;
 import com.sq.demo.utils.IdCreate;
 import com.sq.demo.utils.Time;
 import org.activiti.engine.*;
@@ -15,6 +16,7 @@ import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.repository.DeploymentBuilder;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Attachment;
+import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +25,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.Id;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,6 +55,11 @@ public class ContractController {
     YanshouMapper yanshouMapper;
     @Autowired
     PayableMapper payableMapper;
+    @Autowired
+    ZhongbiaoMapper zhongbiaoMapper;
+    @Autowired
+    ZhaobiaoMapper zhaobiaoMapper;
+
 
     //综合搜索
     @RequestMapping("search")
@@ -130,7 +139,6 @@ public class ContractController {
         } catch (Exception e) {
             return false;
         }
-
     }
 
     //合同作废
@@ -151,93 +159,6 @@ public class ContractController {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    //技术部经理处理合同
-    @RequestMapping("jsbjldoht")
-    public boolean jsbjldoht(String dwyj, String userId, String value, String comment) {
-        try {
-            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-            TaskService taskService = processEngine.getTaskService();
-            Task task = taskService.createTaskQuery().processInstanceId(dwyj).singleResult();
-            Authentication.setAuthenticatedUserId(userId);
-            if (comment == null)
-                comment = "";
-            taskService.addComment(task.getId(), dwyj, comment);
-            taskService.setVariable(task.getId(), "jsb_jl", value);
-            //完成任务
-            taskService.complete(task.getId());
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-
-    }
-
-    //技术部经理领到合同getBgsHtsgetJsbdomanHts
-    @RequestMapping(value = "/getJsbjlHts")
-    public List<Contract_return> getJbsjlHts() {
-        List<Contract_return> res = new ArrayList<>();
-        for (Contract contract : contractMapper.selectYlc()) {
-            if (getPidNode(contract.getDwyj()).equals("技术部经理审批")) {
-                res.add(contractTocontractreturn(contract));
-            }
-        }
-        return res;
-    }
-
-    //经办人领到合同getJsbdomanHts
-    @RequestMapping(value = "/getJsbdomanHts")
-    public List<Contract_return> getJsbdomanHts(String userId) {
-        List<Contract_return> res = new ArrayList<>();
-        for (Contract contract : contractMapper.selectYlc()) {
-            if (contract.getCwbmyj() != null && contract.getCwbmyj().equals(userId) && getPidNode(contract.getDwyj()).equals("填写合同表单")) {
-                res.add(contractTocontractreturn(contract));
-            }
-        }
-        return res;
-    }
-
-    //办公室领到需要处理的合同
-    @RequestMapping(value = "/getBgsHts")
-    public List<Contract_return> getBgsHts(String userId) {
-        List<Contract_return> res = new ArrayList<>();
-//        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-////        IdentityService identityService = processEngine.getIdentityService();
-        for (Contract contract : contractMapper.selectYlc()) {
-
-            if ( getPidNode(contract.getDwyj()).equals("办公室确认")&&(userId.equals("ldy")||userId.equals("zlf"))) {
-                res.add(contractTocontractreturn(contract));
-                break;
-            }
-
-//            //判断该项目是不是自己前期处理的项目
-//            Project project = projectMapper.selectByPrimaryKey(contract.getProjectId());
-//            //那评论
-//            ProjectController controller = new ProjectController();
-//            List<Return_Comments> return_comments = controller.projecttocomment(project.getPid());
-//            for (int i = 0; i < return_comments.size(); i++) {
-//                //评论人
-//                User user = identityService.createUserQuery().userFirstName(return_comments.get(i).getUsernam()).singleResult();
-//                //评论人的group
-//                Group group1 = identityService.createGroupQuery().groupMember(user.getId()).singleResult();
-//                //如果评论人的职位是办公室，同时评论人是自己
-//                if ((group1.getId().equals("bgs") && getPidNode(contract.getDwyj()).equals("办公室确认"))&&(userId.equals("ldy")||userId.equals("zlf"))) {
-//                    res.add(contractTocontractreturn(contract));
-//                    break;
-//                }
-//            }
-        }
-        return res;
-    }
-
-    //拿流程的当前节点
-    @RequestMapping(value = "/getHtNode")
-    public String getPidNode(String dwyj) {
-        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-        TaskService taskService = processEngine.getTaskService();
-        Task task = taskService.createTaskQuery().processInstanceId(dwyj).singleResult();
-        return task.getName();
     }
 
     //开始合同审批
@@ -285,14 +206,248 @@ public class ContractController {
 
     }
 
+    //合同处理
+    @RequestMapping("doht")
+    public boolean doht(String dwyj, String userId, String value, String comment) {
+        try {
+            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = processEngine.getTaskService();
+            IdentityService identityService = processEngine.getIdentityService();
+            Task task = taskService.createTaskQuery().processInstanceId(dwyj).singleResult();
+            Authentication.setAuthenticatedUserId(userId);
+            if (comment == null)
+                comment = "";
+            taskService.addComment(task.getId(), dwyj, comment);
+            List<Group> groups = identityService.createGroupQuery().groupMember(userId).list();
+            String node = getPidNode(dwyj);
+            if (GroupUtils.equalsJs(groups, "jsb_doman") && node.equals("经办人")) {
+                //经办人false作废合同流程
+                if (value.equals("false")) {
+                    Contract contract = new Contract();
+                    contract.setDwyj(dwyj);
+                    contract = contractMapper.selectOne(contract);
+                    //流程id去掉
+                    contract.setDwyj(null);
+                    contractMapper.updateByPrimaryKeySelective(contract);
+                    ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+                    RuntimeService runtimeService = engine.getRuntimeService();
+                    //删流程
+                    runtimeService.deleteProcessInstance(dwyj, "");
+                    //删除历史
+                    HistoryService historyService = engine.getHistoryService();
+                    historyService.deleteHistoricProcessInstance(dwyj);
+                } else {//经办人再次审批
+                    taskService.complete(task.getId());
+                }
+                return true;
+            } else if (GroupUtils.equalsJs(groups, "jsb_jl")) {
+                taskService.setVariable(task.getId(), "jsb_jl", value);
+                //完成任务
+                taskService.complete(task.getId());
+                return true;
+            } else if (GroupUtils.equalsJs(groups, "psr") && node.equals("评审人")) {
+                taskService.setVariable(task.getId(), "psr", value);
+                //完成任务
+                taskService.complete(task.getId());
+                return true;
+            } else if (GroupUtils.equalsJs(groups, "fl")) {
+                taskService.setVariable(task.getId(), "fl", value);
+                //完成任务
+                taskService.complete(task.getId());
+                return true;
+            } else if (GroupUtils.equalsJs(groups, "cw")) {
+                taskService.setVariable(task.getId(), "cw", value);
+                //完成任务
+                taskService.complete(task.getId());
+                return true;
+            } else if (GroupUtils.equalsJs(groups, "fgfz")) {
+                taskService.setVariable(task.getId(), "fgfz", value);
+                //完成任务
+                taskService.complete(task.getId());
+                return true;
+            } else if (GroupUtils.equalsJs(groups, "zjl")) {
+                taskService.setVariable(task.getId(), "zjl", value);
+                //完成任务
+                taskService.complete(task.getId());
+                return true;
+            } else {//签订和归档
+                taskService.complete(task.getId());
+                return true;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    //领取签订合同
+    @RequestMapping("getQdht")
+    public List<Contract_return> getQdht(String userId) {
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
+        List<Group> groups = identityService.createGroupQuery().groupMember(userId).list();
+        List<Contract> contracts = contractMapper.selectYlc();
+        List<Contract_return> res = new ArrayList<>();
+        if (GroupUtils.equalsJs(groups, "jsb_doman")) {
+            for (Contract contract : contracts) {
+                String node = getPidNode(contract.getDwyj());
+                if (node.equals("签订") && contract.getCwbmyj().equals(userId)) {
+                    res.add(contractTocontractreturn(contract));
+                }
+            }
+        } else {//评审人
+            User user = identityService.createUserQuery().userId(userId).singleResult();
+            for (Contract contract : contracts) {
+                String node = getPidNode(contract.getDwyj());
+                if (node.equals("签订")) {
+                    List<Return_Comments> return_comments = getHtComment(contract.getDwyj());
+                    for (Return_Comments return_comments1 : return_comments) {
+                        if (return_comments1.getUsernam().equals(user.getFirstName())) {
+                            res.add(contractTocontractreturn(contract));
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
+    //领取合同
+    @RequestMapping("lqht")
+    public List<Contract_return> lqht(String userId) {
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
+        List<Group> groups = identityService.createGroupQuery().groupMember(userId).list();
+        List<Contract> contracts = contractMapper.selectYlc();
+        List<Contract_return> res = new ArrayList<>();
+        if (GroupUtils.equalsJs(groups, "jsb_doman")) {
+            for (Contract contract : contracts) {
+                String node = getPidNode(contract.getDwyj());
+                if (node.equals("经办人")) {
+                    res.add(contractTocontractreturn(contract));
+                }
+            }
+        } else if (GroupUtils.equalsJs(groups, "jsb_jl")) {
+            for (Contract contract : contracts) {
+                String node = getPidNode(contract.getDwyj());
+                if (node.equals("技术部经理")) {
+                    res.add(contractTocontractreturn(contract));
+                }
+            }
+        } else if (GroupUtils.equalsJs(groups, "psr")) {
+            for (Contract contract : contracts) {
+                String node = getPidNode(contract.getDwyj());
+                if (node.equals("评审人")) {
+                    res.add(contractTocontractreturn(contract));
+                }
+            }
+        } else if (GroupUtils.equalsJs(groups, "fl")) {
+            for (Contract contract : contracts) {
+                String node = getPidNode(contract.getDwyj());
+                if (node.equals("法律事务室")) {
+                    res.add(contractTocontractreturn(contract));
+                }
+            }
+        } else if (GroupUtils.equalsJs(groups, "cw")) {
+            for (Contract contract : contracts) {
+                String node = getPidNode(contract.getDwyj());
+                if (node.equals("财务总监")) {
+                    res.add(contractTocontractreturn(contract));
+                }
+            }
+        } else if (GroupUtils.equalsJs(groups, "fgfz")) {
+            for (Contract contract : contracts) {
+                String node = getPidNode(contract.getDwyj());
+                if (node.equals("分管副总经理")) {
+                    res.add(contractTocontractreturn(contract));
+                }
+            }
+        } else if (GroupUtils.equalsJs(groups, "zjl")) {
+            for (Contract contract : contracts) {
+                String node = getPidNode(contract.getDwyj());
+                if (node.equals("总经理")) {
+                    res.add(contractTocontractreturn(contract));
+                }
+            }
+        }
+        return res;
+    }
+
+    //拿到招标的职位
+    Group getHtjs(List<Group> groups) {
+        List<String> qqjss = new ArrayList<>();
+        qqjss.add("jsb_doman");
+        qqjss.add("jsb_jl");
+        qqjss.add("psr");
+        qqjss.add("fl");
+        qqjss.add("cw");
+        qqjss.add("fgfz");
+        qqjss.add("zjl");
+        for (Group group : groups) {
+            if (qqjss.contains(group.getId())) {
+                return group;
+            }
+        }
+        return null;
+    }
+
+    //pid拿评论
+    @RequestMapping(value = "/getComment")
+    public List<Return_Comments> getHtComment(String dwyj) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
+        TaskService taskService = processEngine.getTaskService();
+        List<Comment> comments = taskService.getProcessInstanceComments(dwyj);
+        List<Return_Comments> return_comments = new ArrayList<>();
+        for (int i = 0; i < comments.size(); i++) {
+            if (comments.get(i).getType().equals("event")) {
+                comments.remove(i);
+                i--;
+            }
+        }
+        for (Comment comment : comments) {
+            String uid = comment.getUserId();
+            User user = identityService.createUserQuery().userId(uid).singleResult();
+            List<Group> groups = identityService.createGroupQuery().groupMember(uid).list();
+            Group group = getHtjs(groups);
+            String unam = user.getFirstName();
+            Return_Comments return_comments1 = new Return_Comments();
+            return_comments1.setComment(comment.getFullMessage());
+            return_comments1.setUsernam(unam);
+            return_comments1.setGroupName(group.getName());
+            String dd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(comment.getTime());
+            return_comments1.setTime(dd);
+            return_comments.add(return_comments1);
+        }
+        return return_comments;
+    }
+
+    //拿流程的当前节点
+    @RequestMapping(value = "/getHtNode")
+    public String getPidNode(String dwyj) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        TaskService taskService = processEngine.getTaskService();
+        Task task = taskService.createTaskQuery().processInstanceId(dwyj).singleResult();
+        return task.getName();
+    }
+
     //归档
     @RequestMapping("/guidang")
     @Transactional
-    public boolean guidang(String id) {
-        Contract contract = new Contract();
-        contract.setId(id);
-        contract.setGd("1");
-        return contractMapper.updateByPrimaryKeySelective(contract) == 1;
+    public boolean guidang(String id, String dwyj) {
+        try {
+            Contract contract = new Contract();
+            contract.setId(id);
+            contract.setGd("1");
+            contractMapper.updateByPrimaryKeySelective(contract);
+            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = processEngine.getTaskService();
+            Task task = taskService.createTaskQuery().processInstanceId(dwyj).singleResult();
+            taskService.complete(task.getId());
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     //修改合同
@@ -399,6 +554,17 @@ public class ContractController {
         c.setRq(contract.getRq());
         c.setProjectName(projectname);
         c.setGd(contract.getGd());
+        c.setKsyxq(contract.getKsyxq());
+        c.setJsyxq(contract.getJsyxq());
+        c.setGq(contract.getGq());
+        c.setLxqk(contract.getLxqk());
+        c.setDeclarationDep(p1.getDeclarationDep());
+        c.setCjsj(contract.getCjsj());
+        //填充当前节点
+        if(contract.getDwyj()==null||contract.getDwyj().equals(""))
+            c.setDqjd("未申请");
+        else
+            c.setDqjd(getPidNode(contract.getDwyj()));
         return c;
     }
 
@@ -448,8 +614,8 @@ public class ContractController {
         }
     }
 
-    Contract DwyjToContract(String dwyj){
-        Contract contract=new Contract();
+    Contract DwyjToContract(String dwyj) {
+        Contract contract = new Contract();
         contract.setDwyj(dwyj);
         return contractMapper.selectOne(contract);
     }
@@ -492,7 +658,6 @@ public class ContractController {
     }
 
 
-
     //删除附件
     @RequestMapping("/deletFj")
     public boolean deletFj(String fid, String fname, String jlid) {
@@ -503,10 +668,6 @@ public class ContractController {
             //必传节点文件去找,找到删除
             Yscjdwj yscjdwj = new Yscjdwj();
             yscjdwj.setFid(fid);
-            if (fname != null)
-                yscjdwj.setFname(fname);
-            if (jlid != null)
-                yscjdwj.setJlid(jlid);
             yscjdwjMapper.delete(yscjdwj);
             return true;
         }
@@ -515,38 +676,38 @@ public class ContractController {
 
     //拿所有可以新建结算的合同id和合同号
     @RequestMapping("/canHtidAndHtno")
-    public List<Hetong> canHtidAndHtno(String userId){
+    public List<Hetong> canHtidAndHtno(String userId) {
         //拿到所有付完了的合同id
-        List<String> htids=payableMapper.getFwHtid();
-        List<Hetong> hetongs=getallhtid();
-        for(String htid:htids){
-            for(int i=0;i<hetongs.size();i++){
-                if(hetongs.get(i).value.equals(htid)){
+        List<String> htids = payableMapper.getFwHtid();
+        List<Hetong> hetongs = getallhtid();
+        for (String htid : htids) {
+            for (int i = 0; i < hetongs.size(); i++) {
+                if (hetongs.get(i).value.equals(htid)) {
                     hetongs.remove(i);
                     break;
                 }
             }
         }
         //同时还要验收
-        for(int i=0;i<hetongs.size();i++){
+        for (int i = 0; i < hetongs.size(); i++) {
             //合同对应的项目id
-            String xmid=contractMapper.selectByPrimaryKey(hetongs.get(i).value).getProjectId();
+            String xmid = contractMapper.selectByPrimaryKey(hetongs.get(i).value).getProjectId();
             //检查改项目id有没有验收
-            Yanshou yanshou=new Yanshou();
+            Yanshou yanshou = new Yanshou();
             yanshou.setProjectid(xmid);
-            if(yanshouMapper.selectOne(yanshou)==null){
+            if (yanshouMapper.selectOne(yanshou) == null) {
                 hetongs.remove(i);
                 i--;
             }
         }
-        ProcessEngine engine=ProcessEngines.getDefaultProcessEngine();
-        IdentityService identityService=engine.getIdentityService();
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = engine.getIdentityService();
         //过滤，不是自己的项目
-        for(int i=0;i<hetongs.size();i++){
-            String xmid=contractMapper.selectByPrimaryKey(hetongs.get(i).value).getProjectId();
-            String jbr=projectMapper.selectByPrimaryKey(xmid).getBider();
-            String userName=identityService.createUserQuery().userId(userId).singleResult().getFirstName();
-            if(!jbr.equals(userName)){
+        for (int i = 0; i < hetongs.size(); i++) {
+            String xmid = contractMapper.selectByPrimaryKey(hetongs.get(i).value).getProjectId();
+            String jbr = projectMapper.selectByPrimaryKey(xmid).getBider();
+            String userName = identityService.createUserQuery().userId(userId).singleResult().getFirstName();
+            if (!jbr.equals(userName)) {
                 hetongs.remove(i);
                 i--;
             }
@@ -630,4 +791,48 @@ public class ContractController {
             return true;
         return false;
     }
+
+    //新建合同，填充其他字段，参数projectId
+    @RequestMapping("/fillContractByXmid")
+    public String fillContractByXmid(String projectId) {
+        Zhongbiao zhongbiao = new Zhongbiao();
+        zhongbiao.setXmid(projectId);
+        zhongbiao = zhongbiaoMapper.selectOne(zhongbiao);
+        Zhaobiao zhaobiao = new Zhaobiao();
+        zhaobiao.setXmid(projectId);
+        Project project = projectMapper.selectByPrimaryKey(projectId);
+        if (zhongbiao != null) {
+            return zhongbiao.getZhongbiaodw() + "/" + zhongbiao.getZhongbiaojg() + "/" + project.getProjectNo() + "/" + project.getBider();
+        } else {
+            return project.getProjectNo() + "/" + project.getBider();
+        }
+    }
+
+    //项目id拿工期
+    @RequestMapping("/getGq")
+    public String getGq(String projectId) {
+        Zhaobiao zhaobiao = new Zhaobiao();
+        zhaobiao.setXmid(projectId);
+        zhaobiao = zhaobiaoMapper.selectOne(zhaobiao);
+        if (zhaobiao != null)
+            return zhaobiao.getTbjzsj();
+        else
+            return "";
+    }
+
+    //填写合同日期(签订日期)
+    @RequestMapping("/savaQdrqAndContractNo")
+    public boolean savaQdrqAndContractNo(String id, String rq,String no) {
+        try {
+            Contract contract = new Contract();
+            contract.setId(id);
+            contract.setRq(rq);
+            contract.setContractNo(no);
+            contractMapper.updateByPrimaryKeySelective(contract);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }

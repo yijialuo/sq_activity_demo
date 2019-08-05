@@ -123,6 +123,13 @@
         </foreach>
       </if>
 
+      <if test="jz!=null and  jz.length>0 ">
+        and
+        <foreach item="item" index="index" collection="jz" open="(" separator="or" close=")">
+          jz like concat('%',#{item},'%')
+        </foreach>
+      </if>
+
       <if test="xmjbr!=null and  xmjbr.length>0 ">
         and
         <foreach item="item" index="index" collection="xmjbr" open="(" separator="or" close=")">
