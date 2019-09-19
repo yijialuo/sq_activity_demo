@@ -25,12 +25,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.Id;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -59,7 +57,8 @@ public class ContractController {
     ZhongbiaoMapper zhongbiaoMapper;
     @Autowired
     ZhaobiaoMapper zhaobiaoMapper;
-
+    @Autowired
+    XmsjbMapper xmsjbMapper;
 
     //综合搜索
     @RequestMapping("search")
@@ -196,6 +195,11 @@ public class ContractController {
                     yscjdwjMapper.updateByPrimaryKeySelective(yscjdwj);
                 }
                 taskService.complete(task.getId());
+                //合同时间记录
+                Xmsjb xmsjb = new Xmsjb();
+                xmsjb.setProjectid(contract.getProjectId());
+                xmsjb.setHtkssj(Time.getNow());
+                xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
                 return true;
             } else {
                 return htzcsp(contract);
@@ -323,7 +327,8 @@ public class ContractController {
         if (GroupUtils.equalsJs(groups, "jsb_doman")) {
             for (Contract contract : contracts) {
                 String node = getPidNode(contract.getDwyj());
-                if (node.equals("经办人")) {
+                //节点经办人、且是自己发起的
+                if (node.equals("经办人") && contract.getCwbmyj().equals(userId)) {
                     res.add(contractTocontractreturn(contract));
                 }
             }
@@ -356,10 +361,15 @@ public class ContractController {
                 }
             }
         } else if (GroupUtils.equalsJs(groups, "fgfz")) {
+            //分管副总管理的类型
+            List<String> manageTypes= Arrays.asList(identityService.getUserInfo(userId,"manageType").split(","));
             for (Contract contract : contracts) {
                 String node = getPidNode(contract.getDwyj());
                 if (node.equals("分管副总经理")) {
-                    res.add(contractTocontractreturn(contract));
+                    Project project = projectMapper.selectByPrimaryKey(contract.getProjectId());
+                    if ( manageTypes.contains(project.getReviser())) {
+                        res.add(contractTocontractreturn(contract));
+                    }
                 }
             }
         } else if (GroupUtils.equalsJs(groups, "zjl")) {
@@ -436,13 +446,17 @@ public class ContractController {
     @Transactional
     public boolean guidang(String id, String dwyj) {
         try {
-            Contract contract = new Contract();
-            contract.setId(id);
+            Contract contract = contractMapper.selectByPrimaryKey(id);
             contract.setGd("1");
             contractMapper.updateByPrimaryKeySelective(contract);
             ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
             TaskService taskService = processEngine.getTaskService();
             Task task = taskService.createTaskQuery().processInstanceId(dwyj).singleResult();
+            //填充合同结束时间
+            Xmsjb xmsjb = new Xmsjb();
+            xmsjb.setProjectid(contract.getProjectId());
+            xmsjb.setHtjssj(Time.getNow());
+            xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
             taskService.complete(task.getId());
             return true;
         } catch (Exception e) {
@@ -561,7 +575,7 @@ public class ContractController {
         c.setDeclarationDep(p1.getDeclarationDep());
         c.setCjsj(contract.getCjsj());
         //填充当前节点
-        if(contract.getDwyj()==null||contract.getDwyj().equals(""))
+        if (contract.getDwyj() == null || contract.getDwyj().equals(""))
             c.setDqjd("未申请");
         else
             c.setDqjd(getPidNode(contract.getDwyj()));
@@ -822,7 +836,7 @@ public class ContractController {
 
     //填写合同日期(签订日期)
     @RequestMapping("/savaQdrqAndContractNo")
-    public boolean savaQdrqAndContractNo(String id, String rq,String no) {
+    public boolean savaQdrqAndContractNo(String id, String rq, String no) {
         try {
             Contract contract = new Contract();
             contract.setId(id);

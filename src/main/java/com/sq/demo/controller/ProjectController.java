@@ -1,20 +1,20 @@
 package com.sq.demo.controller;
 
 import com.github.pagehelper.PageHelper;
-import com.sq.demo.Entity.*;
+import com.sq.demo.Entity.Return_Comments;
+import com.sq.demo.Entity.UserOV;
+import com.sq.demo.Entity.Xm;
 import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.*;
 import com.sq.demo.utils.GroupUtils;
 import com.sq.demo.utils.IdCreate;
 import com.sq.demo.utils.TaskUtil;
 import com.sq.demo.utils.Time;
-
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
 import org.activiti.engine.impl.identity.Authentication;
-
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Comment;
@@ -27,10 +27,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -40,6 +41,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/projectApplication")
 public class ProjectController {
+    @Autowired
+    XmsjbMapper xmsjbMapper;
     @Autowired
     FsMapper fsMapper;
     @Autowired
@@ -456,6 +459,10 @@ public class ProjectController {
                     fsMapper.insert(fs);
                     //taskService.complete(task.getId());
                 }
+                Xmsjb xmsjb = new Xmsjb();
+                xmsjb.setProjectid(project.getId());
+                xmsjb.setQqkssj(Time.getNow());
+                xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
                 return true;
             } else {//有流程id
                 cxsq(project);
@@ -772,11 +779,51 @@ public class ProjectController {
             //添加评论
             Authentication.setAuthenticatedUserId(userId);
             taskService.addComment(task.getId(), pid, comment);
-
             //设置任务代理人
             taskService.setAssignee(task.getId(), userId);
             //设置参数
             taskService.setVariable(task.getId(), varName, value);
+            //完成任务
+            taskService.complete(task.getId());
+            //判断是否结束、如果结束记录时间
+            if (varName.equals("zjl") && value.equals("2") || varName.equals("lh") && value.equals("1")) {
+                Xmsjb xmsjb = new Xmsjb();
+                xmsjb.setProjectid(projectMapper.pidToXmid(pid));
+                xmsjb.setQqjssj(Time.getNow());
+                xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
+            }
+            return true;
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+    }
+
+
+    //备案
+    @Transactional
+    @RequestMapping("doba")
+    public boolean doba(String pid, String userId, String comment, int value) {
+        try {
+            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = processEngine.getTaskService();
+            Task task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
+            if (comment == null)
+                comment = "";
+            //添加评论
+            Authentication.setAuthenticatedUserId(userId);
+            taskService.addComment(task.getId(), pid, comment);
+            //设置任务代理人
+            taskService.setAssignee(task.getId(), userId);
+            //设置备案同意参数
+            taskService.setVariable(task.getId(), "bm", value);
+            //同意备案、设置前期结束时间
+            if (value == 0) {
+                Xmsjb xmsjb = new Xmsjb();
+                xmsjb.setProjectid(projectMapper.pidToXmid(pid));
+                xmsjb.setQqjssj(Time.getNow());
+                xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
+            }
             //完成任务
             taskService.complete(task.getId());
             return true;
@@ -785,6 +832,7 @@ public class ProjectController {
             return false;
         }
     }
+
 
     //完成备案
     @Transactional
@@ -797,6 +845,11 @@ public class ProjectController {
         taskService.setAssignee(task.getId(), userId);
         //完成任务
         taskService.complete(task.getId());
+        //设置前期结束时间
+        Xmsjb xmsjb = new Xmsjb();
+        xmsjb.setProjectid(projectMapper.pidToXmid(pid));
+        xmsjb.setQqjssj(Time.getNow());
+        xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
     }
 
     //判断当前流程的经办人
@@ -810,13 +863,6 @@ public class ProjectController {
             }
         }
         return false;
-    }
-
-    //当前时间
-    public String getnowtime() {
-        Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return sdf.format(date);
     }
 
     //技术部经理和办公室只拿经办过项目的数量
@@ -921,23 +967,25 @@ public class ProjectController {
         return false;
     }
 
+
     //获取备案项目
     @RequestMapping("/getBaXm")
     public List<Project> getBa(String userId) {
+        List<Project> bas = new ArrayList<>();
+        List<Project> projects = projectMapper.getPidProject();
         if (userId.equals("syc")) {//苏燕春拿股份备案
-            List<Project> projects = projectMapper.getPidProject();
-            List<Project> res = new ArrayList<>();
             for (Project project : projects) {
                 if (project.getDepAuditOpinion().equals("股份项目") && isBa(project.getPid())) {
-                    res.add(project);
+                    bas.add(project);
                 }
             }
-            for (Project project : res)
-                addDqjd(project);
-            return res;
+        } else if (userId.equals("db")||userId.equals("lze")) {
+            for (Project project : projects) {
+                if (isBa(project.getPid())  && !project.getDepAuditOpinion().equals("股份项目")) {
+                    bas.add(project);
+                }
+            }
         } else {
-            List<Project> bas = new ArrayList<>();
-            List<Project> projects = projectMapper.getPidProject();
             for (Project project : projects) {
                 ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
                 IdentityService identityService = engine.getIdentityService();
@@ -947,10 +995,10 @@ public class ProjectController {
                     bas.add(project);
                 }
             }
-            for (Project project : bas)
-                addDqjd(project);
-            return bas;
         }
+        for (Project project : bas)
+            addDqjd(project);
+        return bas;
     }
 
     //流程id拿项目
@@ -1020,7 +1068,7 @@ public class ProjectController {
             }
         }
         //如果是办事员，拿到项目，判定是不是自己的申请人，
-        if (GroupUtils.equalsJs(groups, "办事员")) {
+        if (GroupUtils.equalsJs(groups, "doman")) {
             List<Project> res = new ArrayList<>();
             //用户名
             String userName = identityService.createUserQuery().userId(userId).singleResult().getFirstName();
@@ -1313,8 +1361,16 @@ public class ProjectController {
             List<String> res = new ArrayList<>();
             String id = IdCreate.id();
             pa.setId(id);
-            pa.setEngTechAuditOpinion(Time.getNow());
+            //去掉项目名首尾空格
+            pa.setProjectNam(pa.getProjectNam().trim());
+            String createTime = Time.getNow();
+            pa.setEngTechAuditOpinion(createTime);
             projectMapper.insert(pa);
+            //插入项目时间表
+            Xmsjb xmsjb = new Xmsjb();
+            xmsjb.setProjectid(id);
+            xmsjb.setCjsj(createTime);
+            xmsjbMapper.insert(xmsjb);
             res.add(id);
             res.add(pa.getEngTechAuditOpinion());
             return res;
@@ -1592,8 +1648,24 @@ public class ProjectController {
         projectMapper.updateByPrimaryKeySelective(project);
     }
 
+    //拿项目名称和编号
     @RequestMapping("/selectNameAndNo")
     public Map selectNameAndNo(String xmid) {
         return projectMapper.selectNameAndNo(xmid);
+    }
+
+    //图形化统计
+    @RequestMapping("/txhtj")
+    public List<Map> selectXmidAndXmnoAndXmname() {
+        return projectMapper.selectXmidAndXmnoAndXmname();
+    }
+
+    //判断立项审批流程是第几版本、
+    @RequestMapping("getLxspBb")
+    int getLxspBb(String pid) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        TaskService taskService = processEngine.getTaskService();
+        Task task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
+        return Integer.valueOf(task.getProcessDefinitionId().split(":")[1]);
     }
 }

@@ -33,6 +33,8 @@ import java.util.Map;
 @RequestMapping("/zhaobiao")
 public class ZhaobiaoController {
     @Autowired
+    XmsjbMapper xmsjbMapper;
+    @Autowired
     AttachmentlinkMapper attachmentlinkMapper;
     @Autowired
     ZhaobiaoMapper zhaobiaoMapper;
@@ -238,53 +240,57 @@ public class ZhaobiaoController {
     @Transactional
     @RequestMapping("/startZhaobiao")
     public String startZhaobiao(String id) {
-        // try {
-        Zhaobiao zhaobiao = zhaobiaoMapper.selectByPrimaryKey(id);
-        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
-        TaskService taskService = engine.getTaskService();
-        RuntimeService runtimeService = engine.getRuntimeService();
-        ProcessInstance pi = runtimeService.startProcessInstanceByKey("zbsp");
-        zhaobiao.setZbpid(pi.getId());
-        zhaobiaoMapper.updateByPrimaryKeySelective(zhaobiao);
-        Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-        //设置任务受理人
-        taskService.setAssignee(task.getId(), zhaobiao.getSqr());
-        //处理还没有申请时候的附件
-        Contractfile contractfile = new Contractfile();
-        contractfile.setCid(id);
-        //拿到还没有申请时候的文件
-        List<Contractfile> contractfiles = contractfileMapper.select(contractfile);
-        System.out.println(contractfiles.size());
-        RepositoryService repositoryService = engine.getRepositoryService();
-        for (Contractfile contractfile1 : contractfiles) {
-            //上传附件  参数：附件类型、任务id，流程id，附件名称，附件描述，文件流
-            Attachment attachment = taskService.createAttachment("", task.getId(), pi.getId(), contractfile1.getFname(), "", repositoryService.getResourceAsStream(contractfile1.getFid(), contractfile1.getFname()));
-            Attachmentlink attachmentlink = new Attachmentlink();
-            attachmentlink.setUserid(zhaobiao.getSqr());
-            attachmentlink.setAttachment(attachment.getId());
-            attachmentlinkMapper.insert(attachmentlink);
-            //更新已上传节点文件的fid
-            Yscjdwj yscjdwj = new Yscjdwj();
-            //以前是部署id，未申请的时候用部署id下载
-            yscjdwj.setFid(contractfile1.getFid());
-            yscjdwj.setFname(contractfile1.getFname());
-            yscjdwj.setJlid(id);
-            yscjdwj = yscjdwjMapper.selectOne(yscjdwj);
-            //申请了用附件id下载
-            yscjdwj.setFid(attachment.getId());
-            yscjdwjMapper.updateByPrimaryKeySelective(yscjdwj);
+        try {
+            Zhaobiao zhaobiao = zhaobiaoMapper.selectByPrimaryKey(id);
+            ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+            TaskService taskService = engine.getTaskService();
+            RuntimeService runtimeService = engine.getRuntimeService();
+            ProcessInstance pi = runtimeService.startProcessInstanceByKey("zbsp");
+            zhaobiao.setZbpid(pi.getId());
+            zhaobiaoMapper.updateByPrimaryKeySelective(zhaobiao);
+            Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+            //设置任务受理人
+            taskService.setAssignee(task.getId(), zhaobiao.getSqr());
+            //处理还没有申请时候的附件
+            Contractfile contractfile = new Contractfile();
+            contractfile.setCid(id);
+            //拿到还没有申请时候的文件
+            List<Contractfile> contractfiles = contractfileMapper.select(contractfile);
+            RepositoryService repositoryService = engine.getRepositoryService();
+            for (Contractfile contractfile1 : contractfiles) {
+                //上传附件  参数：附件类型、任务id，流程id，附件名称，附件描述，文件流
+                Attachment attachment = taskService.createAttachment("", task.getId(), pi.getId(), contractfile1.getFname(), "", repositoryService.getResourceAsStream(contractfile1.getFid(), contractfile1.getFname()));
+                Attachmentlink attachmentlink = new Attachmentlink();
+                attachmentlink.setUserid(zhaobiao.getSqr());
+                attachmentlink.setAttachment(attachment.getId());
+                attachmentlinkMapper.insert(attachmentlink);
+                //更新已上传节点文件的fid
+                Yscjdwj yscjdwj = new Yscjdwj();
+                //以前是部署id，未申请的时候用部署id下载
+                yscjdwj.setFid(contractfile1.getFid());
+                yscjdwj.setFname(contractfile1.getFname());
+                yscjdwj.setJlid(id);
+                yscjdwj = yscjdwjMapper.selectOne(yscjdwj);
+                //申请了用附件id下载
+                yscjdwj.setFid(attachment.getId());
+                yscjdwjMapper.updateByPrimaryKeySelective(yscjdwj);
+            }
+            //完成填写申请项目
+            taskService.complete(task.getId());
+            //技术部经办人直接同意，因为现在直接由技术经办人发起
+            task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
+            taskService.setVariable(task.getId(), "jbr", true);
+            taskService.setAssignee(task.getId(), zhaobiao.getSqr());
+            taskService.complete(task.getId());
+            Xmsjb xmsjb = new Xmsjb();
+            xmsjb.setProjectid(zhaobiao.getXmid());
+            xmsjb.setZbkssj(Time.getNow());
+            xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
+            return pi.getId();
+        } catch (Exception e) {
+            System.out.println(e);
+            return "";
         }
-        //完成填写申请项目
-        taskService.complete(task.getId());
-        //技术部经办人直接同意，因为现在直接由技术经办人发起
-        task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
-        taskService.setVariable(task.getId(), "jbr", true);
-        taskService.setAssignee(task.getId(), zhaobiao.getSqr());
-        taskService.complete(task.getId());
-        return pi.getId();
-        // } catch (Exception e) {
-        //     return "";
-        //}
     }
 
     //userid查询所有项目 根据用户id拿到自己参与的项目
@@ -551,8 +557,6 @@ public class ZhaobiaoController {
             ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
             TaskService taskService = engine.getTaskService();
             Task task = taskService.createTaskQuery().processInstanceId(zhaobiao.getZbpid()).singleResult();
-            //重新设置项目参数
-            //taskService.setVariable(task.getId(), "zhaobiao", zhaobiao);
             if (comment == null)
                 comment = "";
             //添加评论
@@ -563,6 +567,11 @@ public class ZhaobiaoController {
             taskService.setAssignee(task.getId(), userId);
             //完成任务
             taskService.complete(task.getId());
+            //设置招标完成时间
+            Xmsjb xmsjb = new Xmsjb();
+            xmsjb.setProjectid(zhaobiao.getXmid());
+            xmsjb.setZbjssj(Time.getNow());
+            xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
             return true;
         } catch (Exception e) {
             return false;
@@ -590,6 +599,7 @@ public class ZhaobiaoController {
                 taskService.setVariable(task.getId(), varName, value);
             //完成任务
             taskService.complete(task.getId());
+            //如果招标结束记录结束时间
             return true;
         } catch (Exception e) {
             System.out.println(e);

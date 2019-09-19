@@ -18,19 +18,23 @@ public class SqApplication {
     public static void main(String[] args) {
         SpringApplication.run(SqApplication.class, args);
     }
+
     //下面两个函数设置允许跨域
     private CorsConfiguration buildConfig() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.addAllowedOrigin("*");
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.addExposedHeader("info");
         corsConfiguration.addExposedHeader("allCount");
         corsConfiguration.addExposedHeader("pageCount");
+        corsConfiguration.addExposedHeader("authorization");
         return corsConfiguration;
     }
 
     /**
      * 跨域过滤器
+     *
      * @return
      */
     @Bean
@@ -54,7 +58,6 @@ public class SqApplication {
         config.setMaxRequestSize("9000MB");
         return config.createMultipartConfig();
     }
-
 
 
 }

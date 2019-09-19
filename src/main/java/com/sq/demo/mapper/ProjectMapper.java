@@ -78,6 +78,10 @@ public interface ProjectMapper extends MyMapper<Project> {
     @Select("select ID,PROJECT_NAM FROM project WHERE BIDER = #{Name}")
     List<Map> selectJsbjbrXmidAndXmname(String Name);
 
+    //拿所有的项目id、项目编号、项目名字
+    @Select("select ID,PROJECT_NO,PROJECT_NAM FROM project")
+    List<Map> selectXmidAndXmnoAndXmname();
+
     //根据部门名称那项目
     @Select("select * from project where DECLARATION_DEP=#{departmentName} order by ENG_TECH_AUDIT_OPINION desc")
     List<Project> selectByDepartmentName(String departmentName);
@@ -109,9 +113,6 @@ public interface ProjectMapper extends MyMapper<Project> {
     List<Project> selectByXmlb(@Param("s") String s);
 
     List<Project> search(@Param("select_code") String select_code,@Param("select_xmmc") String select_xmmc,@Param("select_dptnm") String select_dptnm,@Param("select_fqr") String[] select_fqr,@Param("select_jbr") String[] select_jbr,@Param("select_jd") String select_jd,@Param("select_xmfl") String[] select_xmfl,@Param("select_xmlb") String[] select_xmlb);
-
-    @Select("${s}")
-    int ttt(@Param("s") String s);
 
     List<Project> sgSearch( String projectName,String departmentName,String fzr,String xmlb,String yjgq);
 
@@ -154,4 +155,7 @@ public interface ProjectMapper extends MyMapper<Project> {
             "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER}," +
             "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER})")
     void bmnfbb(Map<String,String> params);
+
+    @Select("SELECT ID FROM project WHERE PID=#{pid}")
+    String pidToXmid(String pid);
 }

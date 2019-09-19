@@ -5,10 +5,13 @@ import com.sq.demo.Entity.Payable_Return;
 import com.sq.demo.mapper.ContractMapper;
 import com.sq.demo.mapper.PayableMapper;
 import com.sq.demo.mapper.ProjectMapper;
+import com.sq.demo.mapper.XmsjbMapper;
 import com.sq.demo.pojo.Contract;
 import com.sq.demo.pojo.Payable;
 import com.sq.demo.pojo.Project;
+import com.sq.demo.pojo.Xmsjb;
 import com.sq.demo.utils.IdCreate;
+import com.sq.demo.utils.Time;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,7 +37,8 @@ public class PayableController {
     PayableMapper payableMapper;
     @Autowired
     ProjectMapper projectMapper;
-
+    @Autowired
+    XmsjbMapper xmsjbMapper;
 
     @RequestMapping("/search")
     public List<Payable_Return> search(String projectNo,String projectName,String contractNo,String rq,String jbbm, String jbr,String yszmr,String skdw){
@@ -60,6 +64,15 @@ public class PayableController {
         Payable payable = new Payable();
         payable_receive.setRq( new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
         payable.setId(IdCreate.id());
+        //查询是不是第一次付款,如果是第一次更新项目时间表
+        Payable fpayable=new Payable();
+        fpayable.setProject(payable_receive.getProject());
+        if(payableMapper.selectCount(fpayable)==0){
+            Xmsjb xmsjb=new Xmsjb();
+            xmsjb.setProjectid(payable_receive.getProject());
+            xmsjb.setJskssj(Time.getNow());
+            xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
+        }
         payable.setJbbm(payable_receive.getJbbm());
         payable.setJbr(payable_receive.getJbr());
         payable.setAccount(payable_receive.getAccount());
@@ -89,6 +102,13 @@ public class PayableController {
             wzf = zje.subtract(yzf);
         }
         payable.setWzf(wzf);
+        //如果未支付为0、则支付完、记录时间
+        if(wzf.compareTo(BigDecimal.ZERO)==0){
+            Xmsjb xmsjb=new Xmsjb();
+            xmsjb.setProjectid(payable.getId());
+            xmsjb.setJsjssj(Time.getNow());
+            xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
+        }
         if(payableMapper.insert(payable)==1)
             return true;
         else

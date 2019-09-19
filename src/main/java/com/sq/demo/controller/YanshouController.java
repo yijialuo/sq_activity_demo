@@ -1,10 +1,10 @@
 package com.sq.demo.controller;
 
 import com.github.pagehelper.PageHelper;
-
 import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.*;
 import com.sq.demo.utils.IdCreate;
+import com.sq.demo.utils.Time;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,6 +36,9 @@ public class YanshouController {
     ZhongbiaoMapper zhongbiaoMapper;
     @Autowired
     JinduController jinduController;
+    @Autowired
+    XmsjbMapper xmsjbMapper;
+
 
     @RequestMapping("/search")
     public List<Yanshou> search(String ysNo, String projectName, String projectNo, String kgrq, String sjjgrq, String ysrq) {
@@ -76,9 +79,13 @@ public class YanshouController {
     @Transactional
     @RequestMapping("/guidang")
     public boolean guidang(String id) {
-        Yanshou yanshou = new Yanshou();
-        yanshou.setId(id);
+        Yanshou yanshou = yanshouMapper.selectByPrimaryKey(id);
         yanshou.setGd("1");
+        //项目验收结束时间
+        Xmsjb xmsjb=new Xmsjb();
+        xmsjb.setProjectid(yanshou.getProjectid());
+        xmsjb.setYsjssj(Time.getNow());
+        xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
         return yanshouMapper.updateByPrimaryKeySelective(yanshou) == 1;
     }
 
@@ -88,6 +95,11 @@ public class YanshouController {
     public String addYanshou(@RequestBody Yanshou ys) {
         ys.setId(IdCreate.id());
         yanshouMapper.insert(ys);
+        //项目时间
+        Xmsjb xmsjb=new Xmsjb();
+        xmsjb.setProjectid(ys.getProjectid());
+        xmsjb.setYskssj(Time.getNow());
+        xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
         return ys.getId();
     }
 
