@@ -175,7 +175,7 @@ public class UserController {
         try {
             List<Project> projects = projectMapper.selectAll();
             List<UserOV> userOVS = new ArrayList<>();
-            if (!departmentName.equals("工程技术部")) {
+            if (!departmentName.equals("工程技术部")&&!departmentName.equals("办公室")) {
                 List<String> userNames = new ArrayList<>();
                 for (Project project : projects) {
                     if (project.getDeclarationDep().equals(departmentName) && project.getBider() != null && !project.getBider().equals("")) {
@@ -218,7 +218,7 @@ public class UserController {
             List<User> users = identityService.createUserQuery().list();
             List<UserOV> res = new ArrayList<>();
             //如果不是工程技术部，只能拿自己部门的办事员
-            if (!departmentId.equals("20190123022801622")) {
+            if (!departmentId.equals("20190123022801622")&&!departmentId.equals("20190125102616787")) {
                 for (User user : users) {
                     //找到部门的人
                     if (identityService.getUserInfo(user.getId(), "departmentId").equals(departmentId)) {

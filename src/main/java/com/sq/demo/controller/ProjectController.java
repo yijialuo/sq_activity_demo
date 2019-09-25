@@ -1586,9 +1586,16 @@ public class ProjectController {
         //拿自己的项目的合同
         for (int i = 0; i < xms.size(); i++) {
             String jbr = projectMapper.selectByPrimaryKey(xms.get(i).value).getBider();
-            if (!jbr.equals(userName)) {
-                xms.remove(i);
-                i--;
+            if(!userName.equals("林楷亮")){
+                if (!jbr.equals(userName)) {
+                    xms.remove(i);
+                    i--;
+                }
+            }else {//林楷亮
+                if(!jbr.equals("林楷亮")&&!jbr.equals("牛立刚")){
+                    xms.remove(i);
+                    i--;
+                }
             }
         }
         return xms;

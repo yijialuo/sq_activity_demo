@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sq.demo.mapper.JzbMapper" >
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Jzb" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="jzmc" property="jzmc" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sq.demo.mapper.XmsjbMapper">
+  <resultMap id="BaseResultMap" type="com.sq.demo.pojo.Xmsjb">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="projectId" jdbcType="VARCHAR" property="projectid" />
+    <result column="cjsj" jdbcType="VARCHAR" property="cjsj" />
+    <result column="qqkssj" jdbcType="VARCHAR" property="qqkssj" />
+    <result column="qqjssj" jdbcType="VARCHAR" property="qqjssj" />
+    <result column="zbkssj" jdbcType="VARCHAR" property="zbkssj" />
+    <result column="zbjssj" jdbcType="VARCHAR" property="zbjssj" />
+    <result column="htkssj" jdbcType="VARCHAR" property="htkssj" />
+    <result column="htjssj" jdbcType="VARCHAR" property="htjssj" />
+    <result column="sgkssj" jdbcType="VARCHAR" property="sgkssj" />
+    <result column="sgjssj" jdbcType="VARCHAR" property="sgjssj" />
+    <result column="yskssj" jdbcType="VARCHAR" property="yskssj" />
+    <result column="ysjssj" jdbcType="VARCHAR" property="ysjssj" />
+    <result column="jskssj" jdbcType="VARCHAR" property="jskssj" />
+    <result column="jsjssj" jdbcType="VARCHAR" property="jsjssj" />
+  </resultMap>
+</mapper>

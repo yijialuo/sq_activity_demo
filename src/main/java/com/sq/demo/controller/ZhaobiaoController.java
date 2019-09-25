@@ -394,10 +394,14 @@ public class ZhaobiaoController {
         return zhaobiaoMapper.selectOne(zhaobiao);
     }
 
-    //给招标填充部门
-    public void fillBm(List<Zhaobiao> zhaobiaos) {
-        for (Zhaobiao zhongbiao : zhaobiaos) {
-            zhongbiao.setDeclarationDep(projectMapper.selectByPrimaryKey(zhongbiao.getXmid()).getDeclarationDep());
+    //给招标填充部门，项目名称、项目编号、申请人
+    public void fillZhaobiao(List<Zhaobiao> zhaobiaos) {
+        for (Zhaobiao zhaobiao : zhaobiaos) {
+            Project project=projectMapper.selectByPrimaryKey(zhaobiao.getXmid());
+            zhaobiao.setDeclarationDep(project.getDeclarationDep());
+            zhaobiao.setXmName(project.getProjectNam());
+            zhaobiao.setXmNo(project.getProjectNo());
+            zhaobiao.setUserName(userController.userIdTouserName(zhaobiao.getSqr()));
         }
     }
 
@@ -442,7 +446,7 @@ public class ZhaobiaoController {
                     res.add(zhaobiaos.get(i));
                 }
             }
-            fillBm(res);
+            fillZhaobiao(res);
             return res;
         }
         //如果是技术部经办人、拿到招标、判断改项目的经办人是不是自己
@@ -455,7 +459,7 @@ public class ZhaobiaoController {
                     res.add(zhaobiao);
                 }
             }
-            fillBm(res);
+            fillZhaobiao(res);
             return res;
         }
         //如果是技术部主管经理，拿到招标，判断该项目的技术部主管经理的审批是不是自己
@@ -480,7 +484,7 @@ public class ZhaobiaoController {
                     }
                 }
             }
-            fillBm(res);
+            fillZhaobiao(res);
             return res;
         }
         //办公室
@@ -505,11 +509,11 @@ public class ZhaobiaoController {
                     }
                 }
             }
-            fillBm(res);
+            fillZhaobiao(res);
             return res;
         }
         //技术部经理就一个人、不用过滤
-        fillBm(zhaobiaos);
+        fillZhaobiao(zhaobiaos);
         return zhaobiaos;
     }
 
@@ -541,6 +545,17 @@ public class ZhaobiaoController {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Transactional
+    @RequestMapping("zc")
+    public boolean zc(String id, String fbsj, String dbsj, String tbjzsj){
+        Zhaobiao zhaobiao = zhaobiaoMapper.selectByPrimaryKey(id);
+        zhaobiao.setFbsj(fbsj);//发表时间
+        zhaobiao.setDbsj(dbsj);//定标时间
+        zhaobiao.setTbjzsj(tbjzsj);//工期
+        //更新招标表
+        return zhaobiaoMapper.updateByPrimaryKeySelective(zhaobiao)==1;
     }
 
     //完成招标
