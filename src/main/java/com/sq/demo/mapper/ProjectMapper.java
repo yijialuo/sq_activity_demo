@@ -46,10 +46,10 @@ public interface ProjectMapper extends MyMapper<Project> {
     List<Project> gcjsbxmbhss(@Param("s") String s);
 
     @Select("select * from project where project_nam like CONCAT('%',#{s},'%') and DECLARATION_DEP=#{s2}")
-    List<Project> xmmcss(@Param("s") String s,@Param("s2") String s2);
+    List<Project> xmmcss(@Param("s") String s, @Param("s2") String s2);
 
     @Select("select * from project where project_no like CONCAT('%',#{s},'%') and DECLARATION_DEP=#{s2}")
-    List<Project> xmbhss(@Param("s") String s,@Param("s2") String s2);
+    List<Project> xmbhss(@Param("s") String s, @Param("s2") String s2);
 
     @Select("select * from project limit #{startNo},#{pageSize}")
     List<Project> fenye(@Param("startNo") Integer pageNo, @Param("pageSize") Integer pageSize);
@@ -73,6 +73,10 @@ public interface ProjectMapper extends MyMapper<Project> {
     //id拿名字和编号
     @Select("select project_nam,project_no from project where id = #{xmid}")
     Map selectNameAndNo(String xmid);
+
+    //拿到技术部经办人的项目id和name
+    @Select("select ID,PROJECT_NAM FROM project")
+    List<Map> selectAllXmidAndXmname();
 
     //拿到技术部经办人的项目id和name
     @Select("select ID,PROJECT_NAM FROM project WHERE BIDER = #{Name}")
@@ -112,9 +116,9 @@ public interface ProjectMapper extends MyMapper<Project> {
     @Select("SELECT * FROM project WHERE PROJECT_TYPE=#{s}")
     List<Project> selectByXmlb(@Param("s") String s);
 
-    List<Project> search(@Param("select_code") String select_code,@Param("select_xmmc") String select_xmmc,@Param("select_dptnm") String select_dptnm,@Param("select_fqr") String[] select_fqr,@Param("select_jbr") String[] select_jbr,@Param("select_jd") String select_jd,@Param("select_xmfl") String[] select_xmfl,@Param("select_xmlb") String[] select_xmlb);
+    List<Project> search(@Param("select_code") String select_code, @Param("select_xmmc") String select_xmmc, @Param("select_dptnm") String select_dptnm, @Param("select_fqr") String[] select_fqr, @Param("select_jbr") String[] select_jbr, @Param("select_jd") String select_jd, @Param("select_xmfl") String[] select_xmfl, @Param("select_xmlb") String[] select_xmlb);
 
-    List<Project> sgSearch( String projectName,String departmentName,String fzr,String xmlb,String yjgq);
+    List<Project> sgSearch(String projectName, String departmentName, String fzr, String xmlb, String yjgq);
 
     //拿到有流程的项目
     @Select("select * from project where pid is not null and pid!=''")
@@ -122,39 +126,39 @@ public interface ProjectMapper extends MyMapper<Project> {
 
     @Options(statementType = StatementType.CALLABLE)
     @Select("call yfbb(#{ _year,mode=IN,jdbcType=VARCHAR},#{_month,mode=IN,jdbcType=VARCHAR}," +
-            "#{sb_fbsl,mode=OUT,jdbcType=INTEGER},#{sb_jssl,mode=OUT,jdbcType=INTEGER},#{sb_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{jj_fbsl,mode=OUT,jdbcType=INTEGER},#{jj_jssl,mode=OUT,jdbcType=INTEGER},#{jj_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{xx_fbsl,mode=OUT,jdbcType=INTEGER},#{xx_jssl,mode=OUT,jdbcType=INTEGER},#{xx_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER})")
-    void yfbb(Map<String,String> params);
+            "#{sb_fbsl,mode=OUT,jdbcType=INTEGER},#{sb_jssl,mode=OUT,jdbcType=INTEGER},#{sb_jsje,mode=OUT,jdbcType=INTEGER},#{sb_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{jj_fbsl,mode=OUT,jdbcType=INTEGER},#{jj_jssl,mode=OUT,jdbcType=INTEGER},#{jj_jsje,mode=OUT,jdbcType=INTEGER},#{jj_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{xx_fbsl,mode=OUT,jdbcType=INTEGER},#{xx_jssl,mode=OUT,jdbcType=INTEGER},#{xx_jsje,mode=OUT,jdbcType=INTEGER},#{xx_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER},#{wz_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER},#{gdzc_htje,mode=OUT,jdbcType=INTEGER})")
+    void yfbb(Map<String, String> params);
 
     @Options(statementType = StatementType.CALLABLE)
     @Select("call nfbb(#{ _year,mode=IN,jdbcType=VARCHAR},#{_month,mode=IN,jdbcType=VARCHAR}," +
-            "#{sb_fbsl,mode=OUT,jdbcType=INTEGER},#{sb_jssl,mode=OUT,jdbcType=INTEGER},#{sb_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{jj_fbsl,mode=OUT,jdbcType=INTEGER},#{jj_jssl,mode=OUT,jdbcType=INTEGER},#{jj_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{xx_fbsl,mode=OUT,jdbcType=INTEGER},#{xx_jssl,mode=OUT,jdbcType=INTEGER},#{xx_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER})")
-    void nfbb(Map<String,String> params);
+            "#{sb_fbsl,mode=OUT,jdbcType=INTEGER},#{sb_jssl,mode=OUT,jdbcType=INTEGER},#{sb_jsje,mode=OUT,jdbcType=INTEGER},#{sb_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{jj_fbsl,mode=OUT,jdbcType=INTEGER},#{jj_jssl,mode=OUT,jdbcType=INTEGER},#{jj_jsje,mode=OUT,jdbcType=INTEGER},#{jj_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{xx_fbsl,mode=OUT,jdbcType=INTEGER},#{xx_jssl,mode=OUT,jdbcType=INTEGER},#{xx_jsje,mode=OUT,jdbcType=INTEGER},#{xx_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER},#{wz_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER},#{gdzc_htje,mode=OUT,jdbcType=INTEGER})")
+    void nfbb(Map<String, String> params);
 
     @Options(statementType = StatementType.CALLABLE)
     @Select("call bmyfbb(#{ _year,mode=IN,jdbcType=VARCHAR},#{_month,mode=IN,jdbcType=VARCHAR},#{ _bm,mode=IN,jdbcType=VARCHAR}," +
-            "#{sb_fbsl,mode=OUT,jdbcType=INTEGER},#{sb_jssl,mode=OUT,jdbcType=INTEGER},#{sb_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{jj_fbsl,mode=OUT,jdbcType=INTEGER},#{jj_jssl,mode=OUT,jdbcType=INTEGER},#{jj_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{xx_fbsl,mode=OUT,jdbcType=INTEGER},#{xx_jssl,mode=OUT,jdbcType=INTEGER},#{xx_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER})")
-    void bmyfbb(Map<String,String> params);
+            "#{sb_fbsl,mode=OUT,jdbcType=INTEGER},#{sb_jssl,mode=OUT,jdbcType=INTEGER},#{sb_jsje,mode=OUT,jdbcType=INTEGER},#{sb_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{jj_fbsl,mode=OUT,jdbcType=INTEGER},#{jj_jssl,mode=OUT,jdbcType=INTEGER},#{jj_jsje,mode=OUT,jdbcType=INTEGER},#{jj_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{xx_fbsl,mode=OUT,jdbcType=INTEGER},#{xx_jssl,mode=OUT,jdbcType=INTEGER},#{xx_jsje,mode=OUT,jdbcType=INTEGER},#{xx_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER},#{wz_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER},#{gdzc_htje,mode=OUT,jdbcType=INTEGER})")
+    void bmyfbb(Map<String, String> params);
 
     @Options(statementType = StatementType.CALLABLE)
     @Select("call bmnfbb(#{ _year,mode=IN,jdbcType=VARCHAR},#{_month,mode=IN,jdbcType=VARCHAR},#{ _bm,mode=IN,jdbcType=VARCHAR}," +
-            "#{sb_fbsl,mode=OUT,jdbcType=INTEGER},#{sb_jssl,mode=OUT,jdbcType=INTEGER},#{sb_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{jj_fbsl,mode=OUT,jdbcType=INTEGER},#{jj_jssl,mode=OUT,jdbcType=INTEGER},#{jj_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{xx_fbsl,mode=OUT,jdbcType=INTEGER},#{xx_jssl,mode=OUT,jdbcType=INTEGER},#{xx_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER}," +
-            "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER})")
-    void bmnfbb(Map<String,String> params);
+            "#{sb_fbsl,mode=OUT,jdbcType=INTEGER},#{sb_jssl,mode=OUT,jdbcType=INTEGER},#{sb_jsje,mode=OUT,jdbcType=INTEGER},#{sb_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{jj_fbsl,mode=OUT,jdbcType=INTEGER},#{jj_jssl,mode=OUT,jdbcType=INTEGER},#{jj_jsje,mode=OUT,jdbcType=INTEGER},#{jj_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{xx_fbsl,mode=OUT,jdbcType=INTEGER},#{xx_jssl,mode=OUT,jdbcType=INTEGER},#{xx_jsje,mode=OUT,jdbcType=INTEGER},#{xx_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{wz_fbsl,mode=OUT,jdbcType=INTEGER},#{wz_jssl,mode=OUT,jdbcType=INTEGER},#{wz_jsje,mode=OUT,jdbcType=INTEGER},#{wz_htje,mode=OUT,jdbcType=INTEGER}," +
+            "#{gdzc_fbsl,mode=OUT,jdbcType=INTEGER},#{gdzc_jssl,mode=OUT,jdbcType=INTEGER},#{gdzc_jsje,mode=OUT,jdbcType=INTEGER},#{gdzc_htje,mode=OUT,jdbcType=INTEGER})")
+    void bmnfbb(Map<String, String> params);
 
     @Select("SELECT ID FROM project WHERE PID=#{pid}")
     String pidToXmid(String pid);

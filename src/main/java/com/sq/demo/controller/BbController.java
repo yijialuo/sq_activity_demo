@@ -72,50 +72,77 @@ public class BbController {
         for (int i = 0; i < 5; i++) {
             bt.add("发标数量（项）");
             bt.add("结算数量（项）");
-            bt.add("结算金额（万元）");
+            bt.add("结算金额（万）");
+            bt.add("合同金额（万）");
         }
         bt.add("");
         res.add(bt);
 
         List<String> yfbb = new ArrayList<>();
         yfbb.add("月份：" + month);
-        int zje = 0;
+        int zje = 0,htzje=0;
         yfbb.add(yfmap.get("sb_fbsl").toString());
         yfbb.add(yfmap.get("sb_jssl").toString());
         if (yfmap.get("sb_jsje") == null)
             yfmap.put("sb_jsje", 0);
+        if(yfmap.get("sb_htje")==null)
+            yfmap.put("sb_htje",0);
         zje = zje + Integer.valueOf(yfmap.get("sb_jsje").toString());
-        yfbb.add(yfmap.get("sb_jsje").toString());
+        htzje = htzje + Integer.valueOf(yfmap.get("sb_htje").toString());
+        yfbb.add((Integer.valueOf(yfmap.get("sb_jsje").toString())/10000.00)+"");
+        yfbb.add((Integer.valueOf(yfmap.get("sb_htje").toString())/10000.00)+"");
+
 
         yfbb.add(yfmap.get("jj_fbsl").toString());
         yfbb.add(yfmap.get("jj_jssl").toString());
         if (yfmap.get("jj_jsje") == null)
             yfmap.put("jj_jsje", 0);
+        if (yfmap.get("jj_htje") == null)
+            yfmap.put("jj_htje", 0);
         zje = zje + Integer.valueOf(yfmap.get("jj_jsje").toString());
-        yfbb.add(yfmap.get("jj_jsje").toString());
+        htzje = htzje + Integer.valueOf(yfmap.get("jj_htje").toString());
+        yfbb.add((Integer.valueOf(yfmap.get("jj_jsje").toString())/10000.00)+"");
+        yfbb.add((Integer.valueOf(yfmap.get("jj_htje").toString())/10000.00)+"");
 
         yfbb.add(yfmap.get("xx_fbsl").toString());
         yfbb.add(yfmap.get("xx_jssl").toString());
         if (yfmap.get("xx_jsje") == null)
             yfmap.put("xx_jsje", 0);
+        if (yfmap.get("xx_htje") == null)
+            yfmap.put("xx_htje", 0);
         zje = zje + Integer.valueOf(yfmap.get("xx_jsje").toString());
-        yfbb.add(yfmap.get("xx_jsje").toString());
+        htzje = htzje + Integer.valueOf(yfmap.get("xx_htje").toString());
+        yfbb.add( (Integer.valueOf(yfmap.get("xx_jsje").toString())/10000.00)+"");
+        yfbb.add( (Integer.valueOf(yfmap.get("xx_htje").toString())/10000.00)+"");
+
 
         yfbb.add(yfmap.get("wz_fbsl").toString());
         yfbb.add(yfmap.get("wz_jssl").toString());
         if (yfmap.get("wz_jsje") == null)
             yfmap.put("wz_jsje", 0);
+        if (yfmap.get("wz_htje") == null)
+            yfmap.put("wz_htje", 0);
         zje = zje + Integer.valueOf(yfmap.get("wz_jsje").toString());
-        yfbb.add(yfmap.get("wz_jsje").toString());
+        htzje = htzje + Integer.valueOf(yfmap.get("wz_htje").toString());
+        yfbb.add((Integer.valueOf(yfmap.get("wz_jsje").toString())/10000.00)+"");
+        yfbb.add((Integer.valueOf(yfmap.get("wz_htje").toString())/10000.00)+"");
+
 
         yfbb.add(yfmap.get("gdzc_fbsl").toString());
         yfbb.add(yfmap.get("gdzc_jssl").toString());
         if (yfmap.get("gdzc_jsje") == null)
             yfmap.put("gdzc_jsje", 0);
+        if (yfmap.get("gdzc_htje") == null)
+            yfmap.put("gdzc_htje", 0);
         zje = zje + Integer.valueOf(yfmap.get("gdzc_jsje").toString());
-        yfbb.add(yfmap.get("gdzc_jsje").toString());
-        yfbb.add(String.valueOf(zje));
+        htzje = htzje + Integer.valueOf(yfmap.get("gdzc_htje").toString());
+        yfbb.add((Integer.valueOf(yfmap.get("gdzc_jsje").toString())/10000.00)+"");
+        yfbb.add((Integer.valueOf(yfmap.get("gdzc_htje").toString())/10000.00)+"");
+
+        yfbb.add(String.valueOf(zje/10000.00));
+        yfbb.add(String.valueOf(htzje/10000.00));
         res.add(yfbb);
+
 
         List<String> nfbb = new ArrayList<>();
         nfmap.put("_year", year);
@@ -126,43 +153,64 @@ public class BbController {
             nfmap.put("_bm",bm);
             projectMapper.bmnfbb(nfmap);
         }
-        zje = 0;
+        zje = 0;htzje=0;
         nfbb.add("年初累计：01-" + month);
         nfbb.add(nfmap.get("sb_fbsl").toString());
         nfbb.add(nfmap.get("sb_jssl").toString());
         if (nfmap.get("sb_jsje") == null)
             nfmap.put("sb_jsje", 0);
+        if (nfmap.get("sb_htje") == null)
+            nfmap.put("sb_htje", 0);
         zje = zje + Integer.valueOf(nfmap.get("sb_jsje").toString());
-        nfbb.add(nfmap.get("sb_jsje").toString());
+        htzje = htzje + Integer.valueOf(nfmap.get("sb_htje").toString());
+        nfbb.add((Integer.valueOf(nfmap.get("sb_jsje").toString())/10000.00)+"");
+        nfbb.add((Integer.valueOf(nfmap.get("sb_htje").toString())/10000.00)+"");
 
         nfbb.add(nfmap.get("jj_fbsl").toString());
         nfbb.add(nfmap.get("jj_jssl").toString());
         if (nfmap.get("jj_jsje") == null)
             nfmap.put("jj_jsje", 0);
+        if (nfmap.get("jj_htje") == null)
+            nfmap.put("jj_htje", 0);
         zje = zje + Integer.valueOf(nfmap.get("jj_jsje").toString());
-        nfbb.add(nfmap.get("jj_jsje").toString());
+        htzje = htzje + Integer.valueOf(nfmap.get("jj_htje").toString());
+        nfbb.add((Integer.valueOf(nfmap.get("jj_jsje").toString())/10000.00)+"");
+        nfbb.add((Integer.valueOf(nfmap.get("jj_htje").toString())/10000.00)+"");
 
         nfbb.add(nfmap.get("xx_fbsl").toString());
         nfbb.add(nfmap.get("xx_jssl").toString());
         if (nfmap.get("xx_jsje") == null)
             nfmap.put("xx_jsje", 0);
+        if (nfmap.get("xx_htje") == null)
+            nfmap.put("xx_htje", 0);
         zje = zje + Integer.valueOf(nfmap.get("xx_jsje").toString());
-        nfbb.add(nfmap.get("xx_jsje").toString());
+        htzje = htzje + Integer.valueOf(nfmap.get("xx_htje").toString());
+        nfbb.add((Integer.valueOf(nfmap.get("xx_jsje").toString())/10000.00)+"");
+        nfbb.add((Integer.valueOf(nfmap.get("xx_htje").toString())/10000.00)+"");
 
         nfbb.add(nfmap.get("wz_fbsl").toString());
         nfbb.add(nfmap.get("wz_jssl").toString());
         if (nfmap.get("wz_jsje") == null)
             nfmap.put("wz_jsje", 0);
+        if (nfmap.get("wz_htje") == null)
+            nfmap.put("wz_htje", 0);
         zje = zje + Integer.valueOf(nfmap.get("wz_jsje").toString());
-        nfbb.add(nfmap.get("wz_jsje").toString());
+        htzje = htzje + Integer.valueOf(nfmap.get("wz_htje").toString());
+        nfbb.add((Integer.valueOf(nfmap.get("wz_jsje").toString())/10000.00)+"");
+        nfbb.add((Integer.valueOf(nfmap.get("wz_htje").toString())/10000.00)+"");
 
         nfbb.add(nfmap.get("gdzc_fbsl").toString());
         nfbb.add(nfmap.get("gdzc_jssl").toString());
         if (nfmap.get("gdzc_jsje") == null)
             nfmap.put("gdzc_jsje", 0);
+        if (nfmap.get("gdzc_htje") == null)
+            nfmap.put("gdzc_htje", 0);
         zje = zje + Integer.valueOf(nfmap.get("gdzc_jsje").toString());
-        nfbb.add(nfmap.get("gdzc_jsje").toString());
-        nfbb.add(String.valueOf(zje));
+        htzje = htzje + Integer.valueOf(nfmap.get("gdzc_htje").toString());
+        nfbb.add((Integer.valueOf(nfmap.get("gdzc_jsje").toString())/10000.00)+"");
+        nfbb.add((Integer.valueOf(nfmap.get("gdzc_htje").toString())/10000.00)+"");
+        nfbb.add(String.valueOf(zje/10000.00));
+        nfbb.add(String.valueOf(htzje/10000.00));
         res.add(nfbb);
         return res;
     }
@@ -328,6 +376,7 @@ public class BbController {
         return builder.body(FileUtils.readFileToByteArray(file));
     }
 
+    //项目统计报表
     @GetMapping("/downloadXMTJBB")
     public ResponseEntity<byte[]> downloadXMTJBB(String year, String month,String bm) throws IOException {
         String filePath = getCurrentUploadDirectory() + File.separator + "新沙公司工程项目统计报表 " + year + "-" + month + ".xls";
@@ -338,10 +387,10 @@ public class BbController {
 
         int[][] columnWidths = {
                 {
-                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,17, 18, 19, 20, 21, 22
                 },
                 {
-                        18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256
+                        18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256, 18 * 256
                 }
         };
         ExcelUtil.setCloumnWitth(sheet, columnWidths);
@@ -357,9 +406,9 @@ public class BbController {
 
         HSSFRow row0 = sheet.createRow(0);
         row0.setHeightInPoints(25);// 行高度
-        ExcelUtil.createTempCell(row0, 1, 16, style);
+        ExcelUtil.createTempCell(row0, 1, 22, style);
         HSSFCell cell0_0 = ExcelUtil.createCell(row0, 0, "新沙公司工程项目统计报表          " + year + "-" + month, style);
-        ExcelUtil.createRange(sheet, 0, 0, 0, 16);
+        ExcelUtil.createRange(sheet, 0, 0, 0, 22);
 
 
         HSSFRow row1 = sheet.createRow(1);
@@ -367,41 +416,48 @@ public class BbController {
         ExcelUtil.createRange(sheet, 1, 2, 0, 0);
 
         HSSFCell cell1_1 = ExcelUtil.createCell(row1, 1, "维修", style);
-        ExcelUtil.createTempCell(row1, 2, 9, style);
-        ExcelUtil.createRange(sheet, 1, 1, 1, 9);
+        ExcelUtil.createTempCell(row1, 2, 12, style);
+        ExcelUtil.createRange(sheet, 1, 1, 1, 12);
 
-        HSSFCell cell1_10 = ExcelUtil.createCell(row1, 10, "物资", style);
-        ExcelUtil.createTempCell(row1, 11, 12, style);
-        ExcelUtil.createRange(sheet, 1, 2, 10, 12);
+        HSSFCell cell1_10 = ExcelUtil.createCell(row1, 13, "物资", style);
+        ExcelUtil.createTempCell(row1, 14, 16, style);
+        ExcelUtil.createRange(sheet, 1, 2, 13, 16);
 
-        HSSFCell cell1_13 = ExcelUtil.createCell(row1, 13, "固定资产(设备)", style);
-        ExcelUtil.createTempCell(row1, 14, 15, style);
-        ExcelUtil.createRange(sheet, 1, 2, 13, 15);
+        HSSFCell cell1_13 = ExcelUtil.createCell(row1, 17, "固定资产(设备)", style);
+        ExcelUtil.createTempCell(row1, 18, 20, style);
+        ExcelUtil.createRange(sheet, 1, 2, 17, 20);
 
-        HSSFCell cell9_18 = ExcelUtil.createCell(row1, 16, "总金额（万元）", style);
-        ExcelUtil.createRange(sheet, 1, 2, 16, 16);
+        HSSFCell cell9_18 = ExcelUtil.createCell(row1, 21, "总金额（万元）", style);
+        ExcelUtil.createRange(sheet, 1, 3, 21, 21);
+
+        HSSFCell cell9_19 = ExcelUtil.createCell(row1, 22, "合同总金额（万元）", style);
+        ExcelUtil.createRange(sheet, 1, 3, 22, 22);
 
         HSSFRow row2 = sheet.createRow(2);
         ExcelUtil.createTempCell(row2, 0, 0, style);
-        ExcelUtil.createTempCell(row2, 2, 3, style);
-        ExcelUtil.createTempCell(row2, 5, 6, style);
-        ExcelUtil.createTempCell(row2, 8, 9, style);
+        ExcelUtil.createTempCell(row2, 2, 4, style);
+        ExcelUtil.createTempCell(row2, 6, 8, style);
         ExcelUtil.createTempCell(row2, 10, 12, style);
-        ExcelUtil.createTempCell(row2, 13, 15, style);
+        ExcelUtil.createTempCell(row2, 14, 16, style);
+        ExcelUtil.createTempCell(row2, 18, 20, style);
+        ExcelUtil.createTempCell(row2, 21, 22, style);
 
         ExcelUtil.createTempCell(row2, 16, 16, style);
         HSSFCell cell2_1 = ExcelUtil.createCell(row2, 1, "设备", style);
-        ExcelUtil.createRange(sheet, 2, 2, 1, 3);
+        ExcelUtil.createRange(sheet, 2, 2, 1, 4);
 
-        HSSFCell cell2_4 = ExcelUtil.createCell(row2, 4, "基建", style);
-        ExcelUtil.createRange(sheet, 2, 2, 4, 6);
+        HSSFCell cell2_4 = ExcelUtil.createCell(row2, 5, "基建", style);
+        ExcelUtil.createRange(sheet, 2, 2, 5, 8);
 
-        HSSFCell cell2_7 = ExcelUtil.createCell(row2, 7, "信息", style);
-        ExcelUtil.createRange(sheet, 2, 2, 7, 9);
+        HSSFCell cell2_7 = ExcelUtil.createCell(row2, 9, "信息", style);
+        ExcelUtil.createRange(sheet, 2, 2, 9, 12);
 
         List<List<String>> values = this.get(year, month,bm);
 
         ExcelUtil.insertRow(sheet, 3, values, style);
+
+        HSSFRow row3 = sheet.getRow(3);// 不能createRow因为上面已经创建了第3行，只能getRow
+        ExcelUtil.createTempCell(row3, 21, 22, style);
 
         try {
             java.io.File file = new File(filePath);

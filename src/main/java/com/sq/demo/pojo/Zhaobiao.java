@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class Zhaobiao implements Serializable {
+public class Zhaobiao implements Serializable ,Comparable<Zhaobiao> {
     /**
      * 主键
      */
@@ -63,6 +63,13 @@ public class Zhaobiao implements Serializable {
 
     @Transient
     private String userName;
+
+    //是否暂存的招标、0不是、1是
+    @Transient
+    private String isZc;
+
+    @Transient
+    private String jsbjssj;
     /**
      * 获取主键
      *
@@ -247,5 +254,27 @@ public class Zhaobiao implements Serializable {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getIsZc() {
+        return isZc;
+    }
+
+    public void setIsZc(String isZc) {
+        this.isZc = isZc;
+    }
+
+    public String getJsbjssj() {
+        return jsbjssj;
+    }
+
+    public void setJsbjssj(String jsbjssj) {
+        this.jsbjssj = jsbjssj;
+    }
+
+    @Override
+    public int compareTo(Zhaobiao o) {
+        //return this.getJsbjssj().compareTo(o.getJsbjssj());
+        return o.getJsbjssj().compareTo(this.getJsbjssj());
     }
 }

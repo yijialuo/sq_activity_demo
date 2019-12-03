@@ -2,6 +2,7 @@ package com.sq.demo.controller;
 
 
 import com.sq.demo.Entity.Return_Comments;
+import com.sq.demo.Entity.Zbxx;
 import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.*;
 import com.sq.demo.utils.GroupUtils;
@@ -25,9 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/zhaobiao")
@@ -397,12 +396,38 @@ public class ZhaobiaoController {
     //给招标填充部门，项目名称、项目编号、申请人
     public void fillZhaobiao(List<Zhaobiao> zhaobiaos) {
         for (Zhaobiao zhaobiao : zhaobiaos) {
-            Project project=projectMapper.selectByPrimaryKey(zhaobiao.getXmid());
+            Project project = projectMapper.selectByPrimaryKey(zhaobiao.getXmid());
             zhaobiao.setDeclarationDep(project.getDeclarationDep());
             zhaobiao.setXmName(project.getProjectNam());
             zhaobiao.setXmNo(project.getProjectNo());
             zhaobiao.setUserName(userController.userIdTouserName(zhaobiao.getSqr()));
         }
+    }
+
+    //填充是否暂存的招标
+    public void fillZcZhaobiao(List<Zhaobiao> zhaobiaos) {
+        for (Zhaobiao zhaobiao : zhaobiaos) {
+            String fbsj = zhaobiao.getFbsj();
+            String dbsj = zhaobiao.getDbsj();
+            String tbjzsj = zhaobiao.getTbjzsj();
+            Zhongbiao zhongbiao = new Zhongbiao();
+            zhongbiao.setZbid(zhaobiao.getId());
+            zhongbiao = zhongbiaoMapper.selectOne(zhongbiao);
+            if (fbsj != null && !fbsj.equals("") || dbsj != null && !dbsj.equals("") || tbjzsj != null && !tbjzsj.equals("") || (zhongbiao != null && zhongbiao.getZhongbiaodw() != null && !zhongbiao.getZhongbiaodw().equals("")) || (zhongbiao != null && zhongbiao.getZhongbiaojg() != null && !zhongbiao.getZhongbiaojg().equals(""))) {
+                zhaobiao.setIsZc("1");
+            } else {
+                zhaobiao.setIsZc("0");
+            }
+        }
+    }
+
+    //根据技术部经理排序
+    public void zhaobiaoPx(List<Zhaobiao> zhaobiaos) {
+        for (Zhaobiao zhaobiao : zhaobiaos) {
+            List<Return_Comments> return_comments = getZhaobiaoComment(zhaobiao.getZbpid());
+            zhaobiao.setJsbjssj(return_comments.get(0).getTime());
+        }
+        Collections.sort(zhaobiaos);
     }
 
     //领取招标表单
@@ -475,9 +500,9 @@ public class ZhaobiaoController {
                         //评论人
                         User user = identityService.createUserQuery().userFirstName(return_comments.get(i).getUsernam()).singleResult();
                         //评论人的group
-                        Group group1 = identityService.createGroupQuery().groupMember(user.getId()).singleResult();
+                        List<Group> groupList = identityService.createGroupQuery().groupMember(user.getId()).list();
                         //如果评论人的职位是技术部主管经理，同时评论人是自己
-                        if (group1.getId().equals("jsb_zgjl") && user.getId().equals(userId)) {
+                        if (GroupUtils.equalsJs(groupList, "jsb_zgjl") && user.getId().equals(userId)) {
                             res.add(zhaobiao);
                             break;
                         }
@@ -485,6 +510,8 @@ public class ZhaobiaoController {
                 }
             }
             fillZhaobiao(res);
+            //填充是否暂存的招标
+
             return res;
         }
         //办公室
@@ -500,9 +527,9 @@ public class ZhaobiaoController {
                         //评论人
                         User user = identityService.createUserQuery().userFirstName(return_comments.get(i).getUsernam()).singleResult();
                         //评论人的group
-                        Group group1 = identityService.createGroupQuery().groupMember(user.getId()).singleResult();
-                        //如果评论人的职位是技术部主管经理，同时评论人是自己
-                        if (group1.getId().equals("bgs") && user.getId().equals(userId)) {
+                        List<Group> groupList = identityService.createGroupQuery().groupMember(user.getId()).list();
+                        //如果评论人的职位是办公室，同时评论人是自己
+                        if (GroupUtils.equalsJs(groupList, "bgs") && user.getId().equals(userId)) {
                             res.add(zhaobiao);
                             break;
                         }
@@ -510,6 +537,10 @@ public class ZhaobiaoController {
                 }
             }
             fillZhaobiao(res);
+            //填充是否缓存
+            fillZcZhaobiao(res);
+            //根据技术部经理排序
+            zhaobiaoPx(res);
             return res;
         }
         //技术部经理就一个人、不用过滤
@@ -549,13 +580,25 @@ public class ZhaobiaoController {
 
     @Transactional
     @RequestMapping("zc")
-    public boolean zc(String id, String fbsj, String dbsj, String tbjzsj){
+    public boolean zc(String id, String fbsj, String dbsj, String tbjzsj) {
         Zhaobiao zhaobiao = zhaobiaoMapper.selectByPrimaryKey(id);
         zhaobiao.setFbsj(fbsj);//发表时间
         zhaobiao.setDbsj(dbsj);//定标时间
         zhaobiao.setTbjzsj(tbjzsj);//工期
         //更新招标表
-        return zhaobiaoMapper.updateByPrimaryKeySelective(zhaobiao)==1;
+        return zhaobiaoMapper.updateByPrimaryKeySelective(zhaobiao) == 1;
+    }
+
+    //招标数据的填充
+    @Transactional
+    @RequestMapping("/tczbsj")
+    public void tzcbsj(String id,String fbsj,String dbsj,String tbjzsj){
+        Zhaobiao zhaobiao = zhaobiaoMapper.selectByPrimaryKey(id);
+        zhaobiao.setFbsj(fbsj);//发表时间
+        zhaobiao.setDbsj(dbsj);//定标时间
+        zhaobiao.setTbjzsj(tbjzsj);//工期
+        //更新招标表
+        zhaobiaoMapper.updateByPrimaryKeySelective(zhaobiao);
     }
 
     //完成招标
@@ -642,7 +685,7 @@ public class ZhaobiaoController {
 
     //pid拿评论
     @RequestMapping(value = "/getComment")
-    public List<Return_Comments> projecttocomment(String zbpid) {
+    public List<Return_Comments> getZhaobiaoComment(String zbpid) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = processEngine.getIdentityService();
         TaskService taskService = processEngine.getTaskService();
@@ -679,4 +722,28 @@ public class ZhaobiaoController {
         Task task = taskService.createTaskQuery().processInstanceId(zbpid).singleResult();
         return task.getName();
     }
+
+    //项目id拿招标和中标
+
+    @RequestMapping("getZbxxByXmid")
+    public Zbxx getZbxxByXmid(String xmid) {
+        Zbxx zbxx = new Zbxx();
+        Zhaobiao zhaobiao = new Zhaobiao();
+        zhaobiao.setXmid(xmid);
+        zbxx.zhaobiao = zhaobiaoMapper.selectOne(zhaobiao);
+        Zhongbiao zhongbiao = new Zhongbiao();
+        zhongbiao.setXmid(xmid);
+        zbxx.zhongbiao = zhongbiaoMapper.selectOne(zhongbiao);
+        return zbxx;
+    }
+
+    //判断招标审批流程是第几版本、
+    @RequestMapping("getZbspBb")
+    int getLxspBb(String pid) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        TaskService taskService = processEngine.getTaskService();
+        Task task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
+        return Integer.valueOf(task.getProcessDefinitionId().split(":")[1]);
+    }
+
 }

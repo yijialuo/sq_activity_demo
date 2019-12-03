@@ -5,6 +5,7 @@ import com.sq.demo.Entity.UserOV;
 import com.sq.demo.mapper.DepartmentMapper;
 import com.sq.demo.mapper.FsMapper;
 import com.sq.demo.mapper.ProjectMapper;
+import com.sq.demo.mapper.QxMapper;
 import com.sq.demo.pojo.Department;
 import com.sq.demo.pojo.Fs;
 import com.sq.demo.pojo.Project;
@@ -49,6 +50,8 @@ public class UserController {
     ProjectController projectController;
     @Autowired
     RedisUtil redisUtil;
+    @Autowired
+    QxMapper qxMapper;
 
     //判断是不是技术部的人
     @RequestMapping("/isJsb")
@@ -330,10 +333,11 @@ public class UserController {
             userOV.userName = user.getFirstName();
             userOV.passWord = user.getPassword();
             userOV.departmentId = identityService.getUserInfo(user.getId(), "departmentId");
+            //userOV.qxs=qxMapper.getZjids(userId);
             //查询用户所在的组
             List<Group> groups = identityService.createGroupQuery().groupMember(user.getId()).list();
             userOV.groupId = GroupUtils.getGroupIds(groups);
-            if (userOV.departmentId != null && !userOV.departmentId.equals("")) {
+             if (userOV.departmentId != null && !userOV.departmentId.equals("")) {
                 Department department = new Department();
                 department.setId(userOV.departmentId);
                 String d_name = departmentMapper.selectOne(department).getdNam();

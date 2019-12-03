@@ -15,4 +15,6 @@ public class UserOV {
    public String departmentId;//部门
    public String departmentName;
    public String[] manageType;
+   //主键的权限
+   //public List<String> qxs;
 }

@@ -1,17 +1,14 @@
 package com.sq.demo.controller;
 
 import com.github.pagehelper.PageHelper;
-import com.sq.demo.mapper.ProjectMapper;
-import com.sq.demo.mapper.XxmcbMapper;
-import com.sq.demo.mapper.XxmglMapper;
-import com.sq.demo.pojo.Project;
-import com.sq.demo.pojo.Xxmcb;
-import com.sq.demo.pojo.Xxmgl;
+import com.sq.demo.Entity.Zbxx;
+import com.sq.demo.mapper.*;
+import com.sq.demo.pojo.*;
 import com.sq.demo.utils.IdCreate;
 import com.sq.demo.utils.Time;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +26,10 @@ public class XxmglController {
     XxmcbMapper xxmcbMapper;
     @Autowired
     ProjectMapper projectMapper;
-
+    @Autowired
+    ZhaobiaoMapper zhaobiaoMapper;
+    @Autowired
+    ZhongbiaoMapper zhongbiaoMapper;
 
     @RequestMapping("/getProjects")
     public List<Xxmgl> getProjects(String userName) {
@@ -48,12 +48,12 @@ public class XxmglController {
             res.add(xxmgl);
         }
         //过滤已经新建了的
-        List<String> xmids=xxmglMapper.getAllXmid();
-        if(xmids.size()==0)
+        List<String> xmids = xxmglMapper.getAllXmid();
+        if (xmids.size() == 0)
             return res;
-        List<Xxmgl> res2=new ArrayList<>();
-        for(Xxmgl xxmgl:res){
-            if(!xmids.contains(xxmgl.getY1())){
+        List<Xxmgl> res2 = new ArrayList<>();
+        for (Xxmgl xxmgl : res) {
+            if (!xmids.contains(xxmgl.getY1())) {
                 res2.add(xxmgl);
             }
         }
@@ -62,7 +62,7 @@ public class XxmglController {
 
     @Transactional
     @RequestMapping("/insert")
-    public boolean insert(String xmbh, String xmmc, String lxbm, String sqr, String y1,String y2) {
+    public boolean insert(String xmbh, String xmmc, String lxbm, String sqr, String y1, String y2) {
         try {
             Xxmgl xxmgl = new Xxmgl();
             xxmgl.setId(IdCreate.id());
@@ -135,5 +135,37 @@ public class XxmglController {
         response.setHeader("allcount", "" + xxmglMapper.selectCount(null));
         PageHelper.startPage(pageNum, 10);
         return xxmglMapper.selectAll();
+    }
+
+
+    @RequestMapping("/insertZbxx")
+    @Transactional
+    public boolean insertZbxx(@RequestBody Zbxx zbxx){
+        try {
+            Zhaobiao zhaobiao=zbxx.zhaobiao;
+            Zhongbiao zhongbiao=zbxx.zhongbiao;
+            //插入
+            if(zhaobiao.getId()==null||zhaobiao.getId().equals("")){
+                String zbid=IdCreate.id();
+                zhaobiao.setId(zbid);
+                zhaobiao.setCjsj(Time.getNow());
+                zhaobiaoMapper.insert(zhaobiao);
+                zhongbiao.setId(IdCreate.id());
+                zhongbiao.setZbid(zbid);
+                zhongbiao.setXmid(zhaobiao.getXmid());
+                zhongbiaoMapper.insert(zhongbiao);
+            }else {//更新
+                if(zhaobiao.getFbsj()==null)
+                    zhaobiao.setFbsj("");
+                if(zhaobiao.getDbsj()==null)
+                    zhaobiao.setDqjd("");
+                zhaobiaoMapper.updateByPrimaryKeySelective(zhaobiao);
+                zhongbiaoMapper.updateByPrimaryKeySelective(zhongbiao);
+            }
+            return true;
+        }catch (Exception e){
+            System.out.println(e);
+            return false;
+        }
     }
 }

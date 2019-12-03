@@ -693,6 +693,7 @@ public class ContractController {
     public List<Hetong> canHtidAndHtno(String userId) {
         //拿到所有付完了的合同id
         List<String> htids = payableMapper.getFwHtid();
+        //拿到所有合同id和合同编号
         List<Hetong> hetongs = getallhtid();
         for (String htid : htids) {
             for (int i = 0; i < hetongs.size(); i++) {

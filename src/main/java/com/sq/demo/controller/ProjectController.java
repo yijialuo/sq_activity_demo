@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -112,8 +113,14 @@ public class ProjectController {
     //根据部门名字拿部门项目
     @RequestMapping("/selectByDepartmentName")
     public List<Project> selectByDepartmentName(int pageNum, String departmentName) {
-        PageHelper.startPage(pageNum, 10);
-        return projectMapper.selectByDepartmentName(departmentName);
+        //管理员
+        if (departmentName.equals("无部门")) {
+            PageHelper.startPage(pageNum, 10);
+            return projectMapper.selectAll();
+        } else {
+            PageHelper.startPage(pageNum, 10);
+            return projectMapper.selectByDepartmentName(departmentName);
+        }
     }
 
 
@@ -341,7 +348,7 @@ public class ProjectController {
     public int AllCounts(String dpt) {
         if (dpt == null || dpt.equals(""))
             return 0;
-        if (dpt.equals("工程技术部") || dpt.equals("办公室") || dpt.equals("办公室.") || dpt.equals("领导"))
+        if (dpt.equals("工程技术部") || dpt.equals("办公室") || dpt.equals("办公室.") || dpt.equals("领导") || dpt.equals("无部门"))
             return projectMapper.AllCounts();
         return projectMapper.selfAllCounts(dpt);
     }
@@ -349,6 +356,8 @@ public class ProjectController {
     //拿自己部门项目的数量
     @RequestMapping("/selfAllCounts")
     public int selfAllCounts(String dpt) {
+        if (dpt.equals("无部门"))
+            return projectMapper.AllCounts();
         return projectMapper.selfAllCounts(dpt);
     }
 
@@ -358,8 +367,8 @@ public class ProjectController {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = processEngine.getIdentityService();
         String departmentId = identityService.getUserInfo(userId, "departmentId");
-        //工程技术部或者办公室(办公室.)领导拿所有
-        if (departmentId.equals("20190123022801622") || departmentId.equals("20190125102616787") || departmentId.equals("103a990b-a59a-40bc-8ac9-a505076ca0ae") || departmentId.equals("ba7c0e37-3df1-463d-9eda-c90bc564d6c5")) {
+        //工程技术部、办公室(办公室.)、领导、管理员拿所有
+        if (departmentId.equals("20190123022801622") || departmentId.equals("20190125102616787") || departmentId.equals("103a990b-a59a-40bc-8ac9-a505076ca0ae") || departmentId.equals("ba7c0e37-3df1-463d-9eda-c90bc564d6c5") || userId.equals("admin")) {
             PageHelper.startPage(pageNum, 10);
             List<Project> projects = projectMapper.selectAll();
             for (Project project : projects)
@@ -979,9 +988,9 @@ public class ProjectController {
                     bas.add(project);
                 }
             }
-        } else if (userId.equals("db")||userId.equals("lze")) {
+        } else if (userId.equals("db") || userId.equals("lze")) {
             for (Project project : projects) {
-                if (isBa(project.getPid())  && !project.getDepAuditOpinion().equals("股份项目")) {
+                if (isBa(project.getPid()) && !project.getDepAuditOpinion().equals("股份项目")) {
                     bas.add(project);
                 }
             }
@@ -998,6 +1007,8 @@ public class ProjectController {
         }
         for (Project project : bas)
             addDqjd(project);
+        //填充前一时间
+        sortProject(bas);
         return bas;
     }
 
@@ -1024,6 +1035,24 @@ public class ProjectController {
             }
         }
         return null;
+    }
+
+    //填充项目前一个审批时间
+    public void fillQysj(List<Project> projects){
+        for(Project project:projects){
+            List<Return_Comments> return_comments=projectIdTocomment(project.getId());
+            if(return_comments==null||return_comments.size()==0){
+                project.setQysj("");
+            }else {
+                project.setQysj(return_comments.get(0).getTime());
+            }
+        }
+    }
+
+    //项目按照时间排序
+    public void sortProject(List<Project> projects){
+        fillQysj(projects);
+        Collections.sort(projects);
     }
 
     //领取项目(前期审批)
@@ -1090,6 +1119,7 @@ public class ProjectController {
             }
             for (Project project : res)
                 addDqjd(project);
+            sortProject(res);
             return res;
         }
         //技术部办事员领取项目
@@ -1150,6 +1180,7 @@ public class ProjectController {
             }
             for (Project project : res)
                 addDqjd(project);
+            sortProject(res);
             return res;
         }
         //技术部主管经理领取项目
@@ -1184,12 +1215,16 @@ public class ProjectController {
             }
             for (Project project : res)
                 addDqjd(project);
+            sortProject(res);
             return res;
         }
         for (Project project : projects)
             addDqjd(project);
+        sortProject(projects);
         return projects;
     }
+
+
 
     //查看申请状态
 //    @RequestMapping("/zt")
@@ -1495,8 +1530,12 @@ public class ProjectController {
     //拿到是自己经办人的能招标的项目
     @RequestMapping("/getSelfWzzXmidAndXmname")
     public List<Xm> getSelfWzzXmidAndXmname(String userName) {
-        List<Map> maps = projectMapper.selectJsbjbrXmidAndXmname(userName);
         //自己的所有项目
+        List<Map> maps;
+        if (!userName.equals("管理员"))
+            maps = projectMapper.selectJsbjbrXmidAndXmname(userName);
+        else
+            maps = projectMapper.selectAllXmidAndXmname();
         List<Xm> xms = new ArrayList<>();
         for (int i = 0; i < maps.size(); i++) {
             Xm xm = new Xm();
@@ -1512,7 +1551,7 @@ public class ProjectController {
         List<Xm> res = new ArrayList<>();
         for (Xm xm : xms) {
             Project project = projectMapper.selectByPrimaryKey(xm.value);
-            if (!projectIds.contains(xm.value) && !project.getDepAuditOpinion().equals("股份项目")) {
+            if (!projectIds.contains(xm.value)&& !project.getDepAuditOpinion().equals("股份项目")) {
                 res.add(xm);
             }
         }
@@ -1586,13 +1625,13 @@ public class ProjectController {
         //拿自己的项目的合同
         for (int i = 0; i < xms.size(); i++) {
             String jbr = projectMapper.selectByPrimaryKey(xms.get(i).value).getBider();
-            if(!userName.equals("林楷亮")){
+            if (!userName.equals("林楷亮")) {
                 if (!jbr.equals(userName)) {
                     xms.remove(i);
                     i--;
                 }
-            }else {//林楷亮
-                if(!jbr.equals("林楷亮")&&!jbr.equals("牛立刚")){
+            } else {//林楷亮
+                if (!jbr.equals("林楷亮") && !jbr.equals("牛立刚")) {
                     xms.remove(i);
                     i--;
                 }
@@ -1674,5 +1713,11 @@ public class ProjectController {
         TaskService taskService = processEngine.getTaskService();
         Task task = taskService.createTaskQuery().processInstanceId(pid).singleResult();
         return Integer.valueOf(task.getProcessDefinitionId().split(":")[1]);
+    }
+
+    //根据项目id拿项目类型
+    @RequestMapping("getXmlxByXmid")
+    public String getXmlxByXmid(String xmid){
+        return projectMapper.selectByPrimaryKey(xmid).getDepAuditOpinion();
     }
 }

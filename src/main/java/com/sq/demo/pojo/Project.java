@@ -5,7 +5,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 
-public class Project implements Serializable {
+public class Project implements Serializable,Comparable<Project> {
     /**
      * 主键
      */
@@ -145,6 +145,9 @@ public class Project implements Serializable {
     @Transient
     private String dqjd;
 
+    //前一个人审批的时间
+    @Transient
+    private String qysj;
     /**
      * 获取主键
      *
@@ -539,5 +542,20 @@ public class Project implements Serializable {
 
     public void setJz(String jz) {
         this.jz = jz;
+    }
+
+    public String getQysj() {
+        return qysj;
+    }
+
+    public void setQysj(String qysj) {
+        this.qysj = qysj;
+    }
+
+
+
+    @Override
+    public int compareTo(Project o) {
+        return o.getQysj().compareTo(this.getQysj());
     }
 }
