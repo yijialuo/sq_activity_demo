@@ -59,6 +59,8 @@ public class ContractController {
     ZhaobiaoMapper zhaobiaoMapper;
     @Autowired
     XmsjbMapper xmsjbMapper;
+    @Autowired
+    UserController userController;
 
     //综合搜索
     @RequestMapping("search")
@@ -288,13 +290,20 @@ public class ContractController {
     public List<Contract_return> getQdht(String userId) {
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = engine.getIdentityService();
+        //代替人的所有userid
+        List<String> dtrUserids = userController.getDtuserids(userId);
+        //代替人的所有userName
+        List<String> dtrUserNames = new ArrayList<>();
+        for (int i = 0; i < dtrUserids.size(); i++) {
+            dtrUserNames.add(identityService.createUserQuery().userId(dtrUserids.get(i)).singleResult().getFirstName());
+        }
         List<Group> groups = identityService.createGroupQuery().groupMember(userId).list();
         List<Contract> contracts = contractMapper.selectYlc();
         List<Contract_return> res = new ArrayList<>();
         if (GroupUtils.equalsJs(groups, "jsb_doman")) {
             for (Contract contract : contracts) {
                 String node = getPidNode(contract.getDwyj());
-                if (node.equals("签订") && contract.getCwbmyj().equals(userId)) {
+                if (node.equals("签订") && (contract.getCwbmyj().equals(userId)||dtrUserids.contains(contract.getCwbmyj()))) {
                     res.add(contractTocontractreturn(contract));
                 }
             }
@@ -305,7 +314,7 @@ public class ContractController {
                 if (node.equals("签订")) {
                     List<Return_Comments> return_comments = getHtComment(contract.getDwyj());
                     for (Return_Comments return_comments1 : return_comments) {
-                        if (return_comments1.getUsernam().equals(user.getFirstName())) {
+                        if (return_comments1.getUsernam().equals(user.getFirstName())||dtrUserNames.contains(return_comments1.getUsernam())) {
                             res.add(contractTocontractreturn(contract));
                             break;
                         }
@@ -321,14 +330,21 @@ public class ContractController {
     public List<Contract_return> lqht(String userId) {
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = engine.getIdentityService();
+        //代替人的所有userid
+        List<String> dtrUserids = userController.getDtuserids(userId);
+        //代替人的所有userName
+        List<String> dtrUserNames = new ArrayList<>();
+        for (int i = 0; i < dtrUserids.size(); i++) {
+            dtrUserNames.add(identityService.createUserQuery().userId(dtrUserids.get(i)).singleResult().getFirstName());
+        }
         List<Group> groups = identityService.createGroupQuery().groupMember(userId).list();
         List<Contract> contracts = contractMapper.selectYlc();
         List<Contract_return> res = new ArrayList<>();
         if (GroupUtils.equalsJs(groups, "jsb_doman")) {
             for (Contract contract : contracts) {
                 String node = getPidNode(contract.getDwyj());
-                //节点经办人、且是自己发起的
-                if (node.equals("经办人") && contract.getCwbmyj().equals(userId)) {
+                //节点经办人、且是自己发起的，或者是自己的代替人
+                if (node.equals("经办人") && (contract.getCwbmyj().equals(userId)||dtrUserids.contains(contract.getCwbmyj()))) {
                     res.add(contractTocontractreturn(contract));
                 }
             }
@@ -465,6 +481,16 @@ public class ContractController {
     }
 
     //修改合同
+    @RequestMapping("/updateContractSelective")
+    @Transactional
+    public boolean updateContractSelective(@RequestBody Contract con) {
+        if (contractMapper.updateByPrimaryKeySelective(con) == 1)
+            return true;
+        else
+            return false;
+    }
+
+    //修改合同
     @RequestMapping("/updateContract")
     @Transactional
     public boolean updateContract(@RequestBody Contract con) {
@@ -489,6 +515,13 @@ public class ContractController {
     @Transactional
     public boolean deleteContract(String cid) {
         if (cid != null && !cid.equals("")) {
+            //如果有结算信息，删除失败
+            Payable payable=new Payable();
+            payable.setContractId(cid);
+            //有结算、删除失败
+            if(payableMapper.select(payable).size()!=0){
+                return false;
+            }
             Contractfile contractfile = new Contractfile();
             contractfile.setCid(cid);
             //删文件关联表
@@ -704,17 +737,17 @@ public class ContractController {
             }
         }
         //同时还要验收
-        for (int i = 0; i < hetongs.size(); i++) {
-            //合同对应的项目id
-            String xmid = contractMapper.selectByPrimaryKey(hetongs.get(i).value).getProjectId();
-            //检查改项目id有没有验收
-            Yanshou yanshou = new Yanshou();
-            yanshou.setProjectid(xmid);
-            if (yanshouMapper.selectOne(yanshou) == null) {
-                hetongs.remove(i);
-                i--;
-            }
-        }
+//        for (int i = 0; i < hetongs.size(); i++) {
+//            //合同对应的项目id
+//            String xmid = contractMapper.selectByPrimaryKey(hetongs.get(i).value).getProjectId();
+//            //检查改项目id有没有验收
+//            Yanshou yanshou = new Yanshou();
+//            yanshou.setProjectid(xmid);
+//            if (yanshouMapper.selectOne(yanshou) == null) {
+//                hetongs.remove(i);
+//                i--;
+//            }
+//        }
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = engine.getIdentityService();
         //过滤，不是自己的项目

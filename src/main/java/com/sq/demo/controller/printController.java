@@ -3,12 +3,8 @@ package com.sq.demo.controller;
 import cn.afterturn.easypoi.word.WordExportUtil;
 import com.sq.demo.Entity.Return_Comments;
 import com.sq.demo.mapper.*;
-
 import com.sq.demo.pojo.*;
-
-
 import com.sq.demo.utils.Doc2Pdf;
-import com.sq.demo.utils.FileUtil;
 import com.sq.demo.utils.GroupUtils;
 import com.sq.demo.utils.NumberToCn;
 import org.activiti.engine.IdentityService;
@@ -26,11 +22,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,22 +117,22 @@ public class printController {
     public void zfspd(String id, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Payable payable = payableMapper.selectByPrimaryKey(id);
         Map<String, Object> map = new HashMap<>();
-        map.put("jbbm", payable.getJbbm());
-        map.put("jbr", payable.getJbr());
-        map.put("yszmr", payable.getYszmr());
+        map.put("jbbm", payable.getJbbm()== null ? " " : payable.getJbbm());
+        map.put("jbr", payable.getJbr()== null ? " " :  payable.getJbr());
+        map.put("yszmr", payable.getYszmr()== null ? " " :  payable.getYszmr());
         Contractfile contractfile = new Contractfile();
         contractfile.setCid(id);
         map.put("fjzs", contractfileMapper.select(contractfile).size());
-        map.put("invoiceNo", payable.getInvoiceNo());
+        map.put("invoiceNo", payable.getInvoiceNo()== null ? " " :  payable.getInvoiceNo());
         Contract contract = contractMapper.selectByPrimaryKey(payable.getContractId());
-        map.put("skdw", contract.getDfdsr());
-        map.put("yhzh", payable.getAccount());
-        map.put("khyh", payable.getBank());
+        map.put("skdw", contract.getDfdsr()== null ? " " :  contract.getDfdsr());
+        map.put("yhzh", payable.getAccount()== null ? " " : payable.getAccount());
+        map.put("khyh", payable.getBank()== null ? " " :payable.getBank());
         String zfxm = cidToPnam(contract.getId());
-        map.put("zfxm", zfxm);
-        map.put("hth", contract.getContractNo());
-        map.put("htrq", contract.getRq());
-        map.put("htzje", contract.getPrice());
+        map.put("zfxm", zfxm== null ? " " :zfxm);
+        map.put("hth", contract.getContractNo()== null ? " " :contract.getContractNo());
+        map.put("htrq", contract.getRq()== null ? " " :contract.getRq());
+        map.put("htzje", contract.getPrice()== null ? " " :contract.getPrice());
         map.put("yzfje", cidToYf(contract.getId()).subtract(payable.getBqyf()));
         map.put("wzf", cidToWf(contract.getId()).add(payable.getBqyf()));
         map.put("bqyf", payable.getBqyf().toString());

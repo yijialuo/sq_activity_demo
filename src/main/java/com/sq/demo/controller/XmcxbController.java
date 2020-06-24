@@ -64,7 +64,7 @@ public class XmcxbController {
             } else {
                 boolean t = true;
                 for (Payable payable1 : payables) {
-                    if (payable1.getWzf() != null && payable1.getWzf().equals(new BigDecimal(0))) {
+                    if (payable1.getWzf() != null && payable1.getWzf().compareTo(new BigDecimal(0.00))==0) {
                         xmcxb.setJszt("支付完成");
                         t = false;
                         break;

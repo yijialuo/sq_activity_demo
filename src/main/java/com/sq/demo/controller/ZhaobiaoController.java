@@ -436,6 +436,14 @@ public class ZhaobiaoController {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = processEngine.getIdentityService();
         TaskService taskService = processEngine.getTaskService();
+        //代替人的所有userid
+        List<String> dtrUserids = userController.getDtuserids(userId);
+        //代替人的所有userName
+        List<String> dtrUserNames = new ArrayList<>();
+        for (int i = 0; i < dtrUserids.size(); i++) {
+            dtrUserNames.add(identityService.createUserQuery().userId(dtrUserids.get(i)).singleResult().getFirstName());
+        }
+
         //查询职位
         List<Group> groups = identityService.createGroupQuery().groupMember(userId).list();
         //查询部门
@@ -467,7 +475,7 @@ public class ZhaobiaoController {
         if (GroupUtils.equalsJs(groups, "doman")) {
             List<Zhaobiao> res = new ArrayList<>();
             for (int i = 0; i < zhaobiaos.size(); i++) {
-                if (zhaobiaos.get(i).getSqr().equals(userId)) {
+                if (zhaobiaos.get(i).getSqr().equals(userId)||dtrUserids.contains(zhaobiaos.get(i).getSqr())) {
                     res.add(zhaobiaos.get(i));
                 }
             }
@@ -480,7 +488,7 @@ public class ZhaobiaoController {
             for (Zhaobiao zhaobiao : zhaobiaos) {
                 Project project = projectMapper.selectByPrimaryKey(zhaobiao.getXmid());
                 String userName = identityService.createUserQuery().userId(userId).singleResult().getFirstName();
-                if (project.getBider() != null && !project.getBider().equals("") && project.getBider().equals(userName)) {
+                if (project.getBider() != null && !project.getBider().equals("") && (project.getBider().equals(userName)||dtrUserNames.contains(project.getBider()))) {
                     res.add(zhaobiao);
                 }
             }
@@ -501,9 +509,11 @@ public class ZhaobiaoController {
                         User user = identityService.createUserQuery().userFirstName(return_comments.get(i).getUsernam()).singleResult();
                         //评论人的group
                         List<Group> groupList = identityService.createGroupQuery().groupMember(user.getId()).list();
-                        //如果评论人的职位是技术部主管经理，同时评论人是自己
-                        if (GroupUtils.equalsJs(groupList, "jsb_zgjl") && user.getId().equals(userId)) {
-                            res.add(zhaobiao);
+                        //如果评论人的职位是技术部主管经理(需要第一个主管经理) ，同时评论人是自己，或者是自己的代替人
+                        if (GroupUtils.equalsJs(groupList, "jsb_zgjl") ) {
+                            if(user.getId().equals(userId)||dtrUserids.contains(user.getId())){
+                                res.add(zhaobiao);
+                            }
                             break;
                         }
                     }
@@ -528,8 +538,8 @@ public class ZhaobiaoController {
                         User user = identityService.createUserQuery().userFirstName(return_comments.get(i).getUsernam()).singleResult();
                         //评论人的group
                         List<Group> groupList = identityService.createGroupQuery().groupMember(user.getId()).list();
-                        //如果评论人的职位是办公室，同时评论人是自己
-                        if (GroupUtils.equalsJs(groupList, "bgs") && user.getId().equals(userId)) {
+                        //如果评论人的职位是办公室，同时评论人是自己，或者自己的代替人
+                        if (GroupUtils.equalsJs(groupList, "bgs") && (user.getId().equals(userId)||dtrUserids.contains(user.getId()))) {
                             res.add(zhaobiao);
                             break;
                         }

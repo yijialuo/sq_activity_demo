@@ -1,7 +1,7 @@
 package com.sq.demo.pojo;
 
+import javax.persistence.Id;
 import java.math.BigDecimal;
-import javax.persistence.*;
 
 public class Xmcxb {
     /**
@@ -79,15 +79,17 @@ public class Xmcxb {
 
     private BigDecimal jnjsjd;
 
-    /**
-     * 两会时间
-     */
-    private String xmghsj;
 
     /**
      * 定标时间
      */
     private String dbsj;
+
+    /**
+     * 两会时间
+     */
+    private String xmghsj;
+
 
     private String lhzbwjsj;
 

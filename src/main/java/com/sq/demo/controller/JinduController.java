@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -102,19 +100,19 @@ public class JinduController {
     //完成项目
     @Transactional
     @RequestMapping("/projectFinish")
-    public String projectFinish(String pid) {
-        String dte = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+    public String projectFinish(String pid,String wgsj) {
+        //String dte = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         Project project = new Project();
         project.setId(pid);
         Project p1 = projectMapper.selectOne(project);
-        p1.setFinishDte(dte);
+        p1.setFinishDte(wgsj);
         //项目时间表更新
         Xmsjb xmsjb = new Xmsjb();
         xmsjb.setProjectid(p1.getId());
-        xmsjb.setSgjssj(dte);
+        xmsjb.setSgjssj(wgsj);
         xmsjbMapper.updateByPrimaryKeySelective(xmsjb);
         if (projectMapper.updateByPrimaryKeySelective(p1) == 1) {
-            return dte;
+            return wgsj;
         } else {
             return null;
         }

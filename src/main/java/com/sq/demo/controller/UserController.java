@@ -1,12 +1,11 @@
 package com.sq.demo.controller;
 
 import com.sq.demo.Entity.Return_Comments;
+import com.sq.demo.Entity.SelectLabel;
 import com.sq.demo.Entity.UserOV;
-import com.sq.demo.mapper.DepartmentMapper;
-import com.sq.demo.mapper.FsMapper;
-import com.sq.demo.mapper.ProjectMapper;
-import com.sq.demo.mapper.QxMapper;
+import com.sq.demo.mapper.*;
 import com.sq.demo.pojo.Department;
+import com.sq.demo.pojo.Dt;
 import com.sq.demo.pojo.Fs;
 import com.sq.demo.pojo.Project;
 import com.sq.demo.utils.ArrayToString;
@@ -52,6 +51,8 @@ public class UserController {
     RedisUtil redisUtil;
     @Autowired
     QxMapper qxMapper;
+    @Autowired
+    DtMapper dtMapper;
 
     //判断是不是技术部的人
     @RequestMapping("/isJsb")
@@ -139,7 +140,7 @@ public class UserController {
             List<User> users = identityService.createUserQuery().list();
             for (User user : users) {
                 List<Group> groups = identityService.createGroupQuery().groupMember(user.getId()).list();
-                if (GroupUtils.equalsJs(groups, "jsb_doman") && Arrays.asList(identityService.getUserInfo(user.getId(),"manageType").split(",")).contains(manageType)) {
+                if (GroupUtils.equalsJs(groups, "jsb_doman") && Arrays.asList(identityService.getUserInfo(user.getId(), "manageType").split(",")).contains(manageType)) {
                     UserOV userOV = new UserOV();
                     userOV.userId = user.getId();
                     userOV.userName = user.getFirstName();
@@ -178,7 +179,7 @@ public class UserController {
         try {
             List<Project> projects = projectMapper.selectAll();
             List<UserOV> userOVS = new ArrayList<>();
-            if (!departmentName.equals("工程技术部")&&!departmentName.equals("办公室")) {
+            if (!departmentName.equals("工程技术部") && !departmentName.equals("办公室")) {
                 List<String> userNames = new ArrayList<>();
                 for (Project project : projects) {
                     if (project.getDeclarationDep().equals(departmentName) && project.getBider() != null && !project.getBider().equals("")) {
@@ -221,7 +222,7 @@ public class UserController {
             List<User> users = identityService.createUserQuery().list();
             List<UserOV> res = new ArrayList<>();
             //如果不是工程技术部，只能拿自己部门的办事员
-            if (!departmentId.equals("20190123022801622")&&!departmentId.equals("20190125102616787")) {
+            if (!departmentId.equals("20190123022801622") && !departmentId.equals("20190125102616787")) {
                 for (User user : users) {
                     //找到部门的人
                     if (identityService.getUserInfo(user.getId(), "departmentId").equals(departmentId)) {
@@ -256,7 +257,7 @@ public class UserController {
     public boolean dologin(HttpServletResponse res, HttpServletRequest req, String username, String password) throws UnsupportedEncodingException {
         String clientIp = getIPAddress(req);
         //ip连续登录错误5次，禁止登录，
-        if(redisUtil.get(clientIp)!=null&&redisUtil.get(clientIp).equals(5)){
+        if (redisUtil.get(clientIp) != null && redisUtil.get(clientIp).equals(5)) {
             res.setHeader("info", URLEncoder.encode("密码连续输错5次！请一分钟后再试！", "UTF-8"));
             return false;
         }
@@ -272,12 +273,12 @@ public class UserController {
             return true;
         } else {//登录失败
             //redis增加ip登录次数
-            long loginerrorCount=redisUtil.incr(clientIp, 1);
+            long loginerrorCount = redisUtil.incr(clientIp, 1);
             //登录错误次数达到3次，设置1分钟时间
-            if(loginerrorCount==5){
-                redisUtil.expire(clientIp,60);
+            if (loginerrorCount == 5) {
+                redisUtil.expire(clientIp, 60);
             }
-            res.setHeader("info",URLEncoder.encode("密码错误！","UTF-8"));
+            res.setHeader("info", URLEncoder.encode("密码错误！", "UTF-8"));
             return false;
         }
     }
@@ -337,7 +338,7 @@ public class UserController {
             //查询用户所在的组
             List<Group> groups = identityService.createGroupQuery().groupMember(user.getId()).list();
             userOV.groupId = GroupUtils.getGroupIds(groups);
-             if (userOV.departmentId != null && !userOV.departmentId.equals("")) {
+            if (userOV.departmentId != null && !userOV.departmentId.equals("")) {
                 Department department = new Department();
                 department.setId(userOV.departmentId);
                 String d_name = departmentMapper.selectOne(department).getdNam();
@@ -442,17 +443,43 @@ public class UserController {
         return true;
     }
 
+    @RequestMapping("selectLabelUsers")
+    public List<SelectLabel> selectLabelUsers(String userId, String passWord) {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService = processEngine.getIdentityService();
+        List<Group> checkgroup = identityService.createGroupQuery().groupMember(userId).list();
+        for (Group group : checkgroup) {
+            if (group.getId().equals("admin")) {
+                boolean check = identityService.checkPassword(userId, passWord);
+                List<SelectLabel> res = new ArrayList<>();
+                if (check) {
+                    List<User> users = identityService.createUserQuery().list();
+                    for (User user : users) {
+                        SelectLabel selectLabel = new SelectLabel();
+                        selectLabel.label = user.getFirstName();
+                        selectLabel.value = user.getId();
+                        res.add(selectLabel);
+                    }
+                    return res;
+                } else {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
     @RequestMapping("getallusers")
     public List<UserOV> getallusers(String userId, String passWord) {
         ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = processEngine.getIdentityService();
         List<UserOV> userOVs = new ArrayList<>();
-        List<User> users = identityService.createUserQuery().list();
         List<Group> checkgroup = identityService.createGroupQuery().groupMember(userId).list();
         for (Group group : checkgroup) {
             if (group.getId().equals("admin")) {
                 boolean check = identityService.checkPassword(userId, passWord);
                 if (check) {
+                    List<User> users = identityService.createUserQuery().list();
                     for (User user : users) {
                         UserOV userOV = new UserOV();
                         userOV.userId = user.getId();
@@ -475,8 +502,6 @@ public class UserController {
                 } else {
                     return null;
                 }
-            } else {
-                continue;
             }
         }
         return null;
@@ -522,7 +547,7 @@ public class UserController {
         ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
         IdentityService identityService = engine.getIdentityService();
         User user = identityService.createUserQuery().userId(userId).singleResult();
-        if (project.getProposer().equals(user.getFirstName())||project.getBider()!=null&&project.getBider().equals(user.getFirstName())) {
+        if (project.getProposer().equals(user.getFirstName()) || project.getBider() != null && project.getBider().equals(user.getFirstName())) {
             return true;
         }
         if (project.getPid() != null && !project.getPid().equals("")) {
@@ -535,5 +560,44 @@ public class UserController {
         } else {
             return false;
         }
+    }
+
+    //拿代替人id和name
+    @RequestMapping("getDtrUserIdsAndUserNames")
+    public List<List<String>> getDtrUserIdsAndUserNames(String userid){
+        List<List<String>> res=new ArrayList<>();
+        res.add(getDtuserids(userid));
+        res.add(getDtuserNames(userid));
+        return res;
+    }
+
+    @RequestMapping("getDtuserNames")
+    public List<String> getDtuserNames(String userid){
+        List<String> userids=getDtuserids(userid);
+        if(userids==null||userids.size()==0)
+            return new ArrayList<>();
+        ProcessEngine engine= ProcessEngines.getDefaultProcessEngine();
+        IdentityService identityService=engine.getIdentityService();
+        //代替人的所有userName
+        List<String> dtrUserNames = new ArrayList<>();
+        for (int i = 0; i < userids.size(); i++) {
+            dtrUserNames.add(identityService.createUserQuery().userId(userids.get(i)).singleResult().getFirstName());
+        }
+        return dtrUserNames;
+    }
+
+    @RequestMapping("getDtuserids")
+    public List<String> getDtuserids(String userid){
+        Dt dt=new Dt();
+        dt.setUserid(userid);
+        List<Dt> dts=dtMapper.select(dt);
+        if(dts==null||dts.size()==0){
+            return new ArrayList<>();
+        }
+        List<String> dtuserids=new ArrayList<>();
+        for(int j=0;j<dts.size();j++){
+            dtuserids.add(dts.get(j).getDtuserid());
+        }
+        return dtuserids;
     }
 }
